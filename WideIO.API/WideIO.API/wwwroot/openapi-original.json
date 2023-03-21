@@ -1,0 +1,1944 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "description" : "VideIO project API specification.",
+    "title" : "VideIO API",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "description" : "SwaggerHub API Auto Mocking",
+    "url" : "https://virtserver.swaggerhub.com/zagorskim/VideIO/1.0.0"
+  } ],
+  "tags" : [ {
+    "description" : "User-related endpoints",
+    "name" : "User"
+  }, {
+    "description" : "Video access",
+    "name" : "Video"
+  }, {
+    "description" : "Support tickets",
+    "name" : "Ticket"
+  }, {
+    "description" : "Comments management",
+    "name" : "Comment"
+  }, {
+    "description" : "Playlist management",
+    "name" : "Playlist"
+  }, {
+    "description" : "Search results",
+    "name" : "Search"
+  }, {
+    "description" : "Donation and money operations",
+    "name" : "Donate"
+  }, {
+    "description" : "User's subscriptions",
+    "name" : "Subscriptions"
+  } ],
+  "paths" : {
+    "/user" : {
+      "delete" : {
+        "operationId" : "deleteUserData",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "User account deletion",
+        "tags" : [ "User" ]
+      },
+      "get" : {
+        "operationId" : "getUserData",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "User data retrieval",
+        "tags" : [ "User" ]
+      },
+      "put" : {
+        "operationId" : "editUserData",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "User data editing",
+        "tags" : [ "User" ]
+      }
+    },
+    "/user/videos" : {
+      "get" : {
+        "operationId" : "getUserVideos",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VideoListDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Get user's video",
+        "tags" : [ "Video" ]
+      }
+    },
+    "/register" : {
+      "post" : {
+        "operationId" : "registerUser",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "User registration",
+        "tags" : [ "User" ]
+      }
+    },
+    "/login" : {
+      "post" : {
+        "operationId" : "loginUser",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application:json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "User login",
+        "tags" : [ "User" ]
+      }
+    },
+    "/ban/{id}" : {
+      "post" : {
+        "operationId" : "banUser",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : false,
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "simple"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Ban user",
+        "tags" : [ "User" ]
+      }
+    },
+    "/video" : {
+      "delete" : {
+        "operationId" : "deleteVideo",
+        "parameters" : [ {
+          "description" : "Video ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorised"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "summary" : "Video removal",
+        "tags" : [ "Video" ]
+      },
+      "get" : {
+        "operationId" : "getVideoStream",
+        "parameters" : [ {
+          "description" : "Video ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "example" : "https://example.com/video-id/",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorised"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "summary" : "Video stream retreival",
+        "tags" : [ "Video" ]
+      },
+      "post" : {
+        "operationId" : "uploadVideo",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VideoUploadDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorised"
+          }
+        },
+        "summary" : "Video upload",
+        "tags" : [ "Video" ]
+      }
+    },
+    "/comment" : {
+      "delete" : {
+        "operationId" : "deleteComment",
+        "parameters" : [ {
+          "description" : "Comment ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommentDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Comment removal",
+        "tags" : [ "Comment" ]
+      },
+      "get" : {
+        "operationId" : "getComments",
+        "parameters" : [ {
+          "description" : "Video ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommentListDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Get all comments of video",
+        "tags" : [ "Comment" ]
+      },
+      "post" : {
+        "operationId" : "addCommentToVideo",
+        "parameters" : [ {
+          "description" : "Video ID to which you add comment",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Add comment to video",
+        "tags" : [ "Comment" ]
+      }
+    },
+    "/comment/response" : {
+      "get" : {
+        "operationId" : "getResponseData",
+        "parameters" : [ {
+          "description" : "Comment ID to which you add response",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommentListDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Response data",
+        "tags" : [ "Comment" ]
+      },
+      "post" : {
+        "operationId" : "addResponseToComment",
+        "parameters" : [ {
+          "description" : "Comment ID to which you add response",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Add response to comment",
+        "tags" : [ "Comment" ]
+      }
+    },
+    "/videoMetadata" : {
+      "get" : {
+        "operationId" : "getVideoMetadata",
+        "parameters" : [ {
+          "description" : "Video ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VideoMetadataDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorised"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "summary" : "Video metadata retreival",
+        "tags" : [ "Video" ]
+      },
+      "put" : {
+        "operationId" : "updateVideoMetadata",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VideoMetadataUpdateDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorised"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "summary" : "Video metadata update",
+        "tags" : [ "Video" ]
+      }
+    },
+    "/videoReaction" : {
+      "get" : {
+        "operationId" : "getVideoReactions",
+        "parameters" : [ {
+          "description" : "Video ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VideoReactionDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "summary" : "Video reaction retreival",
+        "tags" : [ "Video" ]
+      },
+      "post" : {
+        "operationId" : "updateVideoReaction",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VideoReactionUpdateDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorised"
+          },
+          "404" : {
+            "description" : "Not found"
+          }
+        },
+        "summary" : "Video reaction update",
+        "tags" : [ "Video" ]
+      }
+    },
+    "/playlist/details" : {
+      "delete" : {
+        "operationId" : "deletePlaylist",
+        "parameters" : [ {
+          "description" : "Playlist ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Delete playlist",
+        "tags" : [ "Playlist" ]
+      },
+      "post" : {
+        "operationId" : "createPlaylist",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreatePlaylistRequestDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreatePlaylistResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Playlist creation",
+        "tags" : [ "Playlist" ]
+      },
+      "put" : {
+        "operationId" : "editPlaylist",
+        "parameters" : [ {
+          "description" : "Playlist ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlaylistEditDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Edit playlist properties",
+        "tags" : [ "Playlist" ]
+      }
+    },
+    "/playlist/user" : {
+      "get" : {
+        "operationId" : "getPlaylistsForUser",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PlaylistBaseDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Get all playlists for user",
+        "tags" : [ "Playlist" ]
+      }
+    },
+    "/playlist/video" : {
+      "get" : {
+        "operationId" : "getPlaylistContent",
+        "parameters" : [ {
+          "description" : "Playlist ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlaylistDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Get videos in playlist",
+        "tags" : [ "Playlist" ]
+      }
+    },
+    "/playlist/{id}/{videoId}" : {
+      "delete" : {
+        "operationId" : "removeVideoFromPlaylist",
+        "parameters" : [ {
+          "description" : "Playlist ID",
+          "explode" : false,
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "simple"
+        }, {
+          "description" : "Video ID to be added",
+          "explode" : false,
+          "in" : "path",
+          "name" : "videoId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "simple"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "204" : {
+            "description" : "Video already removed"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Remove video from playlist",
+        "tags" : [ "Playlist" ]
+      },
+      "post" : {
+        "operationId" : "addVideoToPlaylist",
+        "parameters" : [ {
+          "description" : "Playlist ID",
+          "explode" : false,
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "simple"
+        }, {
+          "description" : "Video ID to be added",
+          "explode" : false,
+          "in" : "path",
+          "name" : "videoId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "simple"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Add video to playlist",
+        "tags" : [ "Playlist" ]
+      }
+    },
+    "/playlist/recommended" : {
+      "get" : {
+        "operationId" : "getRecommendedPlaylist",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlaylistDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Get recommended videos",
+        "tags" : [ "Playlist" ]
+      }
+    },
+    "/ticket" : {
+      "get" : {
+        "operationId" : "getTicket",
+        "parameters" : [ {
+          "description" : "Ticket ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application:json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetTicketDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Get ticket details",
+        "tags" : [ "Ticket" ]
+      },
+      "post" : {
+        "operationId" : "submitTicket",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubmitTicketDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SubmitTicketResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Submit a new ticket",
+        "tags" : [ "Ticket" ]
+      }
+    },
+    "/ticket/status" : {
+      "get" : {
+        "operationId" : "getTicketStatus",
+        "parameters" : [ {
+          "description" : "Ticket ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application:json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetTicketStatusDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Get current ticket status",
+        "tags" : [ "Ticket" ]
+      }
+    },
+    "/subscriptions" : {
+      "delete" : {
+        "operationId" : "deleteSubscription",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        }, {
+          "description" : "Subscribed user ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "subId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Unsubscribe from another user",
+        "tags" : [ "Subscriptions" ]
+      },
+      "get" : {
+        "operationId" : "getSubscriptions",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSubscriptionListDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Get a user's subscriptions",
+        "tags" : [ "Subscriptions" ]
+      },
+      "post" : {
+        "operationId" : "addSubscription",
+        "parameters" : [ {
+          "description" : "User ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        }, {
+          "description" : "Subscribed user ID",
+          "explode" : true,
+          "in" : "query",
+          "name" : "subId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Subscribe to another user",
+        "tags" : [ "Subscriptions" ]
+      }
+    },
+    "/search" : {
+      "get" : {
+        "operationId" : "getSearchResults",
+        "parameters" : [ {
+          "description" : "Search query",
+          "explode" : true,
+          "in" : "query",
+          "name" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SearchResultsDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "summary" : "Get search results",
+        "tags" : [ "Search" ]
+      }
+    },
+    "/donate/topup" : {
+      "post" : {
+        "operationId" : "buyFunds",
+        "parameters" : [ {
+          "description" : "Amount of money to add to account",
+          "explode" : true,
+          "in" : "query",
+          "name" : "amount",
+          "required" : true,
+          "schema" : {
+            "format" : "currency",
+            "type" : "number"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Add funds to account",
+        "tags" : [ "Donate" ]
+      }
+    },
+    "/donate/send" : {
+      "post" : {
+        "operationId" : "sendDonation",
+        "parameters" : [ {
+          "description" : "ID of the recipient of the donation",
+          "explode" : true,
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "style" : "form"
+        }, {
+          "description" : "Amount of money to send",
+          "explode" : true,
+          "in" : "query",
+          "name" : "amount",
+          "required" : true,
+          "schema" : {
+            "format" : "currency",
+            "type" : "number"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Send a donation",
+        "tags" : [ "Donate" ]
+      }
+    },
+    "/donate/withdraw" : {
+      "post" : {
+        "operationId" : "withdrawFunds",
+        "parameters" : [ {
+          "description" : "Amount of money to send",
+          "explode" : true,
+          "in" : "query",
+          "name" : "amount",
+          "required" : true,
+          "schema" : {
+            "format" : "currency",
+            "type" : "number"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Request a withdrawal from account",
+        "tags" : [ "Donate" ]
+      }
+    },
+    "/donate/balance" : {
+      "get" : {
+        "operationId" : "getBalance",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "format" : "currency",
+                  "type" : "number"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request"
+          }
+        },
+        "summary" : "Get the current account balance",
+        "tags" : [ "Donate" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "CommentDto" : {
+        "example" : {
+          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
+          "authorId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
+          "content" : "This is an example comment."
+        },
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "authorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "content" : {
+            "example" : "This is an example comment.",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CommentListDto" : {
+        "example" : {
+          "subscriptions" : [ {
+            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
+            "authorId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
+            "content" : "This is an example comment."
+          }, {
+            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
+            "authorId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
+            "content" : "This is an example comment."
+          } ]
+        },
+        "properties" : {
+          "subscriptions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CommentDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "UserDto" : {
+        "example" : {
+          "surname" : "Doe",
+          "nickname" : "johnny123",
+          "name" : "John",
+          "id" : "123e4567-e89b-12d3-a456-426614174000",
+          "userType" : null,
+          "accountBalance" : 0.8008281904610115,
+          "email" : "john.doe@mail.com"
+        },
+        "properties" : {
+          "id" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "email" : {
+            "example" : "john.doe@mail.com",
+            "type" : "string"
+          },
+          "nickname" : {
+            "example" : "johnny123",
+            "type" : "string"
+          },
+          "name" : {
+            "example" : "John",
+            "type" : "string"
+          },
+          "surname" : {
+            "example" : "Doe",
+            "type" : "string"
+          },
+          "accountBalance" : {
+            "format" : "currency",
+            "type" : "number"
+          },
+          "userType" : {
+            "$ref" : "#/components/schemas/UserTypeDto"
+          }
+        },
+        "type" : "object"
+      },
+      "RegisterDto" : {
+        "example" : {
+          "password" : "Passwd123!",
+          "surname" : "Doe",
+          "nickname" : "johnny123",
+          "name" : "John",
+          "email" : "john.doe@mail.com"
+        },
+        "properties" : {
+          "email" : {
+            "example" : "john.doe@mail.com",
+            "type" : "string"
+          },
+          "nickname" : {
+            "example" : "johnny123",
+            "type" : "string"
+          },
+          "name" : {
+            "example" : "John",
+            "type" : "string"
+          },
+          "surname" : {
+            "example" : "Doe",
+            "type" : "string"
+          },
+          "password" : {
+            "example" : "Passwd123!",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "LoginDto" : {
+        "example" : {
+          "password" : "Passwd123!",
+          "email" : "john.doe@mail.com"
+        },
+        "properties" : {
+          "email" : {
+            "example" : "john.doe@mail.com",
+            "type" : "string"
+          },
+          "password" : {
+            "example" : "Passwd123!",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "LoginResponseDto" : {
+        "properties" : {
+          "token" : {
+            "example" : "AbCdEf123456AbCdEf123456AbCdEf123456",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "UserTypeDto" : {
+        "enum" : [ "Simple", "Creator", "Administrator" ],
+        "type" : "string"
+      },
+      "CreatePlaylistRequestDto" : {
+        "example" : {
+          "visibility" : null,
+          "name" : "Favorites"
+        },
+        "properties" : {
+          "name" : {
+            "example" : "Favorites",
+            "type" : "string"
+          },
+          "visibility" : {
+            "$ref" : "#/components/schemas/VisibilityDto"
+          }
+        },
+        "type" : "object"
+      },
+      "CreatePlaylistResponseDto" : {
+        "example" : {
+          "id" : "123e4567-e89b-12d3-a456-426614174000"
+        },
+        "properties" : {
+          "id" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlaylistBaseDto" : {
+        "example" : {
+          "name" : "Favorites",
+          "count" : 25
+        },
+        "properties" : {
+          "name" : {
+            "example" : "Favorites",
+            "type" : "string"
+          },
+          "count" : {
+            "example" : 25,
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PlaylistDto" : {
+        "example" : {
+          "visibility" : null,
+          "name" : "Favorites",
+          "videos" : [ {
+            "duration" : "743",
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "description" : "All right, so here we are in front of the elephants, the cool thing about these guys is that they have really, really, really long trunks, and that's, that's cool. And that's pretty much all there is to say.",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "title" : "Me at the zoo"
+          }, {
+            "duration" : "743",
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "description" : "All right, so here we are in front of the elephants, the cool thing about these guys is that they have really, really, really long trunks, and that's, that's cool. And that's pretty much all there is to say.",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "title" : "Me at the zoo"
+          } ]
+        },
+        "properties" : {
+          "name" : {
+            "example" : "Favorites",
+            "type" : "string"
+          },
+          "visibility" : {
+            "$ref" : "#/components/schemas/VisibilityDto"
+          },
+          "videos" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VideoBaseDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "PlaylistEditDto" : {
+        "example" : {
+          "visibility" : null,
+          "name" : "My favorites"
+        },
+        "properties" : {
+          "name" : {
+            "example" : "My favorites",
+            "type" : "string"
+          },
+          "visibility" : {
+            "$ref" : "#/components/schemas/VisibilityDto"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoBaseDto" : {
+        "example" : {
+          "duration" : "743",
+          "thumbnail" : "https://example.com/thumbnail/video-id",
+          "description" : "All right, so here we are in front of the elephants, the cool thing about these guys is that they have really, really, really long trunks, and that's, that's cool. And that's pretty much all there is to say.",
+          "id" : "123e4567-e89b-12d3-a456-426614174000",
+          "title" : "Me at the zoo"
+        },
+        "properties" : {
+          "id" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "title" : {
+            "example" : "Me at the zoo",
+            "type" : "string"
+          },
+          "duration" : {
+            "description" : "(hh:)mm:ss",
+            "example" : "743",
+            "type" : "string"
+          },
+          "thumbnail" : {
+            "example" : "https://example.com/thumbnail/video-id",
+            "format" : "uri",
+            "type" : "string"
+          },
+          "description" : {
+            "example" : "All right, so here we are in front of the elephants, the cool thing about these guys is that they have really, really, really long trunks, and that's, that's cool. And that's pretty much all there is to say.",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoListDto" : {
+        "example" : {
+          "subscriptions" : [ {
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "visibility" : null,
+            "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "viewCount" : 1234503,
+            "title" : "How to wash dishes",
+            "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+            "authorNickname" : "john.doe123",
+            "processingProgress" : null,
+            "tags" : [ "tags", "tags" ]
+          }, {
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "visibility" : null,
+            "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "viewCount" : 1234503,
+            "title" : "How to wash dishes",
+            "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+            "authorNickname" : "john.doe123",
+            "processingProgress" : null,
+            "tags" : [ "tags", "tags" ]
+          } ]
+        },
+        "properties" : {
+          "subscriptions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VideoMetadataDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoUploadDto" : {
+        "example" : {
+          "video" : "",
+          "videoMetadata" : {
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "visibility" : null,
+            "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "viewCount" : 1234503,
+            "title" : "How to wash dishes",
+            "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+            "authorNickname" : "john.doe123",
+            "processingProgress" : null,
+            "tags" : [ "tags", "tags" ]
+          }
+        },
+        "properties" : {
+          "video" : {
+            "format" : "binary",
+            "type" : "string"
+          },
+          "videoMetadata" : {
+            "$ref" : "#/components/schemas/VideoMetadataDto"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoMetadataDto" : {
+        "example" : {
+          "thumbnail" : "https://example.com/thumbnail/video-id",
+          "visibility" : null,
+          "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+          "id" : "123e4567-e89b-12d3-a456-426614174000",
+          "viewCount" : 1234503,
+          "title" : "How to wash dishes",
+          "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+          "authorNickname" : "john.doe123",
+          "processingProgress" : null,
+          "tags" : [ "tags", "tags" ]
+        },
+        "properties" : {
+          "id" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "title" : {
+            "example" : "How to wash dishes",
+            "type" : "string"
+          },
+          "description" : {
+            "example" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "type" : "string"
+          },
+          "thumbnail" : {
+            "example" : "https://example.com/thumbnail/video-id",
+            "format" : "uri",
+            "type" : "string"
+          },
+          "authorId" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "authorNickname" : {
+            "example" : "john.doe123",
+            "type" : "string"
+          },
+          "viewCount" : {
+            "example" : 1234503,
+            "type" : "integer"
+          },
+          "tags" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "visibility" : {
+            "$ref" : "#/components/schemas/VisibilityDto"
+          },
+          "processingProgress" : {
+            "$ref" : "#/components/schemas/ProcessingProgressDto"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoMetadataUpdateDto" : {
+        "example" : {
+          "id" : "123e4567-e89b-12d3-a456-426614174000",
+          "videoMetadata" : {
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "visibility" : null,
+            "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "viewCount" : 1234503,
+            "title" : "How to wash dishes",
+            "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+            "authorNickname" : "john.doe123",
+            "processingProgress" : null,
+            "tags" : [ "tags", "tags" ]
+          }
+        },
+        "properties" : {
+          "id" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "videoMetadata" : {
+            "$ref" : "#/components/schemas/VideoMetadataDto"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoReactionDto" : {
+        "example" : {
+          "positiveCount" : 0,
+          "negativeCount" : 6
+        },
+        "properties" : {
+          "positiveCount" : {
+            "type" : "integer"
+          },
+          "negativeCount" : {
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "VideoReactionUpdateDto" : {
+        "example" : {
+          "value" : null
+        },
+        "properties" : {
+          "value" : {
+            "$ref" : "#/components/schemas/ReactionDto"
+          }
+        },
+        "type" : "object"
+      },
+      "ReactionDto" : {
+        "enum" : [ "Positive", "Negative" ],
+        "type" : "string"
+      },
+      "SubmitTicketDto" : {
+        "example" : {
+          "reason" : "This comment is inappropriate.",
+          "targetId" : "123e4567-e89b-12d3-a456-426614174000"
+        },
+        "properties" : {
+          "targetId" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "reason" : {
+            "example" : "This comment is inappropriate.",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SubmitTicketResponseDto" : {
+        "example" : {
+          "id" : "123e4567-e89b-12d3-a456-426614174000"
+        },
+        "properties" : {
+          "id" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "GetTicketDto" : {
+        "properties" : {
+          "submitterId" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "targetId" : {
+            "example" : "123e4567-e89b-12d3-a456-426614174000",
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "reason" : {
+            "example" : "This comment is inappropriate.",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "GetTicketStatusDto" : {
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "UserSubscriptionListDto" : {
+        "example" : {
+          "subscriptions" : [ "123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174000" ]
+        },
+        "properties" : {
+          "subscriptions" : {
+            "items" : {
+              "example" : "123e4567-e89b-12d3-a456-426614174000",
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "VisibilityDto" : {
+        "enum" : [ "Private", "Public" ],
+        "type" : "string"
+      },
+      "ProcessingProgressDto" : {
+        "enum" : [ "Queued", "Processing", "Done" ],
+        "type" : "string"
+      },
+      "SearchResultsDto" : {
+        "example" : {
+          "playlists" : [ {
+            "name" : "Favorites",
+            "count" : 25
+          }, {
+            "name" : "Favorites",
+            "count" : 25
+          } ],
+          "videos" : [ {
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "visibility" : null,
+            "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "viewCount" : 1234503,
+            "title" : "How to wash dishes",
+            "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+            "authorNickname" : "john.doe123",
+            "processingProgress" : null,
+            "tags" : [ "tags", "tags" ]
+          }, {
+            "thumbnail" : "https://example.com/thumbnail/video-id",
+            "visibility" : null,
+            "description" : "I'll teach you how to wash your dishes! All you need is a sponge and dishwashing soap",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "viewCount" : 1234503,
+            "title" : "How to wash dishes",
+            "authorId" : "123e4567-e89b-12d3-a456-426614174000",
+            "authorNickname" : "john.doe123",
+            "processingProgress" : null,
+            "tags" : [ "tags", "tags" ]
+          } ],
+          "users" : [ {
+            "surname" : "Doe",
+            "nickname" : "johnny123",
+            "name" : "John",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "userType" : null,
+            "accountBalance" : 0.8008281904610115,
+            "email" : "john.doe@mail.com"
+          }, {
+            "surname" : "Doe",
+            "nickname" : "johnny123",
+            "name" : "John",
+            "id" : "123e4567-e89b-12d3-a456-426614174000",
+            "userType" : null,
+            "accountBalance" : 0.8008281904610115,
+            "email" : "john.doe@mail.com"
+          } ]
+        },
+        "properties" : {
+          "videos" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VideoMetadataDto"
+            },
+            "type" : "array"
+          },
+          "users" : {
+            "items" : {
+              "$ref" : "#/components/schemas/UserDto"
+            },
+            "type" : "array"
+          },
+          "playlists" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PlaylistBaseDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      }
+    }
+  }
+}

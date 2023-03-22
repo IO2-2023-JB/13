@@ -19,6 +19,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using WideIO.API.Attributes;
 using WideIO.API.Models;
+using MyWideIO.API.Data.Repositories;
 
 namespace WideIO.API.Controllers
 { 
@@ -27,7 +28,17 @@ namespace WideIO.API.Controllers
     /// </summary>
     [ApiController]
     public class UserApiController : ControllerBase
-    { 
+    {
+        private IApiRepository apiRepository;
+
+        public UserApiController(IApiRepository apiRepository)
+        {
+            this.apiRepository = apiRepository;
+        }
+
+
+        //// Generated code below:
+
         /// <summary>
         /// Ban user
         /// </summary>
@@ -188,6 +199,8 @@ namespace WideIO.API.Controllers
         [SwaggerOperation("RegisterUser")]
         public virtual IActionResult RegisterUser([FromBody]RegisterDto registerDto)
         {
+
+            apiRepository.AddUser();
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);

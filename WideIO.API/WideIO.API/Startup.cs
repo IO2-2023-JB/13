@@ -76,7 +76,7 @@ namespace WideIO.API
                     c.SwaggerDoc("1.0.0", new OpenApiInfo
                     {
                         Title = "VideIO API",
-                        Description = "VideIO API (ASP.NET Core 3.1)",
+                        Description = "VideIO API (ASP.NET Core 6.0)",
                         TermsOfService = new Uri("https://github.com/openapitools/openapi-generator"),
                         Contact = new OpenApiContact
                         {

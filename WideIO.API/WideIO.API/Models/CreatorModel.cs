@@ -1,4 +1,7 @@
-﻿namespace MyVideIO.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace MyVideIO.Models
 {
     public class CreatorModel : ViewerModel
     {

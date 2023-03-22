@@ -1,3 +1,13 @@
+Aby odpalić 1-wszy raz frontend należy w cmd w folderze Frontend wykonać komendy:
+
+npm install
+npm run build
+npm start
+
+Przy ponownym uruchomieniu wystarczy w cmd w folderze Frontend wykonać komendę:
+
+npm start
+
 # Introduction 
 TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
 

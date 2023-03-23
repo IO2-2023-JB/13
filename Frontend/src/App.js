@@ -5,6 +5,7 @@ import {Department} from './Department';
 import {Employee} from './Employee';
 import { FetchData } from './FetchData';
 import { BrowserRouter, Route, Switch, NavLink } from 'react-router-dom';
+import Register from './User_Account/Register'
 
 function App() {
   return (
@@ -33,6 +34,11 @@ function App() {
               FetchData
             </NavLink>
           </li>
+          <li className='nav-item m-1'>
+            <NavLink className="btn btn-light btn-outline-primary" to='/register'>
+              Register
+            </NavLink>
+          </li>
         </ul>
       </nav>
       <Switch>
@@ -40,6 +46,7 @@ function App() {
         <Route path='/department' component={Department}/>
         <Route path='/employee' component={Employee}/>
         <Route path='/fetchdata' component={FetchData}/>
+        <Route path='/register' component={Register}/>
       </Switch>
     </div>
     </BrowserRouter>

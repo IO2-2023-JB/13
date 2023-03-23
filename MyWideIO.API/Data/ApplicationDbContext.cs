@@ -4,7 +4,7 @@ using MyVideIO.Models;
 
 namespace MyVideIO.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ViewerModel>
     {
 
         public DbSet<ViewerModel> Viewers { get; set; }

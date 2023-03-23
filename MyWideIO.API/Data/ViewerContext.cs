@@ -4,7 +4,7 @@ using MyVideIO.Models;
 
 namespace MyWideIO.API.Data
 {
-    public class ViewerContext : IdentityDbContext<ViewerModel>
+    /*public class ViewerContext : IdentityDbContext<ViewerModel>
     {
         public ViewerContext(DbContextOptions<ViewerContext> options)
             : base(options)
@@ -18,6 +18,6 @@ namespace MyWideIO.API.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
-    }
+    }*/
 }
 

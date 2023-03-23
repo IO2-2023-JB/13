@@ -12,14 +12,14 @@ using MyWideIO.API.Data;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-builder.Services.AddDbContext<ViewerContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
 builder.Services.AddIdentity<ViewerModel, IdentityRole>(config =>
 {
     config.SignIn.RequireConfirmedEmail = false;
     config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
     config.User.RequireUniqueEmail = true;
 })
-.AddEntityFrameworkStores<ViewerContext>();
+.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -35,7 +35,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
+//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
 builder.Services.AddScoped<IApiRepository, ApiRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 //builder.Services.AddScoped<IApiRepository, ApiRepository>();

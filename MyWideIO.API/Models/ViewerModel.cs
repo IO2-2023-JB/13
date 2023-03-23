@@ -9,9 +9,6 @@ namespace MyVideIO.Models
 {
     public class ViewerModel : IdentityUser
     {
-        
-        [Required] 
-        public string Nick { get; set; } = string.Empty;
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
@@ -21,7 +18,7 @@ namespace MyVideIO.Models
 
 
         //creators subs TODO
-        public IEnumerable<CreatorModel> SubscribedTo { get; set; }
+        //public IEnumerable<CreatorModel> SubscribedTo { get; set; }
 
         public IEnumerable<VideoModel> LikedVideos { get; set; }
 

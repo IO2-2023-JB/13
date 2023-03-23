@@ -6,14 +6,19 @@ import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
+const NAME_REGEX = /^[A-Z][a-z]{2,17}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const REGISTER_URL = '/register';
 
 const Register = () => {
     const userRef = useRef();
+    const nameRef = useRef();
+    const surnameRef = useRef();
+    const emailRef = useRef();
     const errRef = useRef();
     const [user, setUser] = useState('');
-    const [validName, setValidName] = useState(false);
+    const [validNickname, setValidNickname] = useState(false);
     const [userFocus, setUserFocus] = useState(false);
 
     const [pwd, setPwd] = useState('');
@@ -24,6 +29,18 @@ const Register = () => {
     const [validMatch, setValidMatch] = useState(false);
     const [matchFocus, setMatchFocus] = useState(false);
 
+    const [name, setName] = useState('');
+    const [validName, setValidName] = useState(false);
+    const [nameFocus, setNameFocus] = useState(false);
+
+    const [surname, setSurname] = useState('');
+    const [validSurname, setValidSurname] = useState(false);
+    const [surnameFocus, setSurnameFocus] = useState(false);
+
+    const [email, setEmail] = useState('');
+    const [validEmail, setValidEmail] = useState(false);
+    const [emailFocus, setEmailFocus] = useState(false);
+
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -32,7 +49,7 @@ const Register = () => {
     }, [])
 
     useEffect(() => {
-        setValidName(USER_REGEX.test(user));
+        setValidNickname(USER_REGEX.test(user));
     }, [user])
 
     useEffect(() => {
@@ -44,19 +61,129 @@ const Register = () => {
         setErrMsg('');
     }, [user, pwd, matchPwd])
 
-    const handleSubmit = async (e) => {
+    useEffect(() => {
+        setValidName(NAME_REGEX.test(name));
+    }, [name])
 
+    useEffect(() => {
+        setValidSurname(NAME_REGEX.test(surname));
+    }, [surname])
+
+    useEffect(() => {
+        setValidEmail(EMAIL_REGEX.test(email));
+    }, [email])
+
+    const handleSubmit = async (e) => {
+        // e.preventDefault();
+        // // if button enabled with JS hack
+        // const v1 = USER_REGEX.test(user);
+        // const v2 = PWD_REGEX.test(pwd);
+        // const v3 = NAME_REGEX.test(name)
+        // const v4 = NAME_REGEX.test(surname)
+        // const v5 = EMAIL_REGEX.test(email)
+        // if (!v1 || !v2 || !v3 || !v4 || !v5) {
+        //     setErrMsg("Invalid Entry");
+        //     return;
+        // }
+        // try {
+        //     const response = await axios.post(REGISTER_URL,
+        //         JSON.stringify({ user, pwd }),
+        //         {
+        //             headers: { 'Content-Type': 'application/json' },
+        //             withCredentials: true
+        //         }
+        //     );
+        //     console.log(response?.data);
+        //     console.log(response?.accessToken);
+        //     console.log(JSON.stringify(response))
+        //     setSuccess(true);
+        //     //clear state and controlled inputs
+        //     //need value attrib on inputs for this
+        //     setUser('');
+        //     setPwd('');
+        //     setMatchPwd('');
+        // } catch (err) {
+        //     if (!err?.response) {
+        //         setErrMsg('No Server Response');
+        //     } else if (err.response?.status === 409) {
+        //         setErrMsg('Username Taken');
+        //     } else {
+        //         setErrMsg('Registration Failed')
+        //     }
+        //     errRef.current.focus();
+        // }
     }
 
     return (
+        <>
+        {success?(
+            <section>
+                <h1>
+                    Success!
+                </h1>
+                <p>
+                    <a href="#">Sign in</a>
+                </p>
+            </section>
+        ): (
         <section>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
-                        <label htmlFor="username">
-                            Username:
+                        <label htmlFor="name">
+                            Name:
                             <FontAwesomeIcon icon={faCheck} className={validName ? "valid" : "hide"} />
-                            <FontAwesomeIcon icon={faTimes} className={validName || !user ? "hide" : "invalid"} />
+                            <FontAwesomeIcon icon={faTimes} className={validName || !name ? "hide" : "invalid"} />
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            ref={nameRef}
+                            autoComplete="off"
+                            onChange={(e) => setName(e.target.value)}
+                            value={name}
+                            required
+                            aria-invalid={validName ? "false" : "true"}
+                            aria-describedby="uidnote"
+                            onFocus={() => setNameFocus(true)}
+                            onBlur={() => setNameFocus(false)}
+                        />
+                        <p id="uidnote" className={nameFocus && name && !validName ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            3 to 18 characters.<br />
+                            Must begin with a capital letter.<br />
+                            Only letters allowed.
+                        </p>
+
+                        <label htmlFor="surname">
+                            Surname:
+                            <FontAwesomeIcon icon={faCheck} className={validSurname ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={validSurname || !surname ? "hide" : "invalid"} />
+                        </label>
+                        <input
+                            type="text"
+                            id="surname"
+                            ref={surnameRef}
+                            autoComplete="off"
+                            onChange={(e) => setSurname(e.target.value)}
+                            value={surname}
+                            required
+                            aria-invalid={validSurname ? "false" : "true"}
+                            aria-describedby="uidnote"
+                            onFocus={() => setSurnameFocus(true)}
+                            onBlur={() => setSurnameFocus(false)}
+                        />
+                        <p id="uidnote" className={surnameFocus && surname && !validSurname ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            3 to 18 characters.<br />
+                            Must begin with a capital letter.<br />
+                            Only letters allowed.
+                        </p>
+
+                        <label htmlFor="username">
+                            Nickname:
+                            <FontAwesomeIcon icon={faCheck} className={validNickname ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={validNickname || !user ? "hide" : "invalid"} />
                         </label>
                         <input
                             type="text"
@@ -66,16 +193,39 @@ const Register = () => {
                             onChange={(e) => setUser(e.target.value)}
                             value={user}
                             required
-                            aria-invalid={validName ? "false" : "true"}
+                            aria-invalid={validNickname ? "false" : "true"}
                             aria-describedby="uidnote"
                             onFocus={() => setUserFocus(true)}
                             onBlur={() => setUserFocus(false)}
                         />
-                        <p id="uidnote" className={userFocus && user && !validName ? "instructions" : "offscreen"}>
+                        <p id="uidnote" className={userFocus && user && !validNickname ? "instructions" : "offscreen"}>
                             <FontAwesomeIcon icon={faInfoCircle} />
                             4 to 24 characters.<br />
                             Must begin with a letter.<br />
                             Letters, numbers, underscores, hyphens allowed.
+                        </p>
+
+                        <label htmlFor="email">
+                            Email:
+                            <FontAwesomeIcon icon={faCheck} className={validEmail ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? "hide" : "invalid"} />
+                        </label>
+                        <input
+                            type="text"
+                            id="email"
+                            ref={emailRef}
+                            autoComplete="off"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
+                            required
+                            aria-invalid={validEmail ? "false" : "true"}
+                            aria-describedby="uidnote"
+                            onFocus={() => setEmailFocus(true)}
+                            onBlur={() => setEmailFocus(false)}
+                        />
+                        <p id="uidnote" className={emailFocus && email && !validEmail ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Must be valid email address.<br />
                         </p>
 
 
@@ -124,9 +274,17 @@ const Register = () => {
                             Must match the first password input field.
                         </p>
 
-                        <button disabled={!validName || !validPwd || !validMatch ? true : false}>Sign Up</button>
+                        <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
                     </form>
-        </section>
+                    <p>
+                        Already registered? <br/>
+                        <span className="line">
+                            {/*router link here*/}
+                            <a href="#"> Sign in</a>
+                        </span>
+                    </p>
+        </section>)}
+        </>
     )
 }
 

@@ -19,21 +19,22 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using WideIO.API.Attributes;
 using WideIO.API.Models;
-using MyWideIO.API.Data.Repositories;
+using MyWideIO.API.Data.IRepositories;
+using MyWideIO.API.Services;
 
 namespace WideIO.API.Controllers
-{ 
+{
     /// <summary>
     /// 
     /// </summary>
     [ApiController]
     public class UserApiController : ControllerBase
     {
-        private IApiRepository apiRepository;
+        private readonly IUserService _userService;
 
-        public UserApiController(IApiRepository apiRepository)
+        public UserApiController(IUserService userService)
         {
-            this.apiRepository = apiRepository;
+            _userService = userService;
         }
 
 
@@ -197,11 +198,13 @@ namespace WideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("RegisterUser")]
-        public virtual IActionResult RegisterUser([FromBody]RegisterDto registerDto)
+        public async virtual Task<IActionResult> RegisterUser([FromBody]RegisterDto registerDto)
         {
-
-            apiRepository.AddUser();
-
+            if (await _userService.RegisterUserAsync(registerDto))
+                return Ok();
+            else
+                return BadRequest();
+            
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

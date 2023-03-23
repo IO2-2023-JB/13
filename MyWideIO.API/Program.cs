@@ -3,25 +3,40 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MyWideIO.API.Data.Repositories;
+using MyWideIO.API.Data.IRepositories;
+using MyWideIO.API.Services;
+using MyVideIO.Models;
+using Microsoft.AspNetCore.Identity;
+using MyWideIO.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+builder.Services.AddDbContext<ViewerContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
+builder.Services.AddIdentity<ViewerModel, IdentityRole>(config =>
+{
+    config.SignIn.RequireConfirmedEmail = false;
+    config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+    config.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<ViewerContext>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
 builder.Services.AddScoped<IApiRepository, ApiRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+//builder.Services.AddScoped<IApiRepository, ApiRepository>();
 // Add services to the container.
 
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope()) // ?
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // ??
     //dbContext.Database.Migrate();
 }
 // Configure the HTTP request pipeline.
@@ -32,6 +47,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

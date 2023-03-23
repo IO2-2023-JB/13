@@ -1,4 +1,4 @@
-﻿namespace MyWideIO.API.Data.Repositories
+﻿namespace MyWideIO.API.Data.IRepositories
 {
     public interface IApiRepository
     {

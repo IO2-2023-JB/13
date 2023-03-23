@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyVideIO.Data;
+using MyWideIO.API.Data.IRepositories;
 
 namespace MyWideIO.API.Data.Repositories
 {

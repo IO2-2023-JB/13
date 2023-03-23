@@ -21,6 +21,8 @@ using WideIO.API.Attributes;
 using WideIO.API.Models;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace WideIO.API.Controllers
 {
@@ -51,7 +53,7 @@ namespace WideIO.API.Controllers
         [Route("/zagorskim/VideIO/1.0.0/ban/{id}")]
         [ValidateModelState]
         [SwaggerOperation("BanUser")]
-        public virtual IActionResult BanUser([FromRoute (Name = "id")][Required]Guid id)
+        public virtual IActionResult BanUser([FromRoute(Name = "id")][Required] Guid id)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -76,7 +78,7 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("DeleteUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult DeleteUserData([FromQuery (Name = "id")][Required()]Guid id)
+        public virtual IActionResult DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -87,7 +89,7 @@ namespace WideIO.API.Controllers
             // return StatusCode(401);
             string exampleJson = null;
             exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
             : default(UserDto);
@@ -108,7 +110,7 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult EditUserData([FromBody]UserDto userDto)
+        public virtual IActionResult EditUserData([FromBody] UserDto userDto)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -119,7 +121,7 @@ namespace WideIO.API.Controllers
             // return StatusCode(401);
             string exampleJson = null;
             exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
             : default(UserDto);
@@ -139,7 +141,7 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult GetUserData([FromQuery (Name = "id")][Required()]Guid id)
+        public virtual IActionResult GetUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -150,7 +152,7 @@ namespace WideIO.API.Controllers
             // return StatusCode(401);
             string exampleJson = null;
             exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
             : default(UserDto);
@@ -170,16 +172,22 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("LoginUser")]
         [SwaggerResponse(statusCode: 200, type: typeof(LoginResponseDto), description: "OK")]
-        public virtual IActionResult LoginUser([FromBody]LoginDto loginDto)
+        [SwaggerResponse(statusCode: 400, description: "Bad Request")]
+        public virtual async Task<IActionResult> LoginUser([FromBody] LoginDto loginDto)
         {
-
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (await _userService.LoginUserAsync(loginDto))
+                return Ok("token1");
+            else
+                return BadRequest(ModelState);
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(LoginResponseDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
             string exampleJson = null;
             exampleJson = "Custom MIME type example not yet supported: application:json";
-            
+
             var example = exampleJson != null
             ? JsonConvert.DeserializeObject<LoginResponseDto>(exampleJson)
             : default(LoginResponseDto);
@@ -198,13 +206,17 @@ namespace WideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("RegisterUser")]
-        public async virtual Task<IActionResult> RegisterUser([FromBody]RegisterDto registerDto)
+        [SwaggerResponse(statusCode: 200, description: "OK")]
+        [SwaggerResponse(statusCode: 400, description: "Bad Request")]
+        public async virtual Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)
         {
-            if (await _userService.RegisterUserAsync(registerDto))
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (await _userService.RegisterUserAsync(registerDto, ModelState))
                 return Ok();
             else
-                return BadRequest();
-            
+                return BadRequest(ModelState);
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

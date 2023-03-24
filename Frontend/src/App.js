@@ -5,32 +5,40 @@ import {Department} from './Department';
 import {Employee} from './Employee';
 import { FetchData } from './FetchData';
 import { BrowserRouter, Route, Switch, NavLink } from 'react-router-dom';
+import Register from './User_Account/Register'
+import Login from './User_Account/Login'
 
 function App() {
   return (
     <BrowserRouter>
     <div className="App container">
       <h3 className='d-flex justify-content-center m-3'></h3>
-      <nav className='navbar navbar-expand-sm bg-light-dark'>
+      
+      <nav className='navbar fixed-top navbar-expand-sm bg-light-dark'>
         <ul className='navbar-nav'>
           <li className='nav-item- m-1'>
-            <NavLink className="btn btn-light btn-outline-primary" to='/home'>
+            <NavLink className="btn btn-outline-light" to='/home'>
               Home
             </NavLink>
           </li>
-          <li className='nav-item m-1'>
-            <NavLink className="btn btn-light btn-outline-primary" to='/department'>
+          {/* <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/department'>
               Department
             </NavLink>
           </li>
           <li className='nav-item m-1'>
-            <NavLink className="btn btn-light btn-outline-primary" to='/employee'>
+            <NavLink className="btn btn-outline-light" to='/employee'>
               Employee
+            </NavLink>
+          </li> */}
+          <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/login'>
+              Login
             </NavLink>
           </li>
           <li className='nav-item m-1'>
-            <NavLink className="btn btn-light btn-outline-primary" to='/fetchdata'>
-              FetchData
+            <NavLink className="btn btn-outline-light" to='/register'>
+              Register
             </NavLink>
           </li>
         </ul>
@@ -39,7 +47,8 @@ function App() {
         <Route path='/home' component={Home}/>
         <Route path='/department' component={Department}/>
         <Route path='/employee' component={Employee}/>
-        <Route path='/fetchdata' component={FetchData}/>
+        <Route path='/login' component={Login}/>
+        <Route path='/register' component={Register}/>
       </Switch>
     </div>
     </BrowserRouter>

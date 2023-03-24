@@ -41,6 +41,18 @@ builder.Services.AddScoped<IUserService, UserService>();
 //builder.Services.AddScoped<IApiRepository, ApiRepository>();
 // Add services to the container.
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost3000",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                   .AllowAnyHeader()
+                   .AllowAnyMethod()
+                   .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -63,5 +75,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// CORS
+app.UseCors("AllowLocalhost3000");
 
 app.Run();

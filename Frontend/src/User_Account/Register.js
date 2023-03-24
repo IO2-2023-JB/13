@@ -91,7 +91,7 @@ const Register = () => {
                 JSON.stringify({ email: email, nickname: user, name: name, surname: surname, password: pwd }),
                 {
                     headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
+                    withCredentials: false //cred
                 }
             );
             console.log(response?.data);
@@ -110,7 +110,12 @@ const Register = () => {
             if (!err?.response) {
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 400) {
-                setErrMsg('Bad request - err 400')
+                if(err.response.data && typeof err.response.data === 'object' && err.response.data.DuplicateUserName)
+                    setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateUserName : 'Registration Failed');
+                else
+                    setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateEmail  : 'Registration Failed');
+                //setErrMsg(err.response.data)
+                //setErrMsg('Bad request - err 400')
                 //setErrMsg('Username Taken');
             } else {
                 setErrMsg('Registration Failed')
@@ -127,7 +132,7 @@ const Register = () => {
                     Success!
                 </h1>
                 <p>
-                    <a href="#">Sign in</a>
+                    <a href="/login">Sign in</a>
                 </p>
             </section>
         ): (

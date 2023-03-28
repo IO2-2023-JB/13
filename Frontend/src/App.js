@@ -17,27 +17,17 @@ function App() {
       <nav className='navbar fixed-top navbar-expand-sm bg-light-dark'>
         <ul className='navbar-nav'>
           <li className='nav-item- m-1'>
-            <NavLink className="btn btn-outline-light" to='/home'>
+            <NavLink className="btn btn-outline-dark" to='/home'>
               Home
             </NavLink>
           </li>
-          {/* <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/department'>
-              Department
-            </NavLink>
-          </li>
           <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/employee'>
-              Employee
-            </NavLink>
-          </li> */}
-          <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/login'>
+            <NavLink className="btn btn-outline-dark" to='/login'>
               Login
             </NavLink>
           </li>
           <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/register'>
+            <NavLink className="btn btn-outline-dark" to='/register'>
               Register
             </NavLink>
           </li>

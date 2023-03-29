@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.IdentityModel.Tokens;
 using MyVideIO.Models;
 using MyWideIO.API.Data.IRepositories;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
@@ -17,11 +21,20 @@ namespace MyWideIO.API.Services
             _signInManager = signInManager;
         }
 
-        public async Task<bool> LoginUserAsync(LoginDto loginDto)
+        public Task<bool> EditUserDataAsync(UserDto userDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> LoginUserAsync(LoginDto loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
-            var result = await _signInManager.PasswordSignInAsync(user, loginDto.Password, true, false);
-            return result.Succeeded;
+            if (user == null)
+                return string.Empty;
+            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            if (result.Succeeded)
+                return await GenerateToken(user);
+            return string.Empty;
         }
 
         public async Task<bool> RegisterUserAsync(RegisterDto registerDto, ModelStateDictionary modelState)
@@ -38,6 +51,30 @@ namespace MyWideIO.API.Services
                 foreach (var error in result.Errors)
                     modelState.AddModelError(error.Code, error.Description);
             return result.Succeeded;
+        }
+        private async Task<string> GenerateToken(ViewerModel viewer)
+        {
+            var roles = await _userManager.GetRolesAsync(viewer);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, viewer.Name),
+                new Claim(ClaimTypes.Email, viewer.Email),
+                new Claim(ClaimTypes.NameIdentifier, viewer.UserName),
+                new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()), // od kiedy wazny
+                new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()), // do kiedy wazny, dla admina moze, na razie wazny 1 dzien
+            };
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var token = new JwtSecurityToken(
+                new JwtHeader(
+                    new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TajnyKlucz128bit")), // tajny klucz, na razie tutaj, jakis bardzo dlugi losowy string
+                    SecurityAlgorithms.HmacSha256)),
+                    new JwtPayload(claims));
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

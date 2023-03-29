@@ -23,6 +23,7 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WideIO.API.Controllers
 {
@@ -53,6 +54,7 @@ namespace WideIO.API.Controllers
         [Route("/zagorskim/VideIO/1.0.0/ban/{id}")]
         [ValidateModelState]
         [SwaggerOperation("BanUser")]
+        [Authorize(Roles = "Admin")]
         public virtual IActionResult BanUser([FromRoute(Name = "id")][Required] Guid id)
         {
 
@@ -110,7 +112,7 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult EditUserData([FromBody] UserDto userDto)
+        public virtual IActionResult EditUserData([FromBody] UserDto userDto, [FromRoute] string address)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -177,10 +179,11 @@ namespace WideIO.API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            if (await _userService.LoginUserAsync(loginDto))
-                return Ok("token1");
-            else
+            var token = await _userService.LoginUserAsync(loginDto);
+            if (token.IsNullOrEmpty())
                 return BadRequest(ModelState);
+            else
+                return Ok(token);
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(LoginResponseDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

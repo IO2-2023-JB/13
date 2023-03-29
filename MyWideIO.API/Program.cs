@@ -8,6 +8,10 @@ using MyWideIO.API.Services;
 using MyVideIO.Models;
 using Microsoft.AspNetCore.Identity;
 using MyWideIO.API.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -33,7 +37,43 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(config =>
+{
+    config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+              Enter 'Bearer' [space] and then your token in the text input below.
+              \r\n\r\nExample: 'Bearer 12345abcdef'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+          {
+            {
+              new OpenApiSecurityScheme
+              {
+                Reference = new OpenApiReference
+                  {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                  },
+                  Scheme = "oauth2",
+                  Name = "Bearer",
+                  In = ParameterLocation.Header,
+
+                },
+                new List<string>()
+              }
+            });
+
+    //config.SwaggerDoc("v1.3", new OpenApiInfo
+    //{
+    //    Version = "v1.3",
+    //    Title = "MyWideIO.API",
+    //});
+});
 
 //builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
 builder.Services.AddScoped<IApiRepository, ApiRepository>();
@@ -51,8 +91,40 @@ builder.Services.AddCors(options =>
             builder.AllowAnyOrigin()
                    .AllowAnyHeader()
                    .AllowAnyMethod();
-                   //.AllowCredentials();
+            //.AllowCredentials();
         });
+});
+
+// JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TajnyKlucz128bit")), // ten sam klucz
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromMinutes(5)
+    };
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("userAddress", policy =>
+    {
+        policy.RequireAssertion(context =>
+        {
+            var userAddress = context.User.FindFirst(ClaimTypes.Email).Value;
+            // /api/v1/mailbox/email@example.com/inbox/messages/list
+            var address = new HttpContextAccessor().HttpContext.Request.RouteValues["address"].ToString();
+            return address == userAddress;
+        });
+    });
 });
 
 var app = builder.Build();
@@ -79,5 +151,7 @@ app.MapControllers();
 
 // CORS
 app.UseCors("AllowLocalhost3000");
+
+app.UseDeveloperExceptionPage(); // do wywalenia
 
 app.Run();

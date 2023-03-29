@@ -15,15 +15,19 @@ namespace MyWideIO.API.Services
     {
         private readonly UserManager<ViewerModel> _userManager;
         private readonly SignInManager<ViewerModel> _signInManager;
-        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager)
+        private readonly RoleManager<IdentityRole> roleManager;
+
+        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager,RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            this.roleManager = roleManager;
         }
 
-        public Task<bool> EditUserDataAsync(UserDto userDto)
+        public async Task<bool> EditUserDataAsync(UserDto userDto, ClaimsPrincipal user)
         {
-            throw new NotImplementedException();
+            var viewer = await _userManager.GetUserAsync(user);
+            return true;
         }
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
@@ -50,6 +54,12 @@ namespace MyWideIO.API.Services
             if (!result.Succeeded)
                 foreach (var error in result.Errors)
                     modelState.AddModelError(error.Code, error.Description);
+            await _userManager.AddToRoleAsync(viewer, Random.Shared.Next(3) switch // na szybko
+            {
+                0 => "viewer",
+                1 => "creator",
+                2 => "admin"
+            });
             return result.Succeeded;
         }
         private async Task<string> GenerateToken(ViewerModel viewer)

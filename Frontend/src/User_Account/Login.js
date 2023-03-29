@@ -1,19 +1,25 @@
 import { useRef, useState, useEffect, useContext } from 'react';
 import AuthContext from "../context/AuthProvider"
-
+import jwt_decode  from 'jwt-decode';
 import axios from '../api/axios';
+import useAuth from '../hooks/useAuth';
+import {Link, useNavigate, useLocation} from 'react-router-dom'
 
 const LOGIN_URL = '/login';
 
 const Login = () => {
-    const { setAuth } = useContext(AuthContext);
+    const { setAuth } = useAuth();
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/home";
+
     const emailRef = useRef();
     const errRef = useRef();
 
     const [email, setUser] = useState('');
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
-    const [success, setSuccess] = useState(false);
 
     useEffect(() => {
         emailRef.current.focus();
@@ -34,13 +40,18 @@ const Login = () => {
                     withCredentials: true //cred
                 }
             );
-            console.log(JSON.stringify(response?.data));
-            const accessToken = response?.data?.accessToken;
-            const roles = response?.data?.roles;
-            setAuth({email: email, pwd, roles, accessToken});
+            //console.log(JSON.stringify(response?.data));
+            const token = response?.data;
+            const textEncoder = new TextEncoder();
+            //const secretArray = textEncoder.encode('TajnyKlucz128bit');
+            const payload = jwt_decode(token);
+            const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            console.log(roles);
+            const accessToken = token;
+            setAuth({user: email, pwd, roles, accessToken});
             setUser('');
             setPwd('');
-            setSuccess(true);
+            navigate(from, {replace: true});
 
         }catch(err){
             if(!err?.response) {
@@ -56,16 +67,6 @@ const Login = () => {
     }
 
     return (
-        <>
-        {success ? (
-            <section>
-                <h1>You are logged in!</h1>
-                <br />
-                <p>
-                    <a href="/home">Go to Home</a>
-                </p>
-            </section>
-        ) : (
         <section>
             <p ref={errRef} className={errMsg ? "errmsg" : 
             "offscreen"} aria-live="assertive">{errMsg}</p>
@@ -100,8 +101,6 @@ const Login = () => {
                 </span>
             </p>
         </section>
-        )}
-        </>
     )
 }
 

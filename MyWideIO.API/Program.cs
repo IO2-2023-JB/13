@@ -12,45 +12,50 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using System.Runtime.CompilerServices;
 
-var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
-
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
-builder.Services.AddIdentity<ViewerModel, IdentityRole>(config =>
+internal class Program
 {
-    config.SignIn.RequireConfirmedEmail = false;
-    config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
-    config.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 8;
-    options.Password.RequiredUniqueChars = 1;
-
-});
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(config =>
-{
-    config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    private static void Main(string[] args)
     {
-        Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+        var builder = WebApplication.CreateBuilder(args);
+        var configuration = builder.Configuration;
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
+        builder.Services.AddIdentity<ViewerModel, IdentityRole>(config =>
+        {
+            config.SignIn.RequireConfirmedEmail = false;
+            config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+            config.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>();
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 8;
+            options.Password.RequiredUniqueChars = 1;
+
+        });
+        builder.Services.AddControllers();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(config =>
+        {
+            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
               Enter 'Bearer' [space] and then your token in the text input below.
               \r\n\r\nExample: 'Bearer 12345abcdef'",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-    config.AddSecurityRequirement(new OpenApiSecurityRequirement()
-          {
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                  {
             {
               new OpenApiSecurityScheme
               {
@@ -66,92 +71,97 @@ builder.Services.AddSwaggerGen(config =>
                 },
                 new List<string>()
               }
-            });
+                    });
 
-    //config.SwaggerDoc("v1.3", new OpenApiInfo
-    //{
-    //    Version = "v1.3",
-    //    Title = "MyWideIO.API",
-    //});
-});
-
-//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
-builder.Services.AddScoped<IApiRepository, ApiRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddScoped<IApiRepository, ApiRepository>();
-// Add services to the container.
-
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowLocalhost3000",
-        builder =>
-        {
-            //builder.WithOrigins("http://localhost:3000")
-            builder.AllowAnyOrigin()
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-            //.AllowCredentials();
+            //config.SwaggerDoc("v1.3", new OpenApiInfo
+            //{
+            //    Version = "v1.3",
+            //    Title = "MyWideIO.API",
+            //});
         });
-});
 
-// JWT
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TajnyKlucz128bit")), // ten sam klucz
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromMinutes(5)
-    };
-});
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("userAddress", policy =>
-    {
-        policy.RequireAssertion(context =>
+        //builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
+        builder.Services.AddScoped<IApiRepository, ApiRepository>();
+        builder.Services.AddScoped<IUserService, UserService>();
+        //builder.Services.AddScoped<IApiRepository, ApiRepository>();
+        // Add services to the container.
+
+        // CORS
+        builder.Services.AddCors(options =>
         {
-            var userAddress = context.User.FindFirst(ClaimTypes.Email).Value;
-            // /api/v1/mailbox/email@example.com/inbox/messages/list
-            var address = new HttpContextAccessor().HttpContext.Request.RouteValues["address"].ToString();
-            return address == userAddress;
+            options.AddPolicy("AllowLocalhost3000",
+                builder =>
+                {
+                    //builder.WithOrigins("http://localhost:3000")
+                    builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                    //.AllowCredentials();
+                });
         });
-    });
-});
 
-var app = builder.Build();
+        // JWT
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TajnyKlucz128bit")), // ten sam klucz
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+        });
+        builder.Services.AddAuthorization();
 
-using (var scope = app.Services.CreateScope()) // ?
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // ??
-    //dbContext.Database.Migrate();
+        CreateRoles(builder.Services.BuildServiceProvider()).Wait();
+
+        var app = builder.Build();
+
+        using (var scope = app.Services.CreateScope()) // ?
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // ??
+                                                                                              //dbContext.Database.Migrate();
+        }
+        // Configure the HTTP request pipeline. 
+        // if (app.Environment.IsDevelopment()) na razie wlaczony swagger na release
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthentication();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        // CORS
+        app.UseCors("AllowLocalhost3000");
+
+        app.UseDeveloperExceptionPage(); // do wywalenia
+
+        app.Run();
+    }
+    private static async Task CreateRoles(IServiceProvider serviceProvider)
+    {
+        //initializing custom roles 
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        string[] roleNames = { "Viewer", "Creator", "Admin" };
+
+        foreach (var roleName in roleNames)
+        {
+            var roleExist = await roleManager.RoleExistsAsync(roleName);
+            if (!roleExist)
+               await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
 }
-// Configure the HTTP request pipeline. 
-// if (app.Environment.IsDevelopment()) na razie wlaczony swagger na release
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-// CORS
-app.UseCors("AllowLocalhost3000");
-
-app.UseDeveloperExceptionPage(); // do wywalenia
-
-app.Run();

@@ -24,6 +24,7 @@ using MyWideIO.API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace WideIO.API.Controllers
 {
@@ -112,9 +113,11 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult EditUserData([FromBody] UserDto userDto, [FromRoute] string address)
+        public async virtual Task<IActionResult> EditUserData([FromBody] UserDto userDto)
         {
-
+            if (User.FindFirstValue(ClaimTypes.Email) != userDto.Email)
+                return Unauthorized();
+            await _userService.EditUserDataAsync(userDto,User);
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(UserDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

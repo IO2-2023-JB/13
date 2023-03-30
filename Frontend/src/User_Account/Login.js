@@ -4,6 +4,7 @@ import jwt_decode  from 'jwt-decode';
 import axios from '../api/axios';
 import useAuth from '../hooks/useAuth';
 import {Link, useNavigate, useLocation} from 'react-router-dom'
+import {cookies} from '../App'
 
 const LOGIN_URL = '/login';
 
@@ -41,14 +42,18 @@ const Login = () => {
                 }
             );
             //console.log(JSON.stringify(response?.data));
-            const token = response?.data;
-            const textEncoder = new TextEncoder();
+            const token = response?.data?.token;
+            //console.log('token:' + token);
+            //const textEncoder = new TextEncoder();
             //const secretArray = textEncoder.encode('TajnyKlucz128bit');
             const payload = jwt_decode(token);
             const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            //console.log(payload.sub)
             //console.log(roles);
             const accessToken = token;
-            setAuth({user: email, pwd, roles, accessToken});
+            setAuth({user: email, pwd, roles, accessToken, id: payload.sub});
+            cookies.set("accessToken", accessToken, { expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)});
+            //console.log(cookies.get("accessToken"));
             setUser('');
             setPwd('');
             navigate(from, {replace: true});

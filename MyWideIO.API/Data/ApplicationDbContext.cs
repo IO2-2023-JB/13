@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyVideIO.Models;
+using MyWideIO.API.Data;
 
 namespace MyVideIO.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ViewerModel>
+    public class ApplicationDbContext : IdentityDbContext<ViewerModel, UserRole, Guid>
     {
 
         public DbSet<ViewerModel> Viewers { get; set; }

@@ -31,8 +31,8 @@ namespace WideIO.API.Models
             /// <summary>
             /// Enum SimpleEnum for Simple
             /// </summary>
-            [EnumMember(Value = "Simple")]
-            SimpleEnum = 1,
+            [EnumMember(Value = "Viewer")]
+            ViewerEnum = 1,
             
             /// <summary>
             /// Enum CreatorEnum for Creator

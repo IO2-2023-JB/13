@@ -22,7 +22,7 @@ internal class Program
         var configuration = builder.Configuration;
 
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
-        builder.Services.AddIdentity<ViewerModel, IdentityRole>(config =>
+        builder.Services.AddIdentity<ViewerModel, UserRole>(config =>
         {
             config.SignIn.RequireConfirmedEmail = false;
             config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
@@ -152,14 +152,21 @@ internal class Program
     private static async Task CreateRoles(IServiceProvider serviceProvider)
     {
         //initializing custom roles 
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        string[] roleNames = { "Viewer", "Creator", "Admin" };
-
-        foreach (var roleName in roleNames)
+        try
         {
-            var roleExist = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExist)
-               await roleManager.CreateAsync(new IdentityRole(roleName));
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
+            string[] roleNames = { "Viewer", "Creator", "Admin" };
+
+            foreach (var roleName in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                    await roleManager.CreateAsync(new UserRole(roleName));
+            }
+        }
+        catch(Exception e)
+        {
+            ;
         }
     }
 }

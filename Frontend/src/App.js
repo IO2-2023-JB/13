@@ -18,35 +18,20 @@ import AuthContext from "./context/AuthProvider";
 function App() {
   const navigate = useNavigate();
   const { setAuth } = useAuth();
-  const { user, pwd, roles, accessToken } = useContext(AuthContext);
+  const { auth } = useContext(AuthContext);
+  
   const logout = async () => {
     // if used in more components, this should be in context
     setAuth({});
     navigate('/login');
   }
 
-  const login_out = () =>{
-    if(setAuth?.user)
-      return(
-            <NavLink className="btn btn-outline-light" to='/login'>
-              Login
-            </NavLink>
-        )
-    else
-        return(
-                <button onClick={logout}>Sign Out</button>
-        )
-  }
-  // TODO wylogowywanie
   const isLoggedIn = () =>{
-    console.log('user == null');
-    console.log(accessToken == null);
+    console.log(auth?.user ? "Logged In" : "Logged Out");
     return(
-      setAuth?.user?.accessToken
+      auth?.user
     )
   }
-  //const isLoggedIn = setAuth?.user;
-  //const isLoggedIn = user != null;
 
   return (
     <div className="App container">
@@ -70,13 +55,10 @@ function App() {
             </NavLink>
           </li> */}
           {isLoggedIn()?
-            <li className='nav-item m-1'>
-              {/* <button className="btn btn-outline-light" onClick={logout}>
+            <li className='nav-item m-1 mr-auto'>
+               <button className="btn btn-outline-light" onClick={logout} style={{ verticalAlign: 'middle' }}>
                 Logout
-              </button> */}
-              <NavLink className="btn btn-outline-light" to='/register'>
-                Logout
-              </NavLink>
+              </button> 
             </li>
             :
             <li className='nav-item m-1'>
@@ -85,16 +67,13 @@ function App() {
               </NavLink>
             </li>
           }
-          {/* <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/login'>
-              Login
-            </NavLink>
-          </li> */}
+          {!isLoggedIn() &&
           <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/register'>
-              Register
-            </NavLink>
+                Register
+              </NavLink>
           </li>
+          }
         </ul>
       </nav>
       <Routes>

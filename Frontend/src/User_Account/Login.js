@@ -46,7 +46,7 @@ const Login = () => {
             //const secretArray = textEncoder.encode('TajnyKlucz128bit');
             const payload = jwt_decode(token);
             const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-            console.log(roles);
+            //console.log(roles);
             const accessToken = token;
             setAuth({user: email, pwd, roles, accessToken});
             setUser('');
@@ -55,7 +55,7 @@ const Login = () => {
 
         }catch(err){
             if(!err?.response) {
-                setErrMsg('Account with this email does not exist')
+                setErrMsg('Account with this email does not exist') //TODO change
                 //setErrMsg('No Server Response');
             } else if(err.response?.status === 400) {
                 setErrMsg('Wrong email or password');

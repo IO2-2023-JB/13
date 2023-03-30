@@ -1,4 +1,4 @@
-﻿using MyVideIO.Models;
+﻿using WideIO.API.Models;
 
 namespace MyWideIO.API.Data.IRepositories
 {

@@ -78,7 +78,7 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("DeleteUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -87,14 +87,23 @@ namespace WideIO.API.Controllers
             // return StatusCode(400);
             //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(401);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
+            //string exampleJson = null;
+            //exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
-            : default(UserDto);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            //var example = exampleJson != null
+            //? JsonConvert.DeserializeObject<UserDto>(exampleJson)
+            //: default(UserDto);
+            ////TODO: Change the data returned
+            //return new ObjectResult(example);
+
+
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (await _userService.DeleteUserAsync(id))
+                return Ok();
+            else
+                return BadRequest();
         }
 
         /// <summary>

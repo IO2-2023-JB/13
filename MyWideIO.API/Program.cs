@@ -5,7 +5,8 @@ using Microsoft.OpenApi.Models;
 using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Services;
-using MyVideIO.Models;
+using MyWideIO.API.Models.DB_Models;
+//using MyVideIO.Models;
 using Microsoft.AspNetCore.Identity;
 using MyWideIO.API.Data;
 

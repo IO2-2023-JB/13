@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
 using MyVideIO.Models;
+using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.WebSockets;
@@ -16,19 +17,27 @@ namespace MyWideIO.API.Services
     {
         private readonly UserManager<ViewerModel> _userManager;
         private readonly SignInManager<ViewerModel> _signInManager;
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly RoleManager<UserRole> _roleManager;
 
-        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager,RoleManager<IdentityRole> roleManager)
+        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager, RoleManager<UserRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            this.roleManager = roleManager;
+            _roleManager = roleManager;
         }
 
-        public async Task<bool> EditUserDataAsync(UserDto userDto, ClaimsPrincipal user)
+        public async Task</*(*/bool /*Suceeded, IEnumerable<IdentityError>? Errors)*/> EditUserDataAsync(UserDto userDto, ClaimsPrincipal user)
         {
             var viewer = await _userManager.GetUserAsync(user);
+            //if (userDto.Id != viewer.Id)
+            //    return false;
+            //if (userDto.Email.Length > 0 && userDto.Email != viewer.Email)
+            //{
+            //    var emailToken = await _userManager.GenerateChangeEmailTokenAsync(viewer, userDto.Email);
+            //    var result = await _userManager.ChangeEmailAsync(viewer, userDto.Email, emailToken);
+            //    result.
             return true;
+            //}
         }
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
@@ -71,7 +80,7 @@ namespace MyWideIO.API.Services
                 new Claim(ClaimTypes.Name, viewer.Name),
                 new Claim(ClaimTypes.Email, viewer.Email),
                 new Claim(ClaimTypes.NameIdentifier, viewer.UserName),
-                new Claim(JwtRegisteredClaimNames.Sub,viewer.Id), // podobno id powinno byc w sub
+                new Claim(JwtRegisteredClaimNames.Sub,viewer.Id.ToString()), // podobno id powinno byc w sub
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()), // od kiedy wazny
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()), // do kiedy wazny, dla admina moze, na razie wazny 1 dzien
             };

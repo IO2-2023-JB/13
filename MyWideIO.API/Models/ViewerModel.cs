@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace MyVideIO.Models
 {
-    public class ViewerModel : IdentityUser
+    public class ViewerModel : IdentityUser<Guid>
     {
         [Required]
         public string Name { get; set; } = string.Empty;

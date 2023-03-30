@@ -117,7 +117,7 @@ namespace WideIO.API.Controllers
         {
             if (User.FindFirstValue(ClaimTypes.Email) != userDto.Email)
                 return Unauthorized();
-            await _userService.EditUserDataAsync(userDto,User);
+            await _userService.EditUserDataAsync(userDto, User);
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(UserDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -186,7 +186,7 @@ namespace WideIO.API.Controllers
             if (token.IsNullOrEmpty())
                 return BadRequest(ModelState);
             else
-                return Ok(token);
+                return Ok(new LoginResponseDto { Token = token });
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(LoginResponseDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...

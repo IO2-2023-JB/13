@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using MyVideIO.Models;
 using MyWideIO.API.Data.IRepositories;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
 using WideIO.API.Models;
@@ -70,6 +71,7 @@ namespace MyWideIO.API.Services
                 new Claim(ClaimTypes.Name, viewer.Name),
                 new Claim(ClaimTypes.Email, viewer.Email),
                 new Claim(ClaimTypes.NameIdentifier, viewer.UserName),
+                new Claim(JwtRegisteredClaimNames.Sub,viewer.Id), // podobno id powinno byc w sub
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()), // od kiedy wazny
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()), // do kiedy wazny, dla admina moze, na razie wazny 1 dzien
             };
@@ -78,12 +80,17 @@ namespace MyWideIO.API.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var token = new JwtSecurityToken(
-                new JwtHeader(
-                    new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TajnyKlucz128bit")), // tajny klucz, na razie tutaj, jakis bardzo dlugi losowy string
-                    SecurityAlgorithms.HmacSha256)),
-                    new JwtPayload(claims));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TajnyKlucz128bit"));
+            var algorithm = SecurityAlgorithms.HmacSha256;
+
+            var signingCredencials = new SigningCredentials(key, algorithm);
+
+            var header = new JwtHeader(signingCredencials);
+
+            var payload = new JwtPayload(claims);
+
+            var token = new JwtSecurityToken(header, payload);
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

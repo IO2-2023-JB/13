@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MyVideIO.Models;
-using MyWideIO.API.Data.IRepositories;
 using WideIO.API.Models;
+using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Data.IRepositories;
 
 namespace MyWideIO.API.Services
 {
@@ -11,6 +11,7 @@ namespace MyWideIO.API.Services
     {
         private readonly UserManager<ViewerModel> _userManager;
         private readonly SignInManager<ViewerModel> _signInManager;
+
         public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager)
         {
             _userManager = userManager;
@@ -34,9 +35,16 @@ namespace MyWideIO.API.Services
                 Surname = registerDto.Surname
             };
             var result = await _userManager.CreateAsync(viewer, registerDto.Password);
-            if (!result.Succeeded)
+            if (!result.Succeeded && modelState != null)
                 foreach (var error in result.Errors)
                     modelState.AddModelError(error.Code, error.Description);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> DeleteUserAsync(Guid id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            var result = await _userManager.DeleteAsync(user);
             return result.Succeeded;
         }
     }

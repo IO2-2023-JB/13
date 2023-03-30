@@ -8,5 +8,6 @@ namespace MyWideIO.API.Services
     {
         public Task<bool> RegisterUserAsync(RegisterDto registerDto,ModelStateDictionary modelState);
         public Task<bool> LoginUserAsync(LoginDto loginDto);
+        public Task<bool> DeleteUserAsync(Guid id);
     }
 }

@@ -64,6 +64,10 @@ const Login = () => {
                 //setErrMsg('No Server Response');
             } else if(err.response?.status === 400) {
                 setErrMsg('Wrong email or password');
+            } else if(err.response?.status === 404){
+                setErrMsg('Account with this email does not exist');
+            } else if(err.response?.status === 401 ){
+                setErrMsg('Wrong password');
             } else {
                 setErrMsg('Login Failed');
             }

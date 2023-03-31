@@ -114,9 +114,8 @@ const Register = () => {
                     setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateUserName : 'Registration Failed');
                 else
                     setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateEmail  : 'Registration Failed');
-                //setErrMsg(err.response.data)
-                //setErrMsg('Bad request - err 400')
-                //setErrMsg('Username Taken');
+            } else if(err?.status === 409){
+                setErrMsg('Account with this email already exists');
             } else {
                 setErrMsg('Registration Failed')
             }

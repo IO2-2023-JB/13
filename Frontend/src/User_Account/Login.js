@@ -48,10 +48,12 @@ const Login = () => {
             //const secretArray = textEncoder.encode('TajnyKlucz128bit');
             const payload = jwt_decode(token);
             const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+            //console.log(id);
             //console.log(payload.sub)
             //console.log(roles);
             const accessToken = token;
-            setAuth({user: email, pwd, roles, accessToken, id: payload.sub});
+            setAuth({user: email, pwd, roles, accessToken, id});
             cookies.set("accessToken", accessToken, { expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)});
             //console.log(cookies.get("accessToken"));
             setUser('');

@@ -1,19 +1,26 @@
 import { useRef, useState, useEffect, useContext } from 'react';
 import AuthContext from "../context/AuthProvider"
-
+import jwt_decode  from 'jwt-decode';
 import axios from '../api/axios';
+import useAuth from '../hooks/useAuth';
+import {Link, useNavigate, useLocation} from 'react-router-dom'
+import {cookies} from '../App'
 
 const LOGIN_URL = '/login';
 
 const Login = () => {
-    const { setAuth } = useContext(AuthContext);
+    const { setAuth } = useAuth();
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/home";
+
     const emailRef = useRef();
     const errRef = useRef();
 
     const [email, setUser] = useState('');
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
-    const [success, setSuccess] = useState(false);
 
     useEffect(() => {
         emailRef.current.focus();
@@ -31,23 +38,38 @@ const Login = () => {
                 JSON.stringify({email: email, password: pwd}),
                 {
                     headers: { 'Content-Type': 'application/json'},
-                    withCredentials: false //cred
+                    withCredentials: true //cred
                 }
             );
-            console.log(JSON.stringify(response?.data));
-            const accessToken = response?.data?.accessToken;
-            const roles = response?.data?.roles;
-            setAuth({email: email, pwd, roles, accessToken});
+            //console.log(JSON.stringify(response?.data));
+            const token = response?.data?.token;
+            //console.log('token:' + token);
+            //const textEncoder = new TextEncoder();
+            //const secretArray = textEncoder.encode('TajnyKlucz128bit');
+            const payload = jwt_decode(token);
+            const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+            //console.log(id);
+            //console.log(payload.sub)
+            //console.log(roles);
+            const accessToken = token;
+            setAuth({user: email, pwd, roles, accessToken, id});
+            cookies.set("accessToken", accessToken, { expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)});
+            //console.log(cookies.get("accessToken"));
             setUser('');
             setPwd('');
-            setSuccess(true);
+            navigate(from, {replace: true});
 
         }catch(err){
             if(!err?.response) {
-                setErrMsg('Account with this email does not exist')
+                setErrMsg('Account with this email does not exist') //TODO change
                 //setErrMsg('No Server Response');
             } else if(err.response?.status === 400) {
                 setErrMsg('Wrong email or password');
+            } else if(err.response?.status === 404){
+                setErrMsg('Account with this email does not exist');
+            } else if(err.response?.status === 401 ){
+                setErrMsg('Wrong password');
             } else {
                 setErrMsg('Login Failed');
             }
@@ -56,16 +78,6 @@ const Login = () => {
     }
 
     return (
-        <>
-        {success ? (
-            <section>
-                <h1>You are logged in!</h1>
-                <br />
-                <p>
-                    <a href="/home">Go to Home</a>
-                </p>
-            </section>
-        ) : (
         <section>
             <p ref={errRef} className={errMsg ? "errmsg" : 
             "offscreen"} aria-live="assertive">{errMsg}</p>
@@ -100,8 +112,6 @@ const Login = () => {
                 </span>
             </p>
         </section>
-        )}
-        </>
     )
 }
 

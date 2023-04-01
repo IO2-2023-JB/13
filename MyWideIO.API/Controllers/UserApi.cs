@@ -25,6 +25,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using MyVideIO.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace WideIO.API.Controllers
 {
@@ -36,7 +38,7 @@ namespace WideIO.API.Controllers
     {
         private readonly IUserService _userService;
 
-        public UserApiController(IUserService userService)
+        public UserApiController(IUserService userService, UserManager<ViewerModel> userManager)
         {
             _userService = userService;
         }
@@ -111,27 +113,24 @@ namespace WideIO.API.Controllers
         [Route("/zagorskim/VideIO/1.0.0/user")]
         [Consumes("application/json")]
         [ValidateModelState]
+        [Authorize]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
         public async virtual Task<IActionResult> EditUserData([FromBody] UserDto userDto)
         {
-            if (User.FindFirstValue(ClaimTypes.Email) != userDto.Email)
+            if (User.FindFirstValue(ClaimTypes.NameIdentifier) != userDto.Id.ToString())
                 return Unauthorized();
-            await _userService.EditUserDataAsync(userDto, User);
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(UserDto));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(401);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
+            var result = await _userService.EditUserDataAsync(userDto);
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
-            : default(UserDto);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            if (result.Suceeded)
+                return Ok(userDto);// po co sie zwraca to 
+            else
+            {
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(error.Code, error.Description);
+                return BadRequest(ModelState);
+            }    
+            
         }
 
         /// <summary>
@@ -146,23 +145,13 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult GetUserData([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(UserDto));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(401);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
-            : default(UserDto);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            var user = await _userService.GetUserAsync(id);
+            if (user is null)
+                return BadRequest();
+            else
+                return Ok(user);
         }
 
         /// <summary>
@@ -180,8 +169,6 @@ namespace WideIO.API.Controllers
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         public virtual async Task<IActionResult> LoginUser([FromBody] LoginDto loginDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
             var token = await _userService.LoginUserAsync(loginDto);
             if (token.IsNullOrEmpty())
                 return BadRequest(ModelState);
@@ -216,8 +203,6 @@ namespace WideIO.API.Controllers
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         public async virtual Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
             if (await _userService.RegisterUserAsync(registerDto, ModelState))
                 return Ok();
             else

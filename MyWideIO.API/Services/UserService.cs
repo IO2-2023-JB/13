@@ -26,18 +26,67 @@ namespace MyWideIO.API.Services
             _roleManager = roleManager;
         }
 
-        public async Task</*(*/bool /*Suceeded, IEnumerable<IdentityError>? Errors)*/> EditUserDataAsync(UserDto userDto, ClaimsPrincipal user)
+        public async Task<(bool Suceeded, IEnumerable<IdentityError> Errors)> EditUserDataAsync(UserDto userDto)
         {
-            var viewer = await _userManager.GetUserAsync(user);
-            //if (userDto.Id != viewer.Id)
-            //    return false;
-            //if (userDto.Email.Length > 0 && userDto.Email != viewer.Email)
-            //{
-            //    var emailToken = await _userManager.GenerateChangeEmailTokenAsync(viewer, userDto.Email);
-            //    var result = await _userManager.ChangeEmailAsync(viewer, userDto.Email, emailToken);
-            //    result.
-            return true;
-            //}
+            IdentityResult result;
+            var viewer = await _userManager.FindByIdAsync(userDto.Id.ToString()); // xd guid -> string -> guid
+
+            var emailToken = await _userManager.GenerateChangeEmailTokenAsync(viewer, userDto.Email);
+            result = await _userManager.ChangeEmailAsync(viewer, userDto.Email, emailToken);
+            if (!result.Succeeded)
+                return (false, result.Errors);
+
+            viewer.Name = userDto.Name;
+            viewer.Surname = userDto.Surname;
+            viewer.UserName = userDto.Nickname;
+
+            result = await _userManager.UpdateAsync(viewer);
+            if (!result.Succeeded)
+                return (false, result.Errors);
+
+            var role = (await _userManager.GetRolesAsync(viewer)).First();
+            string newRole = "";
+            switch(userDto.UserType)
+            {
+                case UserTypeDto.ViewerEnum:
+                    if (role != "Viewer")
+                        newRole = "Viewer";
+                    break;
+                case UserTypeDto.CreatorEnum:
+                    if (role != "Creator")
+                        newRole = "Creator";
+                    break;
+                case UserTypeDto.AdministratorEnum:
+                    if (role != "Admin")
+                        newRole = "Admin";
+                    break;
+            }
+            if(newRole.Length>0)
+            {
+                result = await _userManager.RemoveFromRoleAsync(viewer, role);
+                     if (!result.Succeeded)
+                    return (false, result.Errors);
+                result = await _userManager.AddToRoleAsync(viewer, newRole);
+                if (!result.Succeeded)
+                    return (false, result.Errors);
+            }       
+
+            return (true, new List<IdentityError>());
+        }
+
+        public async Task<UserDto?> GetUserAsync(Guid id)
+        {
+            var viewer = await _userManager.FindByIdAsync(id.ToString());
+            if (viewer == null)
+                return null;
+            return new UserDto
+            {
+                Id = viewer.Id,
+                Name = viewer.Name,
+                Surname = viewer.Surname,
+                Email = viewer.Email,
+                Nickname = viewer.UserName
+            };
         }
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
@@ -79,8 +128,8 @@ namespace MyWideIO.API.Services
             {
                 new Claim(ClaimTypes.Name, viewer.Name),
                 new Claim(ClaimTypes.Email, viewer.Email),
-                new Claim(ClaimTypes.NameIdentifier, viewer.UserName),
-                new Claim(JwtRegisteredClaimNames.Sub,viewer.Id.ToString()), // podobno id powinno byc w sub
+                new Claim(ClaimTypes.NameIdentifier, viewer.Id.ToString()),
+                //new Claim(JwtRegisteredClaimNames.Sub,viewer.Id.ToString()), // podobno id powinno byc w sub
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()), // od kiedy wazny
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()), // do kiedy wazny, dla admina moze, na razie wazny 1 dzien
             };

@@ -25,8 +25,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using MyVideIO.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MyWideIO.API.Models.DB_Models;
 
 namespace WideIO.API.Controllers
 {

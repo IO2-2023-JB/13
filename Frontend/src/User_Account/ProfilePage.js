@@ -48,6 +48,7 @@ const [userData, setUserData] = useState({
   lastName: "",
   nickname: "",
   email: "",
+  accountBalance: 0,
 });
 
 useEffect(() => {
@@ -57,6 +58,7 @@ useEffect(() => {
       lastName: data?.surname,
       nickname: data?.nickname,
       email: data?.email,
+      accountBalance: data?.accountBalance,
     });
   }
 }, [data]);
@@ -114,11 +116,6 @@ useEffect(() => {
 
   const [editMode, setEditMode] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserData((prevUserData) => ({ ...prevUserData, [name]: value }));
-  };
-
   const handleEditClick = () => {
     setEditMode(true);
   };
@@ -131,14 +128,8 @@ useEffect(() => {
     setEmail(userData.email);
   };
 
-  const handleSubmitClick = () => {
-    setEditMode(false);
-    console.log("Zatwierdzono zmiany: ", userData);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if button enabled with JS hack
     const v1 = USER_REGEX.test(user);
     const v2 = NAME_REGEX.test(name)
     const v3 = NAME_REGEX.test(surname)
@@ -155,8 +146,8 @@ useEffect(() => {
               nickname: user, 
               name: name, 
               surname: surname,
-              accountBalance: 0,
-              userType: auth?.roles == "Viewer" ? 1 : (auth?.roles == "Creator" ? 2: 3)
+              accountBalance: userData.accountBalance,
+              userType: auth?.roles == "Viewer" ? 1 : (auth?.roles == "Creator" ? 2 : 3)
             }),
             {
                 headers: { 
@@ -166,9 +157,9 @@ useEffect(() => {
                 withCredentials: true //cred
             }
         );
-        console.log(response?.data);
-        console.log(response?.accessToken);
-        console.log(JSON.stringify(response))
+        //console.log(response?.data);
+        //console.log(response?.accessToken);
+        //console.log(JSON.stringify(response))
         setSuccess(true);
         //clear state and controlled inputs
         //need value attrib on inputs for this
@@ -176,6 +167,21 @@ useEffect(() => {
         setEmail('')
         setName('')
         setSurname('')
+        axios.get(PROFILE_URL + "?id=" + auth?.id, {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+          //console.log("success");
+          console.log(JSON.stringify(response?.data));
+          setData(response?.data);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
         handleCancelClick();
     } catch (err) {
         if (!err?.response) {

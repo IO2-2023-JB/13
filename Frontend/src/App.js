@@ -35,9 +35,10 @@ function App() {
       const payload = jwt_decode(accessToken);
       const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       const email = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
+      const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
       //console.log(payload.sub)
       //console.log(roles);
-      setAuth({user: email, pwd: "", roles, accessToken, id: payload.sub});
+      setAuth({user: email, pwd: "", roles, accessToken, id});
       navigate(from, {replace: true});
     }
   }, []);

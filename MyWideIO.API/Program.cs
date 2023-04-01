@@ -1,18 +1,16 @@
-using MyVideIO.Data;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using MyWideIO.API.Data.Repositories;
-using MyWideIO.API.Data.IRepositories;
-using MyWideIO.API.Services;
-using MyVideIO.Models;
-using Microsoft.AspNetCore.Identity;
-using MyWideIO.API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using MyVideIO.Data;
+using MyVideIO.Models;
+using MyWideIO.API.Data;
+using MyWideIO.API.Data.IRepositories;
+using MyWideIO.API.Data.Repositories;
+using MyWideIO.API.Services;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using System.Security.Claims;
-using System.Runtime.CompilerServices;
 
 internal class Program
 {
@@ -28,7 +26,8 @@ internal class Program
             config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
             config.User.RequireUniqueEmail = true;
         })
-        .AddEntityFrameworkStores<ApplicationDbContext>();
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
         builder.Services.Configure<IdentityOptions>(options =>
         {
             options.Password.RequireDigit = true;
@@ -136,6 +135,8 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        var a = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
+
         app.UseAuthentication();
 
         app.UseAuthorization();
@@ -151,22 +152,15 @@ internal class Program
     }
     private static async Task CreateRoles(IServiceProvider serviceProvider)
     {
-        //initializing custom roles 
-        try
-        {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
-            string[] roleNames = { "Viewer", "Creator", "Admin" };
+        // role init
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
+        string[] roleNames = { "Viewer", "Creator", "Admin" };
 
-            foreach (var roleName in roleNames)
-            {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                    await roleManager.CreateAsync(new UserRole(roleName));
-            }
-        }
-        catch(Exception e)
+        foreach (var roleName in roleNames)
         {
-            ;
+            var roleExist = await roleManager.RoleExistsAsync(roleName);
+            if (!roleExist)
+                await roleManager.CreateAsync(new UserRole(roleName));
         }
     }
 }

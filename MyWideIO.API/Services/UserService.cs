@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
-using MyVideIO.Models;
 using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
+using MyWideIO.API.Models.DB_Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.WebSockets;
 using System.Security.Claims;
@@ -46,7 +46,7 @@ namespace MyWideIO.API.Services
 
             var role = (await _userManager.GetRolesAsync(viewer)).First();
             string newRole = "";
-            switch(userDto.UserType)
+            switch (userDto.UserType)
             {
                 case UserTypeDto.ViewerEnum:
                     if (role != "Viewer")
@@ -61,15 +61,15 @@ namespace MyWideIO.API.Services
                         newRole = "Admin";
                     break;
             }
-            if(newRole.Length>0)
+            if (newRole.Length > 0)
             {
                 result = await _userManager.RemoveFromRoleAsync(viewer, role);
-                     if (!result.Succeeded)
+                if (!result.Succeeded)
                     return (false, result.Errors);
                 result = await _userManager.AddToRoleAsync(viewer, newRole);
                 if (!result.Succeeded)
                     return (false, result.Errors);
-            }       
+            }
 
             return (true, new List<IdentityError>());
         }
@@ -85,9 +85,16 @@ namespace MyWideIO.API.Services
                 Name = viewer.Name,
                 Surname = viewer.Surname,
                 Email = viewer.Email,
-                Nickname = viewer.UserName
+                Nickname = viewer.UserName,
+                UserType = (await _userManager.GetRolesAsync(viewer)).First() switch
+                {
+                    "Viewer" => UserTypeDto.ViewerEnum,
+                    "Creator" => UserTypeDto.CreatorEnum,
+                    "Admin" => UserTypeDto.AdministratorEnum
+                }
             };
         }
+
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
         {
@@ -107,17 +114,18 @@ namespace MyWideIO.API.Services
                 Email = registerDto.Email,
                 Name = registerDto.Name,
                 UserName = registerDto.Nickname,
-                Surname = registerDto.Surname
+                Surname = registerDto.Surname,
+
             };
             var result = await _userManager.CreateAsync(viewer, registerDto.Password);
             if (!result.Succeeded)
                 foreach (var error in result.Errors)
                     modelState.AddModelError(error.Code, error.Description);
-            await _userManager.AddToRoleAsync(viewer, Random.Shared.Next(3) switch // na szybko
+            await _userManager.AddToRoleAsync(viewer, (Random.Shared.Next(3) + 1) switch // na szybko
             {
-                0 => "viewer",
-                1 => "creator",
-                2 => "admin"
+                1 => "viewer",
+                2 => "creator",
+                3 => "admin"
             });
             return result.Succeeded;
         }

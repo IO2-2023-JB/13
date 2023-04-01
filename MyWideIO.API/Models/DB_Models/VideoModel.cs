@@ -4,17 +4,16 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 
-namespace MyVideIO.Models
+namespace MyWideIO.API.Models.DB_Models
 {
     public class VideoModel
     {
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [StringLength(100)]
-        [Required(ErrorMessage = "Please enter the title of your video")]
         public string Title { get; set; }
 
         [StringLength(500)]
@@ -26,6 +25,14 @@ namespace MyVideIO.Models
 
         public int NegativeReactions { get; set; }
 
-        public IEnumerable<CommentModel> Comments { get; set; }
+        
+        public ICollection<CommentModel> Comments { get; set; }
+
+        public Guid CreatorId { get; set; }
+        public CreatorModel Creator { get; set; }
+        public ICollection<VideoPlaylist> Playlists { get; set; }
+        public ICollection<ViewerLike> LikedBy { get; set; }
+
+
     }
 }

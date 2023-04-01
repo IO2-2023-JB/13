@@ -5,28 +5,22 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 
-namespace MyVideIO.Models
+namespace MyWideIO.API.Models.DB_Models
 {
     public class ViewerModel : IdentityUser<Guid>
     {
+
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
         public string Surname { get; set; } = string.Empty;
+        public string Nick { get; set; } = string.Empty;
 
-        public IEnumerable<VideoModel> WatchLater { get; set; }
+        public ICollection<ViewerWatchLater> WatchLater { get; set; }
+        public ICollection<ViewerSubscription> Subscriptions { get; set; }
 
-
-        //creators subs TODO
-        //public IEnumerable<CreatorModel> SubscribedTo { get; set; }
-
-        public IEnumerable<VideoModel> LikedVideos { get; set; }
-
-        public IEnumerable<PlaylistModel> Playlists { get; set; }
-
+        public ICollection<ViewerLike> Likes { get; set; }
+        public ICollection<PlaylistModel> Playlists { get; set; }
         public DateTime EndOfBan { get; set; }
-
-
-
     }
 }

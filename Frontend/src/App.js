@@ -75,6 +75,16 @@ function App() {
               </NavLink>
           </li>
           }
+          {/* <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/department'>
+              Department
+            </NavLink>
+          </li>
+          <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/employee'>
+              Employee
+            </NavLink>
+          </li> */}
           {isLoggedIn()?
             <li className='nav-item m-1 mr-auto'>
                <button className="btn btn-outline-light" onClick={logout} style={{ verticalAlign: 'middle' }}>
@@ -83,16 +93,16 @@ function App() {
             </li>
             :
             <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-dark" to='/login'>
-              Login
-            </NavLink>
-          </li>
+              <NavLink className="btn btn-outline-light" to='/login'>
+                Login
+              </NavLink>
+            </li>
           }
           {!isLoggedIn() &&
           <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-dark" to='/register'>
-              Register
-            </NavLink>
+            <NavLink className="btn btn-outline-light" to='/register'>
+                Register
+              </NavLink>
           </li>
           }
         </ul>

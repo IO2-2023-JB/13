@@ -147,7 +147,7 @@ useEffect(() => {
               name: name, 
               surname: surname,
               accountBalance: userData.accountBalance,
-              userType: auth?.roles == "Viewer" ? 1 : (auth?.roles == "Creator" ? 2 : 3)
+              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3)
             }),
             {
                 headers: { 
@@ -298,7 +298,7 @@ return (
                             Letters, numbers, underscores, hyphens allowed.
                         </p>
 
-                        <label htmlFor="email">
+                        {/* <label htmlFor="email">
                             Email:
                             <FontAwesomeIcon icon={faCheck} className={validEmail ? "valid" : "hide"} />
                             <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? "hide" : "invalid"} />
@@ -319,7 +319,7 @@ return (
                         <p id="uidnote" className={emailFocus && email && !validEmail ? "instructions" : "offscreen"}>
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Must be valid email address.<br />
-                        </p>
+                        </p> */}
 
                         <button disabled={!validNickname || !validName || !validSurname || !validEmail ? true : false}>Submit</button>
                     </form>

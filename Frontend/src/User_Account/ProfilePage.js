@@ -44,10 +44,10 @@ useEffect(() => {
 }, [auth?.accessToken, auth?.id]);
 
 const [userData, setUserData] = useState({
-  firstName: "asd",
-  lastName: "",
-  nickname: "",
-  email: "",
+  firstName: "Loading...",
+  lastName: "Loading...",
+  nickname: "Loading...",
+  email: "Loading...",
   accountBalance: 0,
 });
 

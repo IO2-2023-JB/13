@@ -16,6 +16,7 @@ import { useContext } from "react";
 import AuthContext from "./context/AuthProvider";
 import { useEffect } from 'react';
 import jwt_decode  from 'jwt-decode';
+import VideoPlayer from './VideoPlayer';
 
 export const cookies = new Cookies();
 
@@ -76,6 +77,11 @@ function App() {
               </NavLink>
           </li>
           }
+          <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/videoplayer'>
+                Play video
+              </NavLink>
+          </li>
           {/* <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/department'>
               Department
@@ -112,6 +118,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path='/home' element={<Home/>}/>
           <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/videoplayer' element={<VideoPlayer/>} />
         </Route>
         <Route path='/department' element={<Department />} />
         <Route path='/employee' element={<Employee />} />

@@ -42,6 +42,12 @@ const Register = () => {
     const [validEmail, setValidEmail] = useState(false);
     const [emailFocus, setEmailFocus] = useState(false);
 
+    const [profile_picture, setProfile_picture] = useState(null);
+    const [profile_picture_name, setProfile_picture_name] = useState('');
+    const [validprofile_picture, setValidprofile_picture] = useState(false);
+    const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
+    const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
+
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -73,6 +79,26 @@ const Register = () => {
     useEffect(() => {
         setValidEmail(EMAIL_REGEX.test(email));
     }, [email])
+
+    const handle_picture = (event) => {
+
+        const file = event.target.files[0];
+        const maxSize = 1 * 1024 * 1024; // 5 MB
+
+        if (file && file.size <= maxSize) {
+            //console.log(file.type);
+            setProfile_picture(file);
+            setProfile_picture_name(file.name);
+            setValidprofile_picture(true);
+            setWrong_profile_picture(false);
+        } else {
+            setProfile_picture(null);
+            setProfile_picture_name('');
+            setValidprofile_picture(false);
+            setWrong_profile_picture(true);
+            alert("Choose a file format .jpg or .png with a maximum size of 5MB.");
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -281,6 +307,30 @@ const Register = () => {
                         <p id="confirmnote" className={matchFocus && !validMatch ? "instructions" : "offscreen"}>
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Must match the first password input field.
+                        </p>
+
+                        <label htmlFor="profile_picture">
+                            Profile Picture (Optional):
+                            <FontAwesomeIcon icon={faCheck} className={validprofile_picture && profile_picture ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={!wrong_profile_picture ? "hide" : "invalid"} /> {/* validprofile_picture || !profile_picture */}
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="profile_picture"
+                            //key={profile_picture}
+                            onChange={handle_picture}
+                            defaultValue={profile_picture_name}
+                            //value={profile_picture_name}
+                            //required
+                            aria-invalid={validMatch ? "false" : "true"}//
+                            aria-describedby="confirmnote"
+                            onFocus={() => setProfile_pictureFocus(true)}
+                            onBlur={() => setProfile_pictureFocus(false)}
+                        />
+                        <p id="confirmnote" className={!validprofile_picture ? "instructions" : "offscreen"}> {/*profile_pictureFocus && */ }
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Must be image up to 5 MB!
                         </p>
 
                         <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>

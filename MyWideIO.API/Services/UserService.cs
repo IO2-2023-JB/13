@@ -49,15 +49,15 @@ namespace MyWideIO.API.Services
             string newRole = "";
             switch (userDto.UserType)
             {
-                case UserTypeDto.ViewerEnum:
+                case UserTypeDto.Viewer:
                     if (role != "Viewer")
                         newRole = "Viewer";
                     break;
-                case UserTypeDto.CreatorEnum:
+                case UserTypeDto.Creator:
                     if (role != "Creator")
                         newRole = "Creator";
                     break;
-                case UserTypeDto.AdministratorEnum:
+                case UserTypeDto.Administrator:
                     if (role != "Admin")
                         newRole = "Admin";
                     break;
@@ -87,9 +87,9 @@ namespace MyWideIO.API.Services
                     Nickname = viewer.UserName,
                     UserType = (await _userManager.GetRolesAsync(viewer)).First() switch
                     {
-                        "Viewer" => UserTypeDto.ViewerEnum,
-                        "Creator" => UserTypeDto.CreatorEnum,
-                        "Admin" => UserTypeDto.AdministratorEnum
+                        "Viewer" => UserTypeDto.Viewer,
+                        "Creator" => UserTypeDto.Creator,
+                        "Admin" => UserTypeDto.Administrator
                     }
                 };
         }
@@ -124,9 +124,9 @@ namespace MyWideIO.API.Services
 
             result = await _userManager.AddToRoleAsync(viewer, registerDto.UserType switch // czemu warning jest
             {
-                UserTypeDto.ViewerEnum => "viewer",
-                UserTypeDto.CreatorEnum => "creator",
-                UserTypeDto.AdministratorEnum => "admin"
+                UserTypeDto.Viewer => "viewer",
+                UserTypeDto.Creator => "creator",
+                UserTypeDto.Administrator => "admin"
             });
             if (!result.Succeeded)
                 throw new UserException(result.Errors.First()?.Code);

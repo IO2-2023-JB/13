@@ -11,6 +11,7 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Text.Json.Serialization;
 
 internal class Program
 {
@@ -39,43 +40,7 @@ internal class Program
 
         });
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(config =>
-        {
-            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nEnter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: 'Bearer 12345abcdef'",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
-                  {
-            {
-              new OpenApiSecurityScheme
-              {
-                Reference = new OpenApiReference
-                  {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                  },
-                  Scheme = "oauth2",
-                  Name = "Bearer",
-                  In = ParameterLocation.Header,
-
-                },
-                new List<string>()
-              }
-                    });
-
-            //config.SwaggerDoc("v1.3", new OpenApiInfo
-            //{
-            //    Version = "v1.3",
-            //    Title = "MyWideIO.API",
-            //});
-        });
+       
 
         //builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
         builder.Services.AddScoped<IApiRepository, ApiRepository>();
@@ -116,6 +81,44 @@ internal class Program
             };
         });
         builder.Services.AddAuthorization();
+
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(config =>
+        {
+            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nEnter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: 'Bearer 12345abcdef'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                  {
+            {
+              new OpenApiSecurityScheme
+              {
+                Reference = new OpenApiReference
+                  {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                  },
+                  Scheme = "oauth2",
+                  Name = "Bearer",
+                  In = ParameterLocation.Header,
+
+                },
+                new List<string>()
+              }
+                    });
+
+            //config.SwaggerDoc("v1.3", new OpenApiInfo
+            //{
+            //    Version = "v1.3",
+            //    Title = "MyWideIO.API",
+            //});
+        });
 
         CreateRoles(builder.Services.BuildServiceProvider()).Wait();
 

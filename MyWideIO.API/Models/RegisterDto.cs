@@ -29,37 +29,42 @@ namespace WideIO.API.Models
         /// <summary>
         /// Gets or Sets Email
         /// </summary>
+        /// <example>&quot;john.doe@mail.com&quot;</example>
         [DataMember(Name = "email", EmitDefaultValue = false)]
         public string Email { get; set; }
 
         /// <summary>
         /// Gets or Sets Nickname
         /// </summary>
+        /// <example>&quot;johnny123&quot;</example>
         [DataMember(Name = "nickname", EmitDefaultValue = false)]
         public string Nickname { get; set; }
 
         /// <summary>
         /// Gets or Sets Name
         /// </summary>
+        /// <example>&quot;John&quot;</example>
         [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or Sets Surname
         /// </summary>
+        /// <example>&quot;Doe&quot;</example>
         [DataMember(Name = "surname", EmitDefaultValue = false)]
         public string Surname { get; set; }
 
         /// <summary>
         /// Gets or Sets Password
         /// </summary>
+        /// <example>&quot;Passwd123!&quot;</example>
         [DataMember(Name = "password", EmitDefaultValue = false)]
         public string Password { get; set; }
 
         /// <summary>
         /// Gets or Sets UserType
         /// </summary>
-        [DataMember(Name = "userType", EmitDefaultValue = false)]
+        [DataMember(Name = "userType", EmitDefaultValue = true)]
         public UserTypeDto UserType { get; set; }
 
         /// <summary>

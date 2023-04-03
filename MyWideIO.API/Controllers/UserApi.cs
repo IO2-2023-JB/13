@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
@@ -29,6 +28,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Exceptions;
 using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WideIO.API.Controllers
 {
@@ -56,8 +56,8 @@ namespace WideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPost]
-        [Route("/zagorskim/VideIO/1.0.0/ban/{id}")]
+        [HttpPost("ban/{id}")]
+        //[Route("ban/{id}")]
         [ValidateModelState]
         [SwaggerOperation("BanUser")]
         [Authorize(Roles = "Admin")]
@@ -81,8 +81,8 @@ namespace WideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpDelete]
-        [Route("/zagorskim/VideIO/1.0.0/user")]
+        [HttpDelete("user")]
+        //[Route("user")]
         [ValidateModelState]
         [SwaggerOperation("DeleteUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
@@ -112,8 +112,8 @@ namespace WideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPut]
-        [Route("/zagorskim/VideIO/1.0.0/user")]
+        [HttpPut("user")]
+        //[Route("user")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("EditUserData")]
@@ -140,15 +140,15 @@ namespace WideIO.API.Controllers
         }
 
         /// <summary>
-        /// User data retrieval
+        /// User data retrieval. No id parameter results in sending the data of the currently logged in user.
         /// </summary>
         /// <param name="id">User ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         /// <response code="404">Not found</response>
-        [HttpGet]
-        [Route("/zagorskim/VideIO/1.0.0/user")]
+        [HttpGet("user")]
+        //[Route("user")]
         [ValidateModelState]
         [SwaggerOperation("GetUserData")]
         [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(UserDto))]
@@ -156,7 +156,7 @@ namespace WideIO.API.Controllers
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         [SwaggerResponse(statusCode: 404, description: "Not found")]
 
-        public virtual async Task<IActionResult> GetUserData([FromQuery(Name = "id")] Guid? id = null)
+        public virtual async Task<IActionResult> GetUserData([FromQuery(Name = "id")] Guid? id)
         {
             if (id == null)
                 id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -184,11 +184,11 @@ namespace WideIO.API.Controllers
         /// </summary>
         /// <param name="loginDto"></param>
         /// <response code="200">OK</response>
-        /// <response code="400">Bad Request</response>
+        /// <response code="400">Bad request</response>
         /// <response code="401">Incorrect password</response>
         /// <response code="404">Account does not exist</response>
-        [HttpPost]
-        [Route("/zagorskim/VideIO/1.0.0/login")]
+        [HttpPost("login")]
+        //[Route("login")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("LoginUser")]
@@ -230,8 +230,8 @@ namespace WideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="409">A user with this e-mail address already exists</response>
-        [HttpPost]
-        [Route("/zagorskim/VideIO/1.0.0/register")]
+        [HttpPost("register")]
+        //[Route("register")]
         [Consumes("application/json")]
         [ValidateModelState]
         [AllowAnonymous]

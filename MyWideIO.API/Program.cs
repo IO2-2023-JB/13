@@ -10,8 +10,13 @@ using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Text;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using System.Text.Json.Serialization;
+using WideIO.API.Formatters;
+using Org.OpenAPITools.Filters;
 
 internal class Program
 {
@@ -40,7 +45,7 @@ internal class Program
 
         });
         builder.Services.AddControllers();
-       
+
 
         //builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
         builder.Services.AddScoped<IApiRepository, ApiRepository>();
@@ -81,7 +86,10 @@ internal class Program
             };
         });
         builder.Services.AddAuthorization();
-
+        //builder.Services.AddControllers(options =>
+        //{
+        //    //options.InputFormatters.Insert(0,new InputFormatterStream());
+        //}).AddNewtonsoftJson();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(config =>
@@ -112,12 +120,16 @@ internal class Program
                 new List<string>()
               }
                     });
-
-            //config.SwaggerDoc("v1.3", new OpenApiInfo
-            //{
-            //    Version = "v1.3",
-            //    Title = "MyWideIO.API",
-            //});
+            config.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
+            config.SwaggerDoc("1.0.6", new OpenApiInfo
+            {
+                Title = "VideIO API",
+                Description = "VideIO project API specification.",
+                Version = "1.0.6",
+            });
+            config.DocumentFilter<BasePathFilter>("/VideIO/1.0.6");
+            config.OperationFilter<GeneratePathParamsValidationFilter>();
+            config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
         });
 
         CreateRoles(builder.Services.BuildServiceProvider()).Wait();
@@ -132,8 +144,14 @@ internal class Program
         // Configure the HTTP request pipeline. 
         // if (app.Environment.IsDevelopment()) na razie wlaczony swagger na release
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "openapi/{documentName}/openapi.json";
+            });
+            app.UseSwaggerUI(c=>
+            {
+                c.SwaggerEndpoint("/openapi/1.0.6/openapi.json", "VideIO API");
+            });
         }
 
         app.UseHttpsRedirection();

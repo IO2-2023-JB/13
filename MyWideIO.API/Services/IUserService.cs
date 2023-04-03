@@ -7,9 +7,9 @@ namespace MyWideIO.API.Services
 {
     public interface IUserService
     {
-        public Task<bool> RegisterUserAsync(RegisterDto registerDto,ModelStateDictionary modelState);
+        public Task RegisterUserAsync(RegisterDto registerDto);
         public Task<string> LoginUserAsync(LoginDto loginDto);
-        public Task<(bool Suceeded, IEnumerable<IdentityError> Errors)> EditUserDataAsync(UserDto userDto);
-        public Task<UserDto?> GetUserAsync(Guid id);
+        public Task EditUserDataAsync(UserDto userDto);
+        public Task<UserDto> GetUserAsync(Guid id);
     }
 }

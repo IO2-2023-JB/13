@@ -5,17 +5,10 @@ import logo from './images/logo.png' // relative path to image
 export class Home extends Component{
     render(){
         return(
-            <div class ="d-flex mt-3 justify-content-center">
-                <table>
+            <div class ="d-flex mt-5 justify-content-center">
+                <table class="mt-5">
                     <tr class="text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="black" class="bi bi-search" viewBox="0 0 16 16" className="buttons">
-                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                        </svg>
-
-                        <input type="text" placeholder="what are you looking for? ..." width="300" className="search-bars"/>
-                    </tr>
-                    <tr class="text-center">
-                        <img src={logo} alt="Italian Trulli" width="780" />
+                        <img src={logo} alt="Italian Trulli" width="840" />
                     </tr>
                     <tr class="text-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" fill="black" class="bi bi-arrow-down-circle-fill" viewBox="0 0 16 16" className="buttons2">
@@ -23,7 +16,7 @@ export class Home extends Component{
                         </svg>
                     </tr>
                     <tr>
-                    <h1 class="text-center">NOW POPULAR</h1>
+                    <h1 class="text-center display-1 my-5">NOW POPULAR</h1>
                     </tr>
                     <tr>
                         <div className="box">

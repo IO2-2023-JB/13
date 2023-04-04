@@ -113,19 +113,35 @@ const Register = () => {
             return;
         }
         try {
-            const response = await axios.post(REGISTER_URL,
-                JSON.stringify({ email: email, nickname: user, name: name, surname: surname, password: pwd }),
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true //cred
-                }
-            );
+            let response;
+            if(validprofile_picture)
+            {
+                const reader = new FileReader();
+                reader.readAsDataURL(profile_picture);
+                response = await axios.post(REGISTER_URL,
+                    JSON.stringify({ email: email, nickname: user, name: name, 
+                        surname: surname, password: pwd, avatarImage: reader.result }),
+                    {
+                        headers: { 'Content-Type': 'application/json' },
+                        withCredentials: true //cred
+                    }
+                );
+            }
+            else
+            {
+                response = await axios.post(REGISTER_URL,
+                    JSON.stringify({ email: email, nickname: user, name: name, 
+                        surname: surname, password: pwd }),
+                    {
+                        headers: { 'Content-Type': 'application/json' },
+                        withCredentials: true //cred
+                    }
+                );
+            }
             console.log(response?.data);
             console.log(response?.accessToken);
             console.log(JSON.stringify(response))
             setSuccess(true);
-            //clear state and controlled inputs
-            //need value attrib on inputs for this
             setUser('');
             setPwd('');
             setMatchPwd('');
@@ -136,12 +152,9 @@ const Register = () => {
             if (!err?.response) {
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 400) {
-                if(err.response.data && typeof err.response.data === 'object' && err.response.data.DuplicateUserName)
-                    setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateUserName : 'Registration Failed');
-                else
-                    setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateEmail  : 'Registration Failed');
+                setErrMsg('Registration Failed');
             } else if(err?.status === 409){
-                setErrMsg('Account with this email already exists');
+                setErrMsg('A user with this e-mail address already exists');
             } else {
                 setErrMsg('Registration Failed')
             }
@@ -323,7 +336,7 @@ const Register = () => {
                             defaultValue={profile_picture_name}
                             //value={profile_picture_name}
                             //required
-                            aria-invalid={validMatch ? "false" : "true"}//
+                            aria-invalid={!wrong_profile_picture ? "false" : "true"}//
                             aria-describedby="confirmnote"
                             onFocus={() => setProfile_pictureFocus(true)}
                             onBlur={() => setProfile_pictureFocus(false)}

@@ -19,8 +19,9 @@ builder.Services.AddIdentity<ViewerModel, IdentityRole>(config =>
     config.SignIn.RequireConfirmedEmail = false;
     config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
     config.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>();
+}).AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;

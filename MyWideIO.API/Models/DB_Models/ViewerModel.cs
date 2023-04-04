@@ -17,6 +17,8 @@ namespace MyWideIO.API.Models.DB_Models
         [Required]
         public string Surname { get; set; } = string.Empty;
 
+        public string Nick { get; set; } = string.Empty;
+
         public ICollection<ViewerWatchLater> WatchLater { get; set; }
         public ICollection<ViewerSubscription> Subscriptions { get; set; }
 

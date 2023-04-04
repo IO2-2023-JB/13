@@ -71,7 +71,7 @@ namespace WideIO.API.Models
         /// Gets or Sets AvatarImage
         /// </summary>
         [DataMember(Name="avatarImage", EmitDefaultValue=true)]
-        public System.IO.Stream AvatarImage { get; set; }
+        public string AvatarImage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

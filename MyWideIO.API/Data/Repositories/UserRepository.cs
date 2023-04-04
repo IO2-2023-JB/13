@@ -11,9 +11,5 @@ namespace MyWideIO.API.Data.Repositories
         {
             _dbContext = dbContext;
         }
-        public async void RegisterUserAsync(ViewerModel viewer)
-        {
-            await _dbContext.Viewers.AddAsync(viewer);
-        }
     }
 }

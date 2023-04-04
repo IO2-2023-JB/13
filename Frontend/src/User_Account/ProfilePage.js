@@ -170,7 +170,7 @@ useEffect(() => {
       if(validprofile_picture)
       {
         const reader = new FileReader();
-                reader.readAsDataURL(profile_picture);
+        reader.readAsDataURL(profile_picture);
         response = await axios.put(PROFILE_URL,
             JSON.stringify({
               id: auth?.id,

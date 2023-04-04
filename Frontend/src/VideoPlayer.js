@@ -45,11 +45,13 @@ const VideoPlayer = () => {
   const video_url = 'https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest(format=m3u8-cmaf)';
   const video_url_dash = "https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest(format=mpd-time-cmaf)"
   const video_url_smoothstreaming = "https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest";
+  const video_url1 = "https://videiomediaservices-usea.streaming.media.azure.net/992730e7-a54f-4d4c-a167-155dd4d29baa/sample-30s.ism/manifest(format=m3u8-cmaf)"
   return (
     <div>
       <ReactHlsPlayer
-        src={long_video_url}
+        src={video_url}
         autoPlay={false}
+        // loop = {true}
         controls={true}
         width="100%"
         height="auto" />

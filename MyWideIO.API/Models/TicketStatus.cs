@@ -21,29 +21,23 @@ using WideIO.API.Converters;
 namespace WideIO.API.Models
 { 
         /// <summary>
-        /// Gets or Sets ReactionDto
+        /// Gets or Sets TicketStatus
         /// </summary>
-        [TypeConverter(typeof(CustomEnumConverter<ReactionDto>))]
+        [TypeConverter(typeof(CustomEnumConverter<TicketStatus>))]
         [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public enum ReactionDto
+        public enum TicketStatus
         {
             
             /// <summary>
-            /// Enum PositiveEnum for Positive
+            /// Enum SubmittedEnum for Submitted
             /// </summary>
-            [EnumMember(Value = "Positive")]
-            PositiveEnum = 1,
+            [EnumMember(Value = "Submitted")]
+            SubmittedEnum = 1,
             
             /// <summary>
-            /// Enum NegativeEnum for Negative
+            /// Enum ResolvedEnum for Resolved
             /// </summary>
-            [EnumMember(Value = "Negative")]
-            NegativeEnum = 2,
-            
-            /// <summary>
-            /// Enum NoneEnum for None
-            /// </summary>
-            [EnumMember(Value = "None")]
-            NoneEnum = 3
+            [EnumMember(Value = "Resolved")]
+            ResolvedEnum = 2
         }
 }

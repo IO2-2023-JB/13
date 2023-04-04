@@ -24,13 +24,28 @@ namespace WideIO.API.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class UserSubscriptionListDto : IEquatable<UserSubscriptionListDto>
+    public partial class SubscribtionDto : IEquatable<SubscribtionDto>
     {
         /// <summary>
-        /// Gets or Sets Subscriptions
+        /// Gets or Sets Id
         /// </summary>
-        [DataMember(Name="subscriptions", EmitDefaultValue=false)]
-        public List<SubscribtionDto> Subscriptions { get; set; }
+        /// <example>&quot;123e4567-e89b-12d3-a456-426614174000&quot;</example>
+        [DataMember(Name="id", EmitDefaultValue=false)]
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AvatarImage
+        /// </summary>
+        /// <example>&quot;https://example.com/avatar/user-id&quot;</example>
+        [DataMember(Name="avatarImage", EmitDefaultValue=false)]
+        public string AvatarImage { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Nickname
+        /// </summary>
+        /// <example>&quot;johnny123&quot;</example>
+        [DataMember(Name="nickname", EmitDefaultValue=false)]
+        public string Nickname { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -39,8 +54,10 @@ namespace WideIO.API.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class UserSubscriptionListDto {\n");
-            sb.Append("  Subscriptions: ").Append(Subscriptions).Append("\n");
+            sb.Append("class SubscribtionDto {\n");
+            sb.Append("  Id: ").Append(Id).Append("\n");
+            sb.Append("  AvatarImage: ").Append(AvatarImage).Append("\n");
+            sb.Append("  Nickname: ").Append(Nickname).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -63,25 +80,34 @@ namespace WideIO.API.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((UserSubscriptionListDto)obj);
+            return obj.GetType() == GetType() && Equals((SubscribtionDto)obj);
         }
 
         /// <summary>
-        /// Returns true if UserSubscriptionListDto instances are equal
+        /// Returns true if SubscribtionDto instances are equal
         /// </summary>
-        /// <param name="other">Instance of UserSubscriptionListDto to be compared</param>
+        /// <param name="other">Instance of SubscribtionDto to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UserSubscriptionListDto other)
+        public bool Equals(SubscribtionDto other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return 
                 (
-                    Subscriptions == other.Subscriptions ||
-                    Subscriptions != null &&
-                    other.Subscriptions != null &&
-                    Subscriptions.SequenceEqual(other.Subscriptions)
+                    Id == other.Id ||
+                    Id != null &&
+                    Id.Equals(other.Id)
+                ) && 
+                (
+                    AvatarImage == other.AvatarImage ||
+                    AvatarImage != null &&
+                    AvatarImage.Equals(other.AvatarImage)
+                ) && 
+                (
+                    Nickname == other.Nickname ||
+                    Nickname != null &&
+                    Nickname.Equals(other.Nickname)
                 );
         }
 
@@ -95,8 +121,12 @@ namespace WideIO.API.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    if (Subscriptions != null)
-                    hashCode = hashCode * 59 + Subscriptions.GetHashCode();
+                    if (Id != null)
+                    hashCode = hashCode * 59 + Id.GetHashCode();
+                    if (AvatarImage != null)
+                    hashCode = hashCode * 59 + AvatarImage.GetHashCode();
+                    if (Nickname != null)
+                    hashCode = hashCode * 59 + Nickname.GetHashCode();
                 return hashCode;
             }
         }
@@ -104,12 +134,12 @@ namespace WideIO.API.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(UserSubscriptionListDto left, UserSubscriptionListDto right)
+        public static bool operator ==(SubscribtionDto left, SubscribtionDto right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(UserSubscriptionListDto left, UserSubscriptionListDto right)
+        public static bool operator !=(SubscribtionDto left, SubscribtionDto right)
         {
             return !Equals(left, right);
         }

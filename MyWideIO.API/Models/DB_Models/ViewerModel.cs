@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
+using WideIO.API.Models;
 
 namespace MyWideIO.API.Models.DB_Models
 {
+
+
     public class ViewerModel : IdentityUser<Guid>
     {
         [Required]
@@ -20,5 +23,8 @@ namespace MyWideIO.API.Models.DB_Models
         public ICollection<ViewerLike> Likes { get; set; }
         public ICollection<PlaylistModel> Playlists { get; set; }
         public DateTime EndOfBan { get; set; }
+        public string? ProfilePicture { get; set; }
+        public decimal? AccountBalance { get; set; }
+        public UserTypeDto UserTypeDto { get; set; }
     }
 }

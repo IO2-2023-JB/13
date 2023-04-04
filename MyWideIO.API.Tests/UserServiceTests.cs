@@ -23,8 +23,6 @@ namespace MyWideIO.API.Tests
         [TestMethod]
         public async Task RegisterUser_Test()
         {
-            var newUser = new ViewerModel() { Name = "Nowy", Surname = "NOWY", Email = "aa@b.c", UserName = "user3" };
-            
             var _userManager = MockUserManager<ViewerModel>(new List<ViewerModel>()).Object;
             var _signInManager = MockSignInManager<ViewerModel>(_userManager);
 
@@ -35,11 +33,64 @@ namespace MyWideIO.API.Tests
             Assert.IsTrue(result);
         }
 
+        [TestMethod]
+        public async Task CorrectLogin_Test()
+        {
+            var _userManager = MockUserManager<ViewerModel>(new List<ViewerModel>()).Object;
+            var _signInManager = MockSignInManager<ViewerModel>(_userManager);
+
+            var userDto = new RegisterDto() { Name = "Nowy", Surname = "NOWY", Email = "aa@b.c", Nickname = "user3", Password = "P@ssw0rd!" };
+            UserService service = new UserService(_userManager, _signInManager);
+            var result = await service.RegisterUserAsync(userDto, null);
+
+            Assert.IsTrue(result);
+
+            var logResult = await service.LoginUserAsync(new LoginDto() { Email = "aa@b.c", Password = "P@ssw0rd!" });
+
+            Assert.IsTrue(logResult);
+        }
+
+        [TestMethod]
+        public async Task InvalidPasswordLogin_Test()
+        {
+            var _userManager = MockUserManager<ViewerModel>(new List<ViewerModel>()).Object;
+            var _signInManager = MockSignInManager<ViewerModel>(_userManager);
+
+            var userDto = new RegisterDto() { Name = "Nowy", Surname = "NOWY", Email = "aa@b.c", Nickname = "user3", Password = "P@ssw0rd!" };
+            UserService service = new UserService(_userManager, _signInManager);
+            var result = await service.RegisterUserAsync(userDto, null);
+
+            Assert.IsTrue(result);
+
+            var logResult = await service.LoginUserAsync(new LoginDto() { Email = "aa@b.c", Password = "WRONG" });
+
+            Assert.IsFalse(logResult);
+        }
+
+        [TestMethod]
+        public async Task DeleteUser_Test()
+        {
+            var _userManager = MockUserManager<ViewerModel>(new List<ViewerModel>()).Object;
+            var _signInManager = MockSignInManager<ViewerModel>(_userManager);
+
+            var userDto = new RegisterDto() { Name = "Nowy", Surname = "NOWY", Email = "aa@b.c", Nickname = "user3", Password = "P@ssw0rd!" };
+            UserService service = new UserService(_userManager, _signInManager);
+            var result = await service.RegisterUserAsync(userDto, null);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, _userManager.Users.Count());
+
+            Guid userId = _signInManager.UserManager.Users.Single().Id;
+            result = await service.DeleteUserAsync(userId);
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, _userManager.Users.Count());
+        }
+
         // help function
 
         private static List<ViewerModel> GetUsers() => new List<ViewerModel>
         {
-            new ViewerModel() { Name="Jan",Surname="Kowalski",Email="a1@b.c",UserName="user1" },
+            new ViewerModel() { Name="Jan",Surname="Kowalski",Email="a1@b.c",UserName="user1", PasswordHash="" },
             new ViewerModel() { Name="Eu",Surname="Geniusz",Email="a2@b.c",UserName="user2" }
         };
 

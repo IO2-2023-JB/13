@@ -7,6 +7,8 @@ import {faCheck, faTimes, faInfoCircle  } from "@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
+import logo from '../images/happy.jpg'
+
 config.autoAddCss = false;
 
 const PROFILE_URL = '/user';
@@ -255,30 +257,133 @@ useEffect(() => {
 }
 
 return (
-  <div>
+  <div style={{marginTop: "200px"}} class="container">
     {!editMode ? (
-      <div>
-        <h1>Profile Data</h1>
-        <section>
-        <label>Name:</label>
-        <div>{userData.firstName}</div>
-        <label>Surname:</label>
-        <div>{userData.lastName}</div>
-        <label>Nickname:</label>
-        <div>{userData.nickname}</div>
-        <label>Email:</label>
-        <div>{userData.email}</div>
+      <div class="row">
+        <h1 class="display-1">{userData.nickname}</h1>
+        <div class ="mt-2 row">
+          <div class="col-sm">
+            <h2>Data</h2>
+            <section>
+              <label>Name:</label>
+              <div>{userData.firstName}</div>
+              <label>Surname:</label>
+              <div>{userData.lastName}</div>
+              <label>Nickname:</label>
+              <div>{userData.nickname}</div>
+              <label>Email:</label>
+              <div>{userData.email}</div>
         <label>Avatar Image:</label>
         <div>
         <img src={userData.avatarImage} alt= "No avatar image" />
         </div>
         <div>
-           <button onClick={handleEditClick}>Edit</button>
+              <div>
+                <button onClick={handleEditClick}>Edit</button>
+              </div>
+            </section>
+          </div>
+          <div class="col-sm">
+            <h2>Picture</h2>
+            <section>
+              <img src = {logo} alt="Italien"/>
+              <label>Description:</label>
+              <div>Let's go!</div>
+              <label>Likes:</label>
+              <div>72</div>
+            </section>
+          </div>
+          <div class="col-sm">
+          <h2>Videos</h2>
+            <section>
+              <ul style={{padding:"0px"}}>
+                <li style={{listStyleType: "none"}}>
+              <div className="box" style={{width:"300px", height:"170px"}}>
+                <div className="box2" style={{width:"280px", height:"150px"}}>
+                    <table>
+                        <tr>
+                        <div className="movie_title" style={{width:"280px", height:"50px", fontSize:"10px", marginTop:"0"}}>
+                            Test video title for non-existing video
+                        </div>
+                        </tr>
+                        <tr>
+                        <div className="movie_thumbnail" style={{width:"280px", height:"100px"}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                            </svg>
+                        </div>
+                        </tr>
+                    </table>
+                    </div> 
+                </div>
+                </li>
+                <li style={{listStyleType: "none"}}>
+              <div className="box" style={{width:"300px", height:"170px"}}>
+                <div className="box2" style={{width:"280px", height:"150px"}}>
+                    <table>
+                        <tr>
+                        <div className="movie_title" style={{width:"280px", height:"50px", fontSize:"10px", marginTop:"0"}}>
+                            Test video title for non-existing video
+                        </div>
+                        </tr>
+                        <tr>
+                        <div className="movie_thumbnail" style={{width:"280px", height:"100px"}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                            </svg>
+                        </div>
+                        </tr>
+                    </table>
+                    </div> 
+                </div>
+                </li>
+                <li style={{listStyleType: "none"}}>
+              <div className="box" style={{width:"300px", height:"170px"}}>
+                <div className="box2" style={{width:"280px", height:"150px"}}>
+                    <table>
+                        <tr>
+                        <div className="movie_title" style={{width:"280px", height:"50px", fontSize:"10px", marginTop:"0"}}>
+                            Test video title for non-existing video
+                        </div>
+                        </tr>
+                        <tr>
+                        <div className="movie_thumbnail" style={{width:"280px", height:"100px"}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                            </svg>
+                        </div>
+                        </tr>
+                    </table>
+                    </div> 
+                </div>
+                </li>
+                <li style={{listStyleType: "none"}}>
+              <div className="box" style={{width:"300px", height:"170px"}}>
+                <div className="box2" style={{width:"280px", height:"150px"}}>
+                    <table>
+                        <tr>
+                        <div className="movie_title" style={{width:"280px", height:"50px", fontSize:"10px", marginTop:"0"}}>
+                            Test video title for non-existing video
+                        </div>
+                        </tr>
+                        <tr>
+                        <div className="movie_thumbnail" style={{width:"280px", height:"100px"}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                            </svg>
+                        </div>
+                        </tr>
+                    </table>
+                    </div> 
+                </div>
+                </li>
+              </ul>
+            </section>
+          </div>
         </div>
-        </section>
-  </div>
+      </div>
     ) : (
-      <div>
+      <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
         <h1>Change Data</h1>
         <section>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>

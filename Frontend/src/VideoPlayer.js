@@ -47,7 +47,7 @@ const VideoPlayer = () => {
   const video_url_smoothstreaming = "https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest";
   const video_url1 = "https://videiomediaservices-usea.streaming.media.azure.net/992730e7-a54f-4d4c-a167-155dd4d29baa/sample-30s.ism/manifest(format=m3u8-cmaf)"
   return (
-    <div>
+    <div class="container-fluid justify-content-center" style={{marginTop: "200px", width: "900px"}}>
       <ReactHlsPlayer
         src={video_url}
         autoPlay={false}

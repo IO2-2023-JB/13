@@ -273,28 +273,19 @@ return (
               <div>{userData.nickname}</div>
               <label>Email:</label>
               <div>{userData.email}</div>
-        <label>Avatar Image:</label>
-        <div>
-        <img src={userData.avatarImage} alt= "No avatar image" />
-        </div>
-        <div>
               <div>
                 <button onClick={handleEditClick}>Edit</button>
               </div>
             </section>
           </div>
           <div class="col-sm">
-            <h2>Picture</h2>
+            <h2>Avatar Image</h2>
             <section>
-              <img src = {logo} alt="Italien"/>
-              <label>Description:</label>
-              <div>Let's go!</div>
-              <label>Likes:</label>
-              <div>72</div>
+              <img src = {userData.avatarImage} alt="No avatar image"/>
             </section>
           </div>
           <div class="col-sm">
-          <h2>Videos</h2>
+          <h2>Your Videos</h2>
             <section>
               <ul style={{padding:"0px"}}>
                 <li style={{listStyleType: "none"}}>

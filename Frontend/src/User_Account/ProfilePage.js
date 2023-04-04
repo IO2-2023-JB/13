@@ -49,6 +49,7 @@ const [userData, setUserData] = useState({
   nickname: "Loading...",
   email: "Loading...",
   accountBalance: 0,
+  avatarImage: '',
 });
 
 useEffect(() => {
@@ -59,6 +60,7 @@ useEffect(() => {
       nickname: data?.nickname,
       email: data?.email,
       accountBalance: data?.accountBalance,
+      avatarImage: data?.avatarImage,
     });
   }
 }, [data]);
@@ -80,6 +82,11 @@ const [surnameFocus, setSurnameFocus] = useState(false)
 const [email, setEmail] = useState('');
 const [validEmail, setValidEmail] = useState(false);
 const [emailFocus, setEmailFocus] = useState(false);
+const [profile_picture, setProfile_picture] = useState(null);
+const [profile_picture_name, setProfile_picture_name] = useState('');
+const [validprofile_picture, setValidprofile_picture] = useState(false);
+const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
+const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
 
 useEffect(() => {
   setName(userData.firstName);
@@ -116,6 +123,26 @@ useEffect(() => {
 
   const [editMode, setEditMode] = useState(false);
 
+  const handle_picture = (event) => {
+
+    const file = event.target.files[0];
+    const maxSize = 1 * 1024 * 1024; // 5 MB
+
+    if (file && file.size <= maxSize) {
+        //console.log(file.type);
+        setProfile_picture(file);
+        setProfile_picture_name(file.name);
+        setValidprofile_picture(true);
+        setWrong_profile_picture(false);
+    } else {
+        setProfile_picture(null);
+        setProfile_picture_name('');
+        setValidprofile_picture(false);
+        setWrong_profile_picture(true);
+        alert("Choose a file format .jpg or .png with a maximum size of 5MB.");
+    }
+  }
+
   const handleEditClick = () => {
     setEditMode(true);
   };
@@ -138,8 +165,13 @@ useEffect(() => {
         setErrMsg("Invalid Entry");
         return;
     }
-    try {
-        const response = await axios.put(PROFILE_URL,
+    try { //TODO add photo
+      let response;
+      if(validprofile_picture)
+      {
+        const reader = new FileReader();
+                reader.readAsDataURL(profile_picture);
+        response = await axios.put(PROFILE_URL,
             JSON.stringify({
               id: auth?.id,
               email: email, 
@@ -147,7 +179,8 @@ useEffect(() => {
               name: name, 
               surname: surname,
               accountBalance: userData.accountBalance,
-              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3)
+              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              avatarImage: reader.result
             }),
             {
                 headers: { 
@@ -157,6 +190,28 @@ useEffect(() => {
                 withCredentials: true //cred
             }
         );
+      }
+      else
+      {
+        response = await axios.put(PROFILE_URL,
+          JSON.stringify({
+            id: auth?.id,
+            email: email, 
+            nickname: user, 
+            name: name, 
+            surname: surname,
+            accountBalance: userData.accountBalance,
+            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3)
+          }),
+          {
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true //cred
+          }
+      );
+      }
         //console.log(response?.data);
         //console.log(response?.accessToken);
         //console.log(JSON.stringify(response))
@@ -167,6 +222,10 @@ useEffect(() => {
         setEmail('')
         setName('')
         setSurname('')
+        setProfile_picture(null);
+        setProfile_picture_name('');
+        setValidprofile_picture(false);
+        setWrong_profile_picture(true);
         axios.get(PROFILE_URL + "?id=" + auth?.id, {
           headers: { 
             'Content-Type': 'application/json',
@@ -186,13 +245,10 @@ useEffect(() => {
     } catch (err) {
         if (!err?.response) {
             setErrMsg('No Server Response');
-        } else if (err.response?.status === 400) {
-            if(err.response.data && typeof err.response.data === 'object' && err.response.data.DuplicateUserName)
-                setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateUserName : 'Registration Failed');
-            else
-                setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateEmail  : 'Registration Failed');
+        } else if (err.response?.status === 401) {
+            setErrMsg('Unauthorized');
         } else {
-            setErrMsg('Data Change Failed')
+            setErrMsg('Data Change Failed');
         }
         errRef.current.focus();
     }
@@ -212,6 +268,10 @@ return (
         <div>{userData.nickname}</div>
         <label>Email:</label>
         <div>{userData.email}</div>
+        <label>Avatar Image:</label>
+        <div>
+        <img src={userData.avatarImage} alt= "No avatar image" />
+        </div>
         <div>
            <button onClick={handleEditClick}>Edit</button>
         </div>
@@ -298,28 +358,29 @@ return (
                             Letters, numbers, underscores, hyphens allowed.
                         </p>
 
-                        {/* <label htmlFor="email">
-                            Email:
-                            <FontAwesomeIcon icon={faCheck} className={validEmail ? "valid" : "hide"} />
-                            <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? "hide" : "invalid"} />
+                        <label htmlFor="profile_picture">
+                            New Profile Picture (Optional):
+                            <FontAwesomeIcon icon={faCheck} className={validprofile_picture && profile_picture ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={!wrong_profile_picture ? "hide" : "invalid"} /> {/* validprofile_picture || !profile_picture */}
                         </label>
                         <input
-                            type="text"
-                            id="email"
-                            ref={emailRef}
-                            autoComplete="off"
-                            onChange={(e) => setEmail(e.target.value)}
-                            value={email}
-                            required
-                            aria-invalid={validEmail ? "false" : "true"}
-                            aria-describedby="uidnote"
-                            onFocus={() => setEmailFocus(true)}
-                            onBlur={() => setEmailFocus(false)}
+                            type="file"
+                            accept="image/*"
+                            id="profile_picture"
+                            //key={profile_picture}
+                            onChange={handle_picture}
+                            defaultValue={profile_picture_name}
+                            //value={profile_picture_name}
+                            //required
+                            //aria-invalid={validMatch ? "false" : "true"}//
+                            aria-describedby="confirmnote"
+                            onFocus={() => setProfile_pictureFocus(true)}
+                            onBlur={() => setProfile_pictureFocus(false)}
                         />
-                        <p id="uidnote" className={emailFocus && email && !validEmail ? "instructions" : "offscreen"}>
+                        <p id="confirmnote" className={!validprofile_picture ? "instructions" : "offscreen"}> {/*profile_pictureFocus && */ }
                             <FontAwesomeIcon icon={faInfoCircle} />
-                            Must be valid email address.<br />
-                        </p> */}
+                            Must be image up to 5 MB!
+                        </p>
 
                         <button disabled={!validNickname || !validName || !validSurname || !validEmail ? true : false}>Submit</button>
                     </form>

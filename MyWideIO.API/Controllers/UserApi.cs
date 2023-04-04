@@ -23,6 +23,10 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MyWideIO.API.Models.DB_Models;
 
 namespace WideIO.API.Controllers
 {
@@ -34,7 +38,7 @@ namespace WideIO.API.Controllers
     {
         private readonly IUserService _userService;
 
-        public UserApiController(IUserService userService)
+        public UserApiController(IUserService userService, UserManager<ViewerModel> userManager)
         {
             _userService = userService;
         }
@@ -53,6 +57,7 @@ namespace WideIO.API.Controllers
         [Route("/zagorskim/VideIO/1.0.0/ban/{id}")]
         [ValidateModelState]
         [SwaggerOperation("BanUser")]
+        [Authorize(Roles = "Admin")]
         public virtual IActionResult BanUser([FromRoute(Name = "id")][Required] Guid id)
         {
 
@@ -107,11 +112,11 @@ namespace WideIO.API.Controllers
         [Route("/zagorskim/VideIO/1.0.0/user")]
         [Consumes("application/json")]
         [ValidateModelState]
+        [Authorize]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
         public async virtual Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
-
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(UserDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -156,7 +161,6 @@ namespace WideIO.API.Controllers
             else
                 return BadRequest(ModelState);
 
-
         }
 
         /// <summary>
@@ -174,12 +178,11 @@ namespace WideIO.API.Controllers
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         public virtual async Task<IActionResult> LoginUser([FromBody] LoginDto loginDto)
         {
-            if (!ModelState.IsValid)
+            var token = await _userService.LoginUserAsync(loginDto);
+            if (token.IsNullOrEmpty())
                 return BadRequest(ModelState);
-            if (await _userService.LoginUserAsync(loginDto))
-                return Ok("token1");
             else
-                return BadRequest(ModelState);
+                return Ok(new LoginResponseDto { Token = token });
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(LoginResponseDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -202,8 +205,6 @@ namespace WideIO.API.Controllers
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         public async virtual Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
             if (await _userService.RegisterUserAsync(registerDto, ModelState))
                 return Ok();
             else

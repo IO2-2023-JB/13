@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Data;
@@ -18,7 +19,7 @@ namespace MyVideIO.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ViewerWatchLater>()
                 .HasKey(vw => new { vw.ViewerId, vw.VideoId });

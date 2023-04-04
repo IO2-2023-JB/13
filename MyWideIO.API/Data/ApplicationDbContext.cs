@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Data;
 
 
 namespace MyVideIO.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ViewerModel, UserRole, Guid>
     {
         public DbSet<ViewerModel> Viewers { get; set; }
         public DbSet<CreatorModel> Creators { get; set; }

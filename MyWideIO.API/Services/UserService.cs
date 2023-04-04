@@ -14,13 +14,13 @@ namespace MyWideIO.API.Services
         private readonly SignInManager<ViewerModel> _signInManager;
         private BlobServiceClient _blobServiceClient;
         private BlobContainerClient _blobContainerClient;
-        private string blobServiceConnectionString = ""; /* TODO */
+        private string blobServiceConnectionString = "https://videioblob.blob.core.windows.net/blob1"; /* TODO */
 
-        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager)
+        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager, BlobServiceClient client = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _blobServiceClient = new BlobServiceClient(blobServiceConnectionString);
+            _blobServiceClient = client != null ? client : new BlobServiceClient(blobServiceConnectionString);
             _blobContainerClient = _blobServiceClient.CreateBlobContainer("container-" + Guid.NewGuid());
         }
 

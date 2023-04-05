@@ -115,12 +115,6 @@ function App() {
               </NavLink>
           </li>
           }
-          <li className='nav-item- m-1'>
-            <NavLink className="btn btn-outline-light" to='/administrator'>
-              Administrator
-            </NavLink>
-          </li>
-          
         </ul>
 
         <div class = "nav-item m-auto">

@@ -41,14 +41,10 @@ const Login = () => {
                     withCredentials: true //cred
                 }
             );
-            //console.log(JSON.stringify(response?.data));
             const token = response?.data?.token;
-            //console.log('token:' + token);
-            //const textEncoder = new TextEncoder();
-            //const secretArray = textEncoder.encode('TajnyKlucz128bit');
             const payload = jwt_decode(token);
             const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-            const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+            const id = payload["sub"];
             //console.log(id);
             //console.log(payload.sub)
             //console.log(roles);
@@ -62,14 +58,14 @@ const Login = () => {
 
         }catch(err){
             if(!err?.response) {
-                setErrMsg('Account with this email does not exist') //TODO change
+                setErrMsg('No Server Response')
                 //setErrMsg('No Server Response');
             } else if(err.response?.status === 400) {
-                setErrMsg('Wrong email or password');
+                setErrMsg('Login Failed');
             } else if(err.response?.status === 404){
-                setErrMsg('Account with this email does not exist');
+                setErrMsg('Account does not exist');
             } else if(err.response?.status === 401 ){
-                setErrMsg('Wrong password');
+                setErrMsg('Incorrect password');
             } else {
                 setErrMsg('Login Failed');
             }
@@ -78,7 +74,7 @@ const Login = () => {
     }
 
     return (
-        <section>
+        <section class="container-fluid justify-content-center" style={{marginTop: "200px"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : 
             "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Sign In</h1>

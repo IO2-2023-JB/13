@@ -43,8 +43,8 @@ function App() {
     if (accessToken) {
       const payload = jwt_decode(accessToken);
       const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-      const email = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
-      const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+      const email = "";
+      const id = payload["sub"];
       //console.log(payload.sub)
       //console.log(roles);
       setAuth({user: email, pwd: "", roles, accessToken, id});
@@ -64,9 +64,9 @@ function App() {
   }
 
   const isLoggedIn = () =>{
-    console.log(auth?.user ? "Logged In" : "Logged Out");
+    console.log(auth?.accessToken ? "Logged In" : "Logged Out");
     return(
-      auth?.user
+      auth?.accessToken
     )
   }
 

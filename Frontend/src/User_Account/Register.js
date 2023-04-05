@@ -121,26 +121,28 @@ const Register = () => {
                 reader.readAsDataURL(profile_picture);
                 let base64String;
                 reader.onload = () => {
-                    console.log(reader.result);
+                    //console.log(reader.result);
                     base64String = reader.result.split(",")[1];
-                    console.log(base64String);
+                    //console.log(base64String);
                 };
                 
                 //console.log(base64String);
+                setTimeout(async () => {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: 1, avatarImage: base64String }),
+                        surname: surname, password: pwd, userType: 1, AvatarImage: base64String }),
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
                     }
                 );
+                }, 1000);
             }
             else
             {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: 1 }), //userType: "Simple"
+                        surname: surname, password: pwd, userType: 1, AvatarImage: "" }), //userType: "Simple"
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred

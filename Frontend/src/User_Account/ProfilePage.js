@@ -102,6 +102,9 @@ useEffect(() => {
 useEffect(() => {
   setEmail(userData.email);
 }, [userData.email]);
+useEffect(() => {
+  setProfile_picture(userData.avatarImage);
+}, [userData.avatarImage]);
 
   useEffect(() => {
     setValidNickname(USER_REGEX.test(user));
@@ -132,10 +135,15 @@ useEffect(() => {
 
     if (file && file.size <= maxSize) {
         //console.log(file.type);
+        //const reader = new FileReader();
+        //reader.readAsDataURL(file);
+        //reader.onload = () => {
+        //const base64String = reader.result;
         setProfile_picture(file);
         setProfile_picture_name(file.name);
         setValidprofile_picture(true);
         setWrong_profile_picture(false);
+        //}
     } else {
         setProfile_picture(null);
         setProfile_picture_name('');
@@ -155,6 +163,7 @@ useEffect(() => {
     setSurname(userData.lastName);
     setUser(userData.nickname);
     setEmail(userData.email);
+    setProfile_picture(userData.avatarImage);
   };
 
   const handleSubmit = async (e) => {
@@ -172,22 +181,29 @@ useEffect(() => {
       if(validprofile_picture)
       {
         const reader = new FileReader();
-        reader.readAsDataURL(profile_picture);
+        await reader.readAsDataURL(profile_picture);
         let base64String;
         reader.onload = () => {
-          console.log(reader.result);
+          //console.log(reader.result);
           base64String = reader.result.split(",")[1];
+          //console.log(base64String);
           console.log(base64String);
+          console.log({
+            nickname: user, 
+            name: name, 
+            surname: surname,
+            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+            avatarImage: base64String
+          });
         };
-        
+        //reader.onloadend = () =>{};
+        //base64String = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
+        setTimeout(async () => {
         response = await axios.put(PROFILE_URL,
             JSON.stringify({
-              id: auth?.id,
-              email: email, 
               nickname: user, 
               name: name, 
               surname: surname,
-              accountBalance: userData.accountBalance,
               userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
               avatarImage: base64String
             }),
@@ -199,18 +215,17 @@ useEffect(() => {
                 withCredentials: true //cred
             }
         );
+      }, 1000);
       }
       else
       {
         response = await axios.put(PROFILE_URL,
           JSON.stringify({
-            id: auth?.id,
-            email: email, 
             nickname: user, 
             name: name, 
             surname: surname,
-            accountBalance: userData.accountBalance,
-            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3)
+            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+            avatarImage: ""
           }),
           {
               headers: { 

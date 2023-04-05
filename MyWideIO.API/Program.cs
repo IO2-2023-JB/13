@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyVideIO.Data;
@@ -9,8 +10,10 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Threading.Tasks;
 
 internal class Program
 {
@@ -37,6 +40,10 @@ internal class Program
             options.Password.RequiredLength = 8;
             options.Password.RequiredUniqueChars = 1;
 
+        });
+        builder.Services.AddAzureClients(clientBuilder =>
+        {
+            clientBuilder.AddBlobServiceClient(configuration.GetConnectionString("AzureBlobConnection"));
         });
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -117,15 +124,16 @@ internal class Program
         });
         builder.Services.AddAuthorization();
 
-        CreateRoles(builder.Services.BuildServiceProvider()).Wait();
-
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope()) // ?
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // ??
-                                                                                              //dbContext.Database.Migrate();
+            //dbContext.Database.Migrate(); /// to jakos tam mozna zablokowac zeby sie nie robilo co kazdy build
+                                            /// ale mi sie nie udalo takze do odkomentowania przy migracji xd
         }
+
+        CreateRoles(builder.Services.BuildServiceProvider()).Wait();
         // Configure the HTTP request pipeline. 
         // if (app.Environment.IsDevelopment()) na razie wlaczony swagger na release
         {
@@ -134,8 +142,6 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
-
-        var a = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
 
         app.UseAuthentication();
 

@@ -12,6 +12,8 @@ using System.Text;
 using WideIO.API.Models;
 using Azure.Storage.Blobs;
 using System.Reflection.PortableExecutable;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Blobs.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -24,16 +26,19 @@ namespace MyWideIO.API.Services
         // BLOBA MOZNA ZROBIC DO TEGO JAK NIE BEDZIE 
         // DZIALALO ODKLADANIE  W BAZIE
 
-        //private BlobServiceClient _blobServiceClient;
-        //private BlobContainerClient _blobContainerClient;
+        private BlobServiceClient _blobServiceClient;
+        private BlobContainerClient _blobContainerClient;
         //private string blobServiceConnectionString = "https://videioblob.blob.core.windows.net/blob1"; /* TODO */
+        private readonly string containerName = "blob1";
 
-        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager, RoleManager<UserRole> roleManager/*, BlobServiceClient client = null*/)
+        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager, RoleManager<UserRole> roleManager, BlobServiceClient blobServiceClient)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            //_blobServiceClient = client != null ? client : new BlobServiceClient(blobServiceConnectionString);
-            //_blobContainerClient = _blobServiceClient.CreateBlobContainer("container-" + Guid.NewGuid());
+            _blobServiceClient = blobServiceClient;
+            _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            if (!_blobContainerClient.Exists())
+                _blobContainerClient = _blobServiceClient.CreateBlobContainer(containerName);
             _roleManager = roleManager;
         }
 
@@ -101,7 +106,7 @@ namespace MyWideIO.API.Services
                 {
                     "Viewer" => UserTypeDto.ViewerEnum,
                     "Creator" => UserTypeDto.CreatorEnum,
-                    "Admin" => UserTypeDto.AdministratorEnum
+                    "Admin" => UserTypeDto.AdministratorEnum,
                 },
                 AvatarImage = viewer.ProfilePicture == null ? "" : viewer.ProfilePicture
             };
@@ -126,22 +131,17 @@ namespace MyWideIO.API.Services
                 Email = registerDto.Email,
                 Name = registerDto.Name,
                 UserName = registerDto.Nickname,
-                Surname = registerDto.Surname,
-                ProfilePicture = registerDto.AvatarImage
-                //ProfilePicture = GetBase64Image(registerDto.AvatarImage)
-                //ProfilePicture = (await UploadBlobFile(registerDto.AvatarImage)) // Nie możemy wstawić tutaj zdjecia bo nie znamy id uzytkownika
+                Surname = registerDto.Surname
 
             };
             var result = await _userManager.CreateAsync(viewer, registerDto.Password);
             if (!result.Succeeded && modelState != null)
                 foreach (var error in result.Errors)
                     modelState.AddModelError(error.Code, error.Description);
-
-            //else if(result.Succeeded)
-            //{
-            //    var user = await _userManager.FindByEmailAsync(viewer.Email);
-            //    user.ProfilePicture = (await UploadBlobFile(registerDto.AvatarImage, user.Id.ToString())); ////  tutaj nie wiem czy nie wstawic backslasha pomiedzy
-            //}
+            if (!result.Succeeded)
+                return false;
+            viewer.ProfilePicture = await UploadBlobFile(registerDto.AvatarImage, viewer.Id.ToString() + ".png"); ////  tutaj nie wiem czy nie wstawic backslasha pomiedzy
+            await _userManager.UpdateAsync(viewer);
 
             await _userManager.AddToRoleAsync(viewer, (Random.Shared.Next(3) + 1) switch // na szybko
             {
@@ -162,7 +162,7 @@ namespace MyWideIO.API.Services
         public async Task<UserDto?> GetUser(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            if(user != null)
+            if (user != null)
             {
                 return new UserDto()
                 {
@@ -173,8 +173,8 @@ namespace MyWideIO.API.Services
                     Surname = user.Surname,
                     AccountBalance = user.AccountBalance,
                     UserType = user.UserTypeDto,
-                    AvatarImage = user.ProfilePicture == null? "" : user.ProfilePicture,
-                    SubscriptionsCount = user.Subscriptions.Count
+                    AvatarImage = user.ProfilePicture == null ? "" : user.ProfilePicture,
+                    SubscriptionsCount = user.Subscriptions?.Count,
                 };
             }
             return null;
@@ -187,7 +187,7 @@ namespace MyWideIO.API.Services
             {
                 //await UploadBlobFile(new MemoryStream(, id.ToString());
 
-                user.Surname= dto.Surname;
+                user.Surname = dto.Surname;
                 user.Name = dto.Name;
                 user.UserName = dto.Nickname;
                 user.UserTypeDto = dto.UserType;
@@ -198,22 +198,26 @@ namespace MyWideIO.API.Services
         }
 
 
-        //private async Task<string> UploadBlobFile(Stream bytes, string fileName)
-        //{
-        //    BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+        private async Task<string> UploadBlobFile(string base64photo, string fileName)
+        {
+            byte[] buffer = Convert.FromBase64String(base64photo);
 
-        //    BinaryReader reader = new BinaryReader(bytes);
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
 
-        //    byte[] buffer = new byte[bytes.Length];
+            
 
-        //    reader.Read(buffer, 0, buffer.Length);
+            BinaryData binaryData = new BinaryData(buffer);
 
-        //    BinaryData binaryData = new BinaryData(buffer);
+            await blobClient.UploadAsync(binaryData, true);
+            await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders
+            {
+                ContentType = "image/png"
+            });
 
-        //    await blobClient.UploadAsync(binaryData, true);
+            
 
-        //    return fileName;
-        //}
+            return blobClient.Uri.AbsoluteUri;
+        }
 
 
         //private async Task<byte[]> GetBlobFile(string fileName)
@@ -235,7 +239,7 @@ namespace MyWideIO.API.Services
 
         private string GetBase64Image(Stream bytes)
         {
-            using(var rdr = new BinaryReader(bytes))
+            using (var rdr = new BinaryReader(bytes))
             {
                 byte[] buffer = new byte[bytes.Length];
                 rdr.Read(buffer, 0, buffer.Length);
@@ -243,7 +247,7 @@ namespace MyWideIO.API.Services
             }
         }
 
-            
+
         private async Task<string> GenerateToken(ViewerModel viewer)
         {
             var roles = await _userManager.GetRolesAsync(viewer);

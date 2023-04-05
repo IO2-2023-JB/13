@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyVideIO.Data;
@@ -39,6 +40,10 @@ internal class Program
             options.Password.RequiredLength = 8;
             options.Password.RequiredUniqueChars = 1;
 
+        });
+        builder.Services.AddAzureClients(clientBuilder =>
+        {
+            clientBuilder.AddBlobServiceClient(configuration.GetConnectionString("AzureBlobConnection"));
         });
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -137,8 +142,6 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
-
-        var a = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
 
         app.UseAuthentication();
 

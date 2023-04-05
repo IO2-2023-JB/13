@@ -15,35 +15,34 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using WideIO.API.Converters;
+using System.Text.Json.Serialization;
 
 namespace WideIO.API.Models
-{ 
+{
+    /// <summary>
+    /// Gets or Sets UserTypeDto
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum UserTypeDto
+    {
+
         /// <summary>
-        /// Gets or Sets UserTypeDto
+        /// Enum SimpleEnum for Simple
         /// </summary>
-        [TypeConverter(typeof(CustomEnumConverter<UserTypeDto>))]
-        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public enum UserTypeDto
-        {
-            
-            /// <summary>
-            /// Enum SimpleEnum for Simple
-            /// </summary>
-            [EnumMember(Value = "Viewer")]
-            ViewerEnum = 1,
-            
-            /// <summary>
-            /// Enum CreatorEnum for Creator
-            /// </summary>
-            [EnumMember(Value = "Creator")]
-            CreatorEnum = 2,
-            
-            /// <summary>
-            /// Enum AdministratorEnum for Administrator
-            /// </summary>
-            [EnumMember(Value = "Administrator")]
-            AdministratorEnum = 3
-        }
+        [EnumMember(Value = "Viewer")]
+        Viewer = 1,
+
+        /// <summary>
+        /// Enum CreatorEnum for Creator
+        /// </summary>
+        [EnumMember(Value = "Creator")]
+        Creator = 2,
+
+        /// <summary>
+        /// Enum AdministratorEnum for Administrator
+        /// </summary>
+        [EnumMember(Value = "Administrator")]
+        Administrator = 3
+    }
 }

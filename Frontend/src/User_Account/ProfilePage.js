@@ -8,6 +8,7 @@ import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import logo from '../images/happy.jpg'
+import { useNavigate, useLocation } from 'react-router-dom';
 
 config.autoAddCss = false;
 
@@ -102,9 +103,6 @@ useEffect(() => {
 useEffect(() => {
   setEmail(userData.email);
 }, [userData.email]);
-useEffect(() => {
-  setProfile_picture(userData.avatarImage);
-}, [userData.avatarImage]);
 
   useEffect(() => {
     setValidNickname(USER_REGEX.test(user));
@@ -163,7 +161,7 @@ useEffect(() => {
     setSurname(userData.lastName);
     setUser(userData.nickname);
     setEmail(userData.email);
-    setProfile_picture(userData.avatarImage);
+    //setProfile_picture(userData.avatarImage);
   };
 
   const handleSubmit = async (e) => {
@@ -215,7 +213,10 @@ useEffect(() => {
                 withCredentials: true //cred
             }
         );
-      }, 1000);
+        setData(response?.data);
+        handleCancelClick();
+        window.location.reload()
+      }, 100);
       }
       else
       {
@@ -235,37 +236,42 @@ useEffect(() => {
               withCredentials: true //cred
           }
       );
+      setData(response?.data);
+      handleCancelClick();
       }
-        //console.log(response?.data);
-        //console.log(response?.accessToken);
-        //console.log(JSON.stringify(response))
-        setSuccess(true);
-        //clear state and controlled inputs
-        //need value attrib on inputs for this
-        setUser('');
-        setEmail('')
-        setName('')
-        setSurname('')
-        setProfile_picture(null);
-        setProfile_picture_name('');
-        setValidprofile_picture(false);
-        setWrong_profile_picture(true);
-        axios.get(PROFILE_URL + "?id=" + auth?.id, {
-          headers: { 
-            'Content-Type': 'application/json',
-            "Authorization" : `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true 
-        })
-        .then(response => {
-          //console.log("success");
-          console.log(JSON.stringify(response?.data));
-          setData(response?.data);
-        })
-        .catch(error => {
-          console.log("error: ", error);
-        });
-        handleCancelClick();
+      // setTimeout(() => {
+      //   //console.log(response?.data);
+      //   //console.log(response?.accessToken);
+      //   //console.log(JSON.stringify(response))
+      //   setSuccess(true);
+      //   //clear state and controlled inputs
+      //   //need value attrib on inputs for this
+      //   setUser('');
+      //   setEmail('')
+      //   setName('')
+      //   setSurname('')
+      //   setProfile_picture(null);
+      //   setProfile_picture_name('');
+      //   setValidprofile_picture(false);
+      //   setWrong_profile_picture(false);
+      //   axios.get(PROFILE_URL + "?id=" + auth?.id, {
+      //     headers: { 
+      //       'Content-Type': 'application/json',
+      //       "Authorization" : `Bearer ${auth?.accessToken}`
+      //     },
+      //     withCredentials: true 
+      //   })
+      //   .then(response => {
+      //     //console.log("success");
+      //     console.log(JSON.stringify(response?.data));
+      //     setData(response?.data);
+      //     //setUserData(response.data);
+      //   })
+      //   .catch(error => {
+      //     console.log("error: ", error);
+      //   });
+      //   handleCancelClick();
+      // }, 500);
     } catch (err) {
         if (!err?.response) {
             setErrMsg('No Server Response');
@@ -303,7 +309,7 @@ return (
           <div class="col-sm">
             <h2>Avatar Image</h2>
             <section>
-              <img src = {userData.avatarImage} alt="No avatar image"/>
+              <img key={userData.avatarImage} src = {userData.avatarImage} alt="No avatar image"/>
             </section>
           </div>
           <div class="col-sm">

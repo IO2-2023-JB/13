@@ -49,7 +49,7 @@ const VideoPlayer = () => {
   return (
     <div class="container-fluid justify-content-center" style={{marginTop: "200px", width: "900px"}}>
       <ReactHlsPlayer
-        src={video_url}
+        src={video_url1}
         autoPlay={false}
         // loop = {true}
         controls={true}

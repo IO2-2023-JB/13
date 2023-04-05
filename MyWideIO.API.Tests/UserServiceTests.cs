@@ -14,9 +14,72 @@ using MyWideIO.API.Services;
 using WideIO.API.Models;
 using System.Diagnostics;
 using Azure.Storage.Blobs;
+using MyWideIO.API.Data;
+using Xunit;
+using FluentAssertions;
 
 namespace MyWideIO.API.Tests
 {
+    public class UserServiceTests
+    {
+        [Fact]
+        public void RegisterUserAsync_ShouldReturn_WhenDataIsCorrect()
+        {
+            // Arrange
+            var userManagerMock = new Mock<UserManager<ViewerModel>>(MockBehavior.Strict);
+            userManagerMock.Setup(u => u.CreateAsync(It.IsAny<ViewerModel>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var signInManagerMock = new Mock<SignInManager<ViewerModel>>(userManagerMock.Object, null, null, null, null, null, null);
+            var roleManagerMock = new Mock<RoleManager<UserRole>>(null, null, null, null, null);
+            
+
+            var blobServiceClientMock = new Mock<BlobServiceClient>(MockBehavior.Strict);
+            blobServiceClientMock.Setup(bs => bs.GetBlobContainerClient(It.IsAny<string>())).Returns(() =>
+            {
+                var blobContainerClientMock = new Mock<BlobContainerClient>(MockBehavior.Default);
+                var responseMock = new Mock<Azure.Response<bool>>(MockBehavior.Strict);
+                responseMock.Setup(r => r.Value).Returns(true);
+                blobContainerClientMock.Setup(bc => bc.Exists(default)).Returns(() =>
+                {
+                    var responseMock = new Mock<Azure.Response<bool>>(MockBehavior.Strict);
+                    responseMock.Setup(r => r.Value).Returns(true);
+                    return responseMock;
+                });
+                blobContainerClientMock.Setup(bc => bc.GetBlobClient(It.IsAny<string>())).Returns(() =>
+                {
+                    var blobClient = new Mock<BlobClient>(MockBehavior.Strict);
+                    blobClient.Setup(b=>b.UploadAsync(It.IsAny<BinaryData>())).Returns(() =>
+                    {
+                        var responseMock = new Mock<Azure.Response>(MockBehavior.Strict);
+                        return responseMock;
+                    });
+                });
+                return blobContainerClientMock;
+            });
+
+
+            var userService = new UserService(userManagerMock.Object, signInManagerMock.Object, roleManagerMock.Object, blobServiceClientMock.Object);
+
+            var registerDto = new RegisterDto
+            {
+                Email = "asd@asd.asd",
+                Name = "asd",
+                Surname = "asd",
+                Password = "Password1!",
+                UserType = UserTypeDto.Viewer,
+                AvatarImage = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+            };
+
+            // Act
+            var task = userService.RegisterUserAsync(registerDto);
+            task.Wait();
+            // Assert
+
+            task.IsCompletedSuccessfully.Should().BeTrue();
+            userManagerMock.VerifyAll();
+        }
+    }
     //[TestClass]
     //public class UserServiceTests
     //{

@@ -21,29 +21,29 @@ using WideIO.API.Converters;
 namespace WideIO.API.Models
 { 
         /// <summary>
-        /// Gets or Sets ReactionDto
+        /// Gets or Sets SortingTypes
         /// </summary>
-        [TypeConverter(typeof(CustomEnumConverter<ReactionDto>))]
+        [TypeConverter(typeof(CustomEnumConverter<SortingTypes>))]
         [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public enum ReactionDto
+        public enum SortingTypes
         {
             
             /// <summary>
-            /// Enum PositiveEnum for Positive
+            /// Enum PublishDateEnum for PublishDate
             /// </summary>
-            [EnumMember(Value = "Positive")]
-            PositiveEnum = 1,
+            [EnumMember(Value = "PublishDate")]
+            PublishDateEnum = 1,
             
             /// <summary>
-            /// Enum NegativeEnum for Negative
+            /// Enum AlphabeticalEnum for Alphabetical
             /// </summary>
-            [EnumMember(Value = "Negative")]
-            NegativeEnum = 2,
+            [EnumMember(Value = "Alphabetical")]
+            AlphabeticalEnum = 2,
             
             /// <summary>
-            /// Enum NoneEnum for None
+            /// Enum PopularityEnum for Popularity
             /// </summary>
-            [EnumMember(Value = "None")]
-            NoneEnum = 3
+            [EnumMember(Value = "Popularity")]
+            PopularityEnum = 3
         }
 }

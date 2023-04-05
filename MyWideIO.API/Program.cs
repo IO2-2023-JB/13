@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyVideIO.Data;
@@ -9,10 +10,12 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
 using Newtonsoft.Json.Converters;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Serialization;
 using System.Text.Json.Serialization;
 using WideIO.API.Formatters;
@@ -43,6 +46,10 @@ internal class Program
             options.Password.RequiredLength = 8;
             options.Password.RequiredUniqueChars = 1;
 
+        });
+        builder.Services.AddAzureClients(clientBuilder =>
+        {
+            clientBuilder.AddBlobServiceClient(configuration.GetConnectionString("AzureBlobConnection"));
         });
         builder.Services.AddControllers();
 
@@ -139,8 +146,11 @@ internal class Program
         using (var scope = app.Services.CreateScope()) // ?
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // ??
-                                                                                              //dbContext.Database.Migrate();
+            //dbContext.Database.Migrate(); /// to jakos tam mozna zablokowac zeby sie nie robilo co kazdy build
+                                            /// ale mi sie nie udalo takze do odkomentowania przy migracji xd
         }
+
+        CreateRoles(builder.Services.BuildServiceProvider()).Wait();
         // Configure the HTTP request pipeline. 
         // if (app.Environment.IsDevelopment()) na razie wlaczony swagger na release
         {
@@ -155,8 +165,6 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
-
-        var a = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
 
         app.UseAuthentication();
 

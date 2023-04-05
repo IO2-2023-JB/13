@@ -1,4 +1,4 @@
-﻿
+﻿using WideIO.API.Models;
 
 namespace MyWideIO.API.Data.IRepositories
 {

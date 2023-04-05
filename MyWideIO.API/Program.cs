@@ -12,8 +12,14 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Text;
+using Newtonsoft.Json.Converters;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Serialization;
+using System.Text.Json.Serialization;
+using WideIO.API.Formatters;
+using Org.OpenAPITools.Filters;
 
 internal class Program
 {
@@ -46,43 +52,7 @@ internal class Program
             clientBuilder.AddBlobServiceClient(configuration.GetConnectionString("AzureBlobConnection"));
         });
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(config =>
-        {
-            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nEnter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: 'Bearer 12345abcdef'",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
-                  {
-            {
-              new OpenApiSecurityScheme
-              {
-                Reference = new OpenApiReference
-                  {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                  },
-                  Scheme = "oauth2",
-                  Name = "Bearer",
-                  In = ParameterLocation.Header,
 
-                },
-                new List<string>()
-              }
-                    });
-
-            //config.SwaggerDoc("v1.3", new OpenApiInfo
-            //{
-            //    Version = "v1.3",
-            //    Title = "MyWideIO.API",
-            //});
-        });
 
         //builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
         builder.Services.AddScoped<IApiRepository, ApiRepository>();
@@ -123,6 +93,53 @@ internal class Program
             };
         });
         builder.Services.AddAuthorization();
+        //builder.Services.AddControllers(options =>
+        //{
+        //    //options.InputFormatters.Insert(0,new InputFormatterStream());
+        //}).AddNewtonsoftJson();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(config =>
+        {
+            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nEnter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: 'Bearer 12345abcdef'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                  {
+            {
+              new OpenApiSecurityScheme
+              {
+                Reference = new OpenApiReference
+                  {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                  },
+                  Scheme = "oauth2",
+                  Name = "Bearer",
+                  In = ParameterLocation.Header,
+
+                },
+                new List<string>()
+              }
+                    });
+            config.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
+            config.SwaggerDoc("1.0.6", new OpenApiInfo
+            {
+                Title = "VideIO API",
+                Description = "VideIO project API specification.",
+                Version = "1.0.6",
+            });
+            config.DocumentFilter<BasePathFilter>("/VideIO/1.0.6");
+            config.OperationFilter<GeneratePathParamsValidationFilter>();
+            config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
+        });
+
+        CreateRoles(builder.Services.BuildServiceProvider()).Wait();
 
         var app = builder.Build();
 
@@ -137,8 +154,14 @@ internal class Program
         // Configure the HTTP request pipeline. 
         // if (app.Environment.IsDevelopment()) na razie wlaczony swagger na release
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "openapi/{documentName}/openapi.json";
+            });
+            app.UseSwaggerUI(c=>
+            {
+                c.SwaggerEndpoint("/openapi/1.0.6/openapi.json", "VideIO API");
+            });
         }
 
         app.UseHttpsRedirection();

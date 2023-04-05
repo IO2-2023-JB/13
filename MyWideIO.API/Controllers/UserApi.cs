@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,6 +26,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Exceptions;
+using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WideIO.API.Controllers
 {
@@ -34,6 +36,7 @@ namespace WideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Authorize]
     public class UserApiController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -53,8 +56,8 @@ namespace WideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPost]
-        [Route("/zagorskim/VideIO/1.0.0/ban/{id}")]
+        [HttpPost("ban/{id}")]
+        //[Route("ban/{id}")]
         [ValidateModelState]
         [SwaggerOperation("BanUser")]
         [Authorize(Roles = "Admin")]
@@ -78,11 +81,13 @@ namespace WideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpDelete]
-        [Route("/zagorskim/VideIO/1.0.0/user")]
+        [HttpDelete("user")]
+        //[Route("user")]
         [ValidateModelState]
         [SwaggerOperation("DeleteUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
+        [SwaggerResponse(statusCode: 400, description: "Bad Request")]
+        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         public virtual async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
@@ -92,75 +97,99 @@ namespace WideIO.API.Controllers
             // return StatusCode(400);
             //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(401);
-            
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            if (await _userService.DeleteUserAsync(id))
+
+            try
+            {
+                await _userService.DeleteUserAsync(id);
                 return Ok();
-            else
-                return BadRequest();
+            }
+            //catch(UserNotFoundException e)
+            //{
+            //    return NotFound(e.Message);
+            //}
+            catch (UserException e) // blad
+            {
+                return BadRequest(e.Message);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
         /// User data editing
         /// </summary>
-        /// <param name="userDto"></param>
+        /// <param name="id">User ID</param>
+        /// <param name="updateUserDto"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPut]
-        [Route("/zagorskim/VideIO/1.0.0/user")]
+        [HttpPut("user")]
+        //[Route("user")]
         [Consumes("application/json")]
         [ValidateModelState]
-        [Authorize]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
+        [SwaggerResponse(statusCode: 400, description: "Bad Request")]
+        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         public async virtual Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(UserDto));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(401);
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            if (await _userService.PutUserData(updateUserDto, (Guid)id))
-                return Ok();
-            else
-                return BadRequest(ModelState);
+            if (id == null)
+                id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            try
+            {
+                var userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
+                return Ok(userDto);// po co sie zwraca to 
+            }
+            catch (UserException e) // blad
+            {
+                return BadRequest(e.Message);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
-        /// User data retrieval
+        /// User data retrieval. No id parameter results in sending the data of the currently logged in user.
         /// </summary>
         /// <param name="id">User ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
-        [Route("/zagorskim/VideIO/1.0.0/user")]
+        /// <response code="404">Not found</response>
+        [HttpGet("user")]
+        //[Route("user")]
         [ValidateModelState]
         [SwaggerOperation("GetUserData")]
-        [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual async Task<IActionResult> GetUserData([FromQuery(Name = "id")][Required()] Guid id)
+        [SwaggerResponse(statusCode: 200, description: "OK", type: typeof(UserDto))]
+        [SwaggerResponse(statusCode: 400, description: "Bad request")]
+        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
+        [SwaggerResponse(statusCode: 404, description: "Not found")]
+
+        public virtual async Task<IActionResult> GetUserData([FromQuery(Name = "id")] Guid? id)
         {
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(UserDto));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(401);
-            UserDto? userDto = null;
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            if ((userDto = await _userService.GetUser(id)) != null)
+            if (id == null)
+                id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            try
+            {
+                var userDto = await _userService.GetUserAsync(id.Value);
                 return Ok(userDto);
-            else
-                return BadRequest(ModelState);
-
+            }
+            catch (UserNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (UserException e) // blad
+            {
+                return BadRequest(e.Message);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -169,25 +198,42 @@ namespace WideIO.API.Controllers
         /// <param name="loginDto"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
-        [HttpPost]
-        [Route("/zagorskim/VideIO/1.0.0/login")]
+        /// <response code="401">Incorrect password</response>
+        /// <response code="404">Account does not exist</response>
+        [HttpPost("login")]
+        //[Route("login")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("LoginUser")]
+        [AllowAnonymous]
         [SwaggerResponse(statusCode: 200, type: typeof(LoginResponseDto), description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
+        [SwaggerResponse(statusCode: 401, description: "Incorrect password")]
+        [SwaggerResponse(statusCode: 404, description: "Account does not exist")]
+
         public virtual async Task<IActionResult> LoginUser([FromBody] LoginDto loginDto)
         {
-            var token = await _userService.LoginUserAsync(loginDto);
-            if (token.IsNullOrEmpty())
-                return BadRequest(ModelState);
-            else
+            try
+            {
+                var token = await _userService.LoginUserAsync(loginDto);
                 return Ok(new LoginResponseDto { Token = token });
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(LoginResponseDto));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            
+            }
+            catch (IncorrectPasswordException e)
+            {
+                return Unauthorized(e.Message);
+            }
+            catch (UserNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (UserException e) // blad
+            {
+                return BadRequest(e.Message);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -196,26 +242,35 @@ namespace WideIO.API.Controllers
         /// <param name="registerDto"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
-        [HttpPost]
-        [Route("/zagorskim/VideIO/1.0.0/register")]
+        /// <response code="409">A user with this e-mail address already exists</response>
+        [HttpPost("register")]
+        //[Route("register")]
         [Consumes("application/json")]
         [ValidateModelState]
+        [AllowAnonymous]
         [SwaggerOperation("RegisterUser")]
         [SwaggerResponse(statusCode: 200, description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
-        public async virtual Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)
+        [SwaggerResponse(statusCode: 409, description: "A user with this e-mail address already exists")]
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)
         {
-            if (await _userService.RegisterUserAsync(registerDto, ModelState))
+            try
+            {
+                await _userService.RegisterUserAsync(registerDto);
                 return Ok();
-            else
-                return BadRequest(ModelState);
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200);
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-
-            throw new NotImplementedException();
+            }
+            catch (DuplicateEmailException e) // email juz istnieje
+            {
+                return Conflict(e.Message);
+            }
+            catch (UserException e) // inny blad
+            {
+                return BadRequest(e.Message);
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

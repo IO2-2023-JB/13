@@ -24,28 +24,41 @@ namespace WideIO.API.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class PlaylistBaseDto : IEquatable<PlaylistBaseDto>
+    public partial class UpdateUserDto : IEquatable<UpdateUserDto>
     {
+        /// <summary>
+        /// Gets or Sets Nickname
+        /// </summary>
+        /// <example>&quot;johnny123&quot;</example>
+        [DataMember(Name="nickname", EmitDefaultValue=false)]
+        public string Nickname { get; set; }
+
         /// <summary>
         /// Gets or Sets Name
         /// </summary>
-        /// <example>&quot;Favorites&quot;</example>
+        /// <example>&quot;John&quot;</example>
         [DataMember(Name="name", EmitDefaultValue=false)]
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or Sets Count
+        /// Gets or Sets Surname
         /// </summary>
-        /// <example>25</example>
-        [DataMember(Name="count", EmitDefaultValue=true)]
-        public int Count { get; set; }
+        /// <example>&quot;Doe&quot;</example>
+        [DataMember(Name="surname", EmitDefaultValue=false)]
+        public string Surname { get; set; }
 
         /// <summary>
-        /// Gets or Sets Id
+        /// Gets or Sets UserType
         /// </summary>
-        /// <example>&quot;123e4567-e89b-12d3-a456-426614174000&quot;</example>
-        [DataMember(Name="id", EmitDefaultValue=false)]
-        public Guid Id { get; set; }
+        [DataMember(Name="userType", EmitDefaultValue=true)]
+        public UserTypeDto UserType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AvatarImage
+        /// </summary>
+        /// <example>&quot;https://example.com/avatar/user-id&quot;</example>
+        [DataMember(Name="avatarImage", EmitDefaultValue=true)]
+        public string AvatarImage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -54,10 +67,12 @@ namespace WideIO.API.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class PlaylistBaseDto {\n");
+            sb.Append("class UpdateUserDto {\n");
+            sb.Append("  Nickname: ").Append(Nickname).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
-            sb.Append("  Count: ").Append(Count).Append("\n");
-            sb.Append("  Id: ").Append(Id).Append("\n");
+            sb.Append("  Surname: ").Append(Surname).Append("\n");
+            sb.Append("  UserType: ").Append(UserType).Append("\n");
+            sb.Append("  AvatarImage: ").Append(AvatarImage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -80,34 +95,44 @@ namespace WideIO.API.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((PlaylistBaseDto)obj);
+            return obj.GetType() == GetType() && Equals((UpdateUserDto)obj);
         }
 
         /// <summary>
-        /// Returns true if PlaylistBaseDto instances are equal
+        /// Returns true if UpdateUserDto instances are equal
         /// </summary>
-        /// <param name="other">Instance of PlaylistBaseDto to be compared</param>
+        /// <param name="other">Instance of UpdateUserDto to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PlaylistBaseDto other)
+        public bool Equals(UpdateUserDto other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return 
                 (
+                    Nickname == other.Nickname ||
+                    Nickname != null &&
+                    Nickname.Equals(other.Nickname)
+                ) && 
+                (
                     Name == other.Name ||
                     Name != null &&
                     Name.Equals(other.Name)
                 ) && 
                 (
-                    Count == other.Count ||
-                    
-                    Count.Equals(other.Count)
+                    Surname == other.Surname ||
+                    Surname != null &&
+                    Surname.Equals(other.Surname)
                 ) && 
                 (
-                    Id == other.Id ||
-                    Id != null &&
-                    Id.Equals(other.Id)
+                    UserType == other.UserType ||
+                    
+                    UserType.Equals(other.UserType)
+                ) && 
+                (
+                    AvatarImage == other.AvatarImage ||
+                    AvatarImage != null &&
+                    AvatarImage.Equals(other.AvatarImage)
                 );
         }
 
@@ -121,12 +146,16 @@ namespace WideIO.API.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
+                    if (Nickname != null)
+                    hashCode = hashCode * 59 + Nickname.GetHashCode();
                     if (Name != null)
                     hashCode = hashCode * 59 + Name.GetHashCode();
+                    if (Surname != null)
+                    hashCode = hashCode * 59 + Surname.GetHashCode();
                     
-                    hashCode = hashCode * 59 + Count.GetHashCode();
-                    if (Id != null)
-                    hashCode = hashCode * 59 + Id.GetHashCode();
+                    hashCode = hashCode * 59 + UserType.GetHashCode();
+                    if (AvatarImage != null)
+                    hashCode = hashCode * 59 + AvatarImage.GetHashCode();
                 return hashCode;
             }
         }
@@ -134,12 +163,12 @@ namespace WideIO.API.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(PlaylistBaseDto left, PlaylistBaseDto right)
+        public static bool operator ==(UpdateUserDto left, UpdateUserDto right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(PlaylistBaseDto left, PlaylistBaseDto right)
+        public static bool operator !=(UpdateUserDto left, UpdateUserDto right)
         {
             return !Equals(left, right);
         }

@@ -1,4 +1,5 @@
 ﻿using MyVideIO.Data;
+using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Data.IRepositories;
 
 namespace MyWideIO.API.Data.Repositories

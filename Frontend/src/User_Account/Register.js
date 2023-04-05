@@ -135,7 +135,7 @@ const Register = () => {
                 </p>
             </section>
         ): (
-        <section>
+        <section class="container-fluid justify-content-center" style={{marginTop:"200px"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>

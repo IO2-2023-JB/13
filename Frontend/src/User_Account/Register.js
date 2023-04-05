@@ -116,9 +116,17 @@ const Register = () => {
             let response;
             if(validprofile_picture)
             {
+                //console.log(profile_picture);
                 const reader = new FileReader();
                 reader.readAsDataURL(profile_picture);
-                const base64String = reader.result.split(",")[1];
+                let base64String;
+                reader.onload = () => {
+                    console.log(reader.result);
+                    base64String = reader.result.split(",")[1];
+                    console.log(base64String);
+                };
+                
+                //console.log(base64String);
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
                         surname: surname, password: pwd, userType: 1, avatarImage: base64String }),

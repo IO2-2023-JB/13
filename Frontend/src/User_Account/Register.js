@@ -42,6 +42,12 @@ const Register = () => {
     const [validEmail, setValidEmail] = useState(false);
     const [emailFocus, setEmailFocus] = useState(false);
 
+    const [profile_picture, setProfile_picture] = useState(null);
+    const [profile_picture_name, setProfile_picture_name] = useState('');
+    const [validprofile_picture, setValidprofile_picture] = useState(false);
+    const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
+    const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
+
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -74,6 +80,26 @@ const Register = () => {
         setValidEmail(EMAIL_REGEX.test(email));
     }, [email])
 
+    const handle_picture = (event) => {
+
+        const file = event.target.files[0];
+        const maxSize = 5 * 1024 * 1024; // 5 MB
+
+        if (file && file.size <= maxSize) {
+            //console.log(file.type);
+            setProfile_picture(file);
+            setProfile_picture_name(file.name);
+            setValidprofile_picture(true);
+            setWrong_profile_picture(false);
+        } else {
+            setProfile_picture(null);
+            setProfile_picture_name('');
+            setValidprofile_picture(false);
+            setWrong_profile_picture(true);
+            alert("Choose a file format .jpg or .png with a maximum size of 5MB.");
+        }
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         // if button enabled with JS hack
@@ -87,19 +113,46 @@ const Register = () => {
             return;
         }
         try {
-            const response = await axios.post(REGISTER_URL,
-                JSON.stringify({ email: email, nickname: user, name: name, surname: surname, password: pwd }),
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true //cred
-                }
-            );
+            let response;
+            if(validprofile_picture)
+            {
+                //console.log(profile_picture);
+                const reader = new FileReader();
+                reader.readAsDataURL(profile_picture);
+                let base64String;
+                reader.onload = () => {
+                    //console.log(reader.result);
+                    base64String = reader.result.split(",")[1];
+                    //console.log(base64String);
+                };
+                
+                //console.log(base64String);
+                setTimeout(async () => {
+                response = await axios.post(REGISTER_URL,
+                    JSON.stringify({ email: email, nickname: user, name: name, 
+                        surname: surname, password: pwd, userType: 1, AvatarImage: base64String }),
+                    {
+                        headers: { 'Content-Type': 'application/json' },
+                        withCredentials: true //cred
+                    }
+                );
+                }, 1000);
+            }
+            else
+            {
+                response = await axios.post(REGISTER_URL,
+                    JSON.stringify({ email: email, nickname: user, name: name, 
+                        surname: surname, password: pwd, userType: 1, AvatarImage: "" }), //userType: "Simple"
+                    {
+                        headers: { 'Content-Type': 'application/json' },
+                        withCredentials: true //cred
+                    }
+                );
+            }
             console.log(response?.data);
             console.log(response?.accessToken);
             console.log(JSON.stringify(response))
             setSuccess(true);
-            //clear state and controlled inputs
-            //need value attrib on inputs for this
             setUser('');
             setPwd('');
             setMatchPwd('');
@@ -110,12 +163,9 @@ const Register = () => {
             if (!err?.response) {
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 400) {
-                if(err.response.data && typeof err.response.data === 'object' && err.response.data.DuplicateUserName)
-                    setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateUserName : 'Registration Failed');
-                else
-                    setErrMsg(err.response.data && typeof err.response.data === 'object' ? err.response.data.DuplicateEmail  : 'Registration Failed');
+                setErrMsg('Registration Failed');
             } else if(err?.status === 409){
-                setErrMsg('Account with this email already exists');
+                setErrMsg('A user with this e-mail address already exists');
             } else {
                 setErrMsg('Registration Failed')
             }
@@ -126,7 +176,7 @@ const Register = () => {
     return (
         <>
         {success?(
-            <section>
+            <section class="container-fluid justify-content-center" style={{marginTop: "200px"}}>
                 <h1>
                     Success!
                 </h1>
@@ -135,7 +185,7 @@ const Register = () => {
                 </p>
             </section>
         ): (
-        <section>
+        <section class="container-fluid justify-content-center" style={{marginTop: "200px"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
@@ -281,6 +331,30 @@ const Register = () => {
                         <p id="confirmnote" className={matchFocus && !validMatch ? "instructions" : "offscreen"}>
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Must match the first password input field.
+                        </p>
+
+                        <label htmlFor="profile_picture">
+                            Profile Picture (Optional):
+                            <FontAwesomeIcon icon={faCheck} className={validprofile_picture && profile_picture ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={!wrong_profile_picture ? "hide" : "invalid"} /> {/* validprofile_picture || !profile_picture */}
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="profile_picture"
+                            //key={profile_picture}
+                            onChange={handle_picture}
+                            defaultValue={profile_picture_name}
+                            //value={profile_picture_name}
+                            //required
+                            aria-invalid={!wrong_profile_picture ? "false" : "true"}//
+                            aria-describedby="confirmnote"
+                            onFocus={() => setProfile_pictureFocus(true)}
+                            onBlur={() => setProfile_pictureFocus(false)}
+                        />
+                        <p id="confirmnote" className={!validprofile_picture ? "instructions" : "offscreen"}> {/*profile_pictureFocus && */ }
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Must be image up to 5 MB!
                         </p>
 
                         <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>

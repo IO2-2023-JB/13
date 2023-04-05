@@ -74,7 +74,7 @@ const Login = () => {
     }
 
     return (
-        <section class="container-fluid justify-content-center" style={{marginTop: "200px"}}>
+        <section class="container-fluid justify-content-center" style={{marginTop:"200px"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : 
             "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Sign In</h1>

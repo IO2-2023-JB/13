@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import {Home} from './Home';
+import {Administrator} from './Administrator'
 import {Department} from './Department';
 import {Employee} from './Employee';
 import { FetchData } from './FetchData';
@@ -22,6 +23,7 @@ import * as AiIcons from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import './Sidebar.css';
+import whitelogo from './images/logo2.png'
 import { IconContext } from 'react-icons';
 
 export const cookies = new Cookies();
@@ -73,7 +75,8 @@ function App() {
     <div class="container-fluid">
       <nav class='navbar fixed-top navbar-expand-sm m-0 bg-dark'>
         <ul className='navbar-nav mx-2'>
-          <li className='nav-item- m-1'>
+          
+          <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/home'>
               Home
             </NavLink>
@@ -105,8 +108,14 @@ function App() {
               </NavLink>
           </li>
           }
+          <li className='nav-item- m-1'>
+            <NavLink className="btn btn-outline-light" to='/administrator'>
+              Administrator
+            </NavLink>
+          </li>
           
         </ul>
+
         <div class = "nav-item m-auto">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" class="bi bi-search" viewBox="0 0 16 16" className="buttons">
             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
@@ -148,6 +157,7 @@ function App() {
         <Route path='/department' element={<Department />} />
         <Route path='/employee' element={<Employee />} />
         <Route path='/login' element={<Login />} />
+        <Route path="/administrator" element={<Administrator />}/>
         <Route path='/register' element={<Register />} />
         <Route path='/employee' element={<Employee />} />
       </Routes>

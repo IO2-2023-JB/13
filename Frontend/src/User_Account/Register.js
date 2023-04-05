@@ -118,9 +118,10 @@ const Register = () => {
             {
                 const reader = new FileReader();
                 reader.readAsDataURL(profile_picture);
+                const base64String = reader.result.split(",")[1];
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, avatarImage: reader.result }),
+                        surname: surname, password: pwd, userType: 1, avatarImage: base64String }),
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
@@ -131,7 +132,7 @@ const Register = () => {
             {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: "Simple" }),
+                        surname: surname, password: pwd, userType: 1 }), //userType: "Simple"
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred

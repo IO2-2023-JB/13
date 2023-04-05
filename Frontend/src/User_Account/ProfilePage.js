@@ -128,7 +128,7 @@ useEffect(() => {
   const handle_picture = (event) => {
 
     const file = event.target.files[0];
-    const maxSize = 1 * 1024 * 1024; // 5 MB
+    const maxSize = 5 * 1024 * 1024; // 5 MB
 
     if (file && file.size <= maxSize) {
         //console.log(file.type);
@@ -167,12 +167,13 @@ useEffect(() => {
         setErrMsg("Invalid Entry");
         return;
     }
-    try { //TODO add photo
+    try {
       let response;
       if(validprofile_picture)
       {
         const reader = new FileReader();
         reader.readAsDataURL(profile_picture);
+        const base64String = reader.result.split(",")[1];
         response = await axios.put(PROFILE_URL,
             JSON.stringify({
               id: auth?.id,
@@ -182,7 +183,7 @@ useEffect(() => {
               surname: surname,
               accountBalance: userData.accountBalance,
               userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-              avatarImage: reader.result
+              avatarImage: base64String
             }),
             {
                 headers: { 

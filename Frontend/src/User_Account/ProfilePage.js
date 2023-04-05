@@ -173,7 +173,13 @@ useEffect(() => {
       {
         const reader = new FileReader();
         reader.readAsDataURL(profile_picture);
-        const base64String = reader.result.split(",")[1];
+        let base64String;
+        reader.onload = () => {
+          console.log(reader.result);
+          base64String = reader.result.split(",")[1];
+          console.log(base64String);
+        };
+        
         response = await axios.put(PROFILE_URL,
             JSON.stringify({
               id: auth?.id,

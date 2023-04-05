@@ -83,7 +83,7 @@ const Register = () => {
     const handle_picture = (event) => {
 
         const file = event.target.files[0];
-        const maxSize = 1 * 1024 * 1024; // 5 MB
+        const maxSize = 5 * 1024 * 1024; // 5 MB
 
         if (file && file.size <= maxSize) {
             //console.log(file.type);

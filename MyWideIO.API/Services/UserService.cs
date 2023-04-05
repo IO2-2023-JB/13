@@ -10,6 +10,10 @@ using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
 using WideIO.API.Models;
+using Azure.Storage.Blobs;
+using System.Reflection.PortableExecutable;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Blobs.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -19,10 +23,22 @@ namespace MyWideIO.API.Services
         private readonly SignInManager<ViewerModel> _signInManager;
         private readonly RoleManager<UserRole> _roleManager;
 
-        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager, RoleManager<UserRole> roleManager)
+        // BLOBA MOZNA ZROBIC DO TEGO JAK NIE BEDZIE 
+        // DZIALALO ODKLADANIE  W BAZIE
+
+        private BlobServiceClient _blobServiceClient;
+        private BlobContainerClient _blobContainerClient;
+        //private string blobServiceConnectionString = "https://videioblob.blob.core.windows.net/blob1"; /* TODO */
+        private readonly string containerName = "blob1";
+
+        public UserService(UserManager<ViewerModel> userManager, SignInManager<ViewerModel> signInManager, RoleManager<UserRole> roleManager, BlobServiceClient blobServiceClient)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _blobServiceClient = blobServiceClient;
+            _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            if (!_blobContainerClient.Exists())
+                _blobContainerClient = _blobServiceClient.CreateBlobContainer(containerName);
             _roleManager = roleManager;
         }
 
@@ -90,8 +106,9 @@ namespace MyWideIO.API.Services
                 {
                     "Viewer" => UserTypeDto.ViewerEnum,
                     "Creator" => UserTypeDto.CreatorEnum,
-                    "Admin" => UserTypeDto.AdministratorEnum
-                }
+                    "Admin" => UserTypeDto.AdministratorEnum,
+                },
+                AvatarImage = viewer.ProfilePicture == null ? "" : viewer.ProfilePicture
             };
         }
 
@@ -114,13 +131,18 @@ namespace MyWideIO.API.Services
                 Email = registerDto.Email,
                 Name = registerDto.Name,
                 UserName = registerDto.Nickname,
-                Surname = registerDto.Surname,
+                Surname = registerDto.Surname
 
             };
             var result = await _userManager.CreateAsync(viewer, registerDto.Password);
-            if (!result.Succeeded)
+            if (!result.Succeeded && modelState != null)
                 foreach (var error in result.Errors)
                     modelState.AddModelError(error.Code, error.Description);
+            if (!result.Succeeded)
+                return false;
+            viewer.ProfilePicture = await UploadBlobFile(registerDto.AvatarImage, viewer.Id.ToString() + ".png"); ////  tutaj nie wiem czy nie wstawic backslasha pomiedzy
+            await _userManager.UpdateAsync(viewer);
+
             await _userManager.AddToRoleAsync(viewer, (Random.Shared.Next(3) + 1) switch // na szybko
             {
                 1 => "viewer",
@@ -129,6 +151,103 @@ namespace MyWideIO.API.Services
             });
             return result.Succeeded;
         }
+
+        public async Task<bool> DeleteUserAsync(Guid id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            var result = await _userManager.DeleteAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task<UserDto?> GetUser(Guid id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user != null)
+            {
+                return new UserDto()
+                {
+                    Id = id,
+                    Email = user.Email,
+                    Nickname = user.UserName,
+                    Name = user.Name,
+                    Surname = user.Surname,
+                    AccountBalance = user.AccountBalance,
+                    UserType = user.UserTypeDto,
+                    AvatarImage = user.ProfilePicture == null ? "" : user.ProfilePicture,
+                    SubscriptionsCount = user.Subscriptions?.Count,
+                };
+            }
+            return null;
+        }
+
+        public async Task<bool> PutUserData(UpdateUserDto dto, Guid id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user != null)
+            {
+                //await UploadBlobFile(new MemoryStream(, id.ToString());
+
+                user.Surname = dto.Surname;
+                user.Name = dto.Name;
+                user.UserName = dto.Nickname;
+                user.UserTypeDto = dto.UserType;
+                user.ProfilePicture = dto.AvatarImage;
+                return true;
+            }
+            return false;
+        }
+
+
+        private async Task<string> UploadBlobFile(string base64photo, string fileName)
+        {
+            byte[] buffer = Convert.FromBase64String(base64photo);
+
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+
+            
+
+            BinaryData binaryData = new BinaryData(buffer);
+
+            await blobClient.UploadAsync(binaryData, true);
+            await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders
+            {
+                ContentType = "image/png"
+            });
+
+            
+
+            return blobClient.Uri.AbsoluteUri;
+        }
+
+
+        //private async Task<byte[]> GetBlobFile(string fileName)
+        //{
+        //    BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+        //    if (await blobClient.ExistsAsync())
+        //    {
+        //        var response = await blobClient.DownloadAsync();
+        //        using (var rd = new BinaryReader(response.Value.Content))
+        //        {
+        //            long size = rd.BaseStream.Length;
+        //            byte[] bts = new byte[size];
+        //            rd.Read(bts, 0, (int)size);
+        //            return bts;
+        //        }
+        //    }
+        //    return null;
+        //}
+
+        private string GetBase64Image(Stream bytes)
+        {
+            using (var rdr = new BinaryReader(bytes))
+            {
+                byte[] buffer = new byte[bytes.Length];
+                rdr.Read(buffer, 0, buffer.Length);
+                return Convert.ToBase64String(buffer);
+            }
+        }
+
+
         private async Task<string> GenerateToken(ViewerModel viewer)
         {
             var roles = await _userManager.GetRolesAsync(viewer);

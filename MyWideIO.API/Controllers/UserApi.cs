@@ -71,7 +71,7 @@ namespace WideIO.API.Controllers
             throw new NotImplementedException();
         }
 
-        /// <summary>
+        /// <summary>   
         /// User account deletion
         /// </summary>
         /// <param name="id">User ID</param>
@@ -83,7 +83,7 @@ namespace WideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("DeleteUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public virtual IActionResult DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -92,14 +92,13 @@ namespace WideIO.API.Controllers
             // return StatusCode(400);
             //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(401);
-            string exampleJson = null;
-            exampleJson = "{\r\n  \"surname\" : \"Doe\",\r\n  \"nickname\" : \"johnny123\",\r\n  \"name\" : \"John\",\r\n  \"id\" : \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"accountBalance\" : 0.8008281904610115,\r\n  \"email\" : \"john.doe@mail.com\"\r\n}";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<UserDto>(exampleJson)
-            : default(UserDto);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (await _userService.DeleteUserAsync(id))
+                return Ok();
+            else
+                return BadRequest();
         }
 
         /// <summary>
@@ -116,21 +115,21 @@ namespace WideIO.API.Controllers
         [Authorize]
         [SwaggerOperation("EditUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
-        public async virtual Task<IActionResult> EditUserData([FromBody] UserDto userDto)
+        public async virtual Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
-            if (User.FindFirstValue(ClaimTypes.NameIdentifier) != userDto.Id.ToString())
-                return Unauthorized();
-            var result = await _userService.EditUserDataAsync(userDto);
+            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(200, default(UserDto));
+            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(400);
+            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(401);
 
-            if (result.Suceeded)
-                return Ok(userDto);// po co sie zwraca to 
-            else
-            {
-                foreach (var error in result.Errors)
-                    ModelState.AddModelError(error.Code, error.Description);
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            }    
-            
+            if (await _userService.PutUserData(updateUserDto, (Guid)id))
+                return Ok();
+            else
+                return BadRequest(ModelState);
         }
 
         /// <summary>
@@ -147,11 +146,21 @@ namespace WideIO.API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
         public virtual async Task<IActionResult> GetUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
-            var user = await _userService.GetUserAsync(id);
-            if (user is null)
-                return BadRequest();
+
+            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(200, default(UserDto));
+            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(400);
+            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
+            // return StatusCode(401);
+            UserDto? userDto = null;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if ((userDto = await _userService.GetUser(id)) != null)
+                return Ok(userDto);
             else
-                return Ok(user);
+                return BadRequest(ModelState);
+
         }
 
         /// <summary>
@@ -178,14 +187,7 @@ namespace WideIO.API.Controllers
             // return StatusCode(200, default(LoginResponseDto));
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "Custom MIME type example not yet supported: application:json";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<LoginResponseDto>(exampleJson)
-            : default(LoginResponseDto);
-            //TODO: Change the data returned
-            return new ObjectResult(example);
+            
         }
 
         /// <summary>

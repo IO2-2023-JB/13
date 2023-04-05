@@ -24,13 +24,14 @@ namespace WideIO.API.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class UserSubscriptionListDto : IEquatable<UserSubscriptionListDto>
+    public partial class RespondToTicketDto : IEquatable<RespondToTicketDto>
     {
         /// <summary>
-        /// Gets or Sets Subscriptions
+        /// Gets or Sets Response
         /// </summary>
-        [DataMember(Name="subscriptions", EmitDefaultValue=false)]
-        public List<SubscribtionDto> Subscriptions { get; set; }
+        /// <example>&quot;OK, deleted. Thank you for your input.&quot;</example>
+        [DataMember(Name="response", EmitDefaultValue=false)]
+        public string Response { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -39,8 +40,8 @@ namespace WideIO.API.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class UserSubscriptionListDto {\n");
-            sb.Append("  Subscriptions: ").Append(Subscriptions).Append("\n");
+            sb.Append("class RespondToTicketDto {\n");
+            sb.Append("  Response: ").Append(Response).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -63,25 +64,24 @@ namespace WideIO.API.Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((UserSubscriptionListDto)obj);
+            return obj.GetType() == GetType() && Equals((RespondToTicketDto)obj);
         }
 
         /// <summary>
-        /// Returns true if UserSubscriptionListDto instances are equal
+        /// Returns true if RespondToTicketDto instances are equal
         /// </summary>
-        /// <param name="other">Instance of UserSubscriptionListDto to be compared</param>
+        /// <param name="other">Instance of RespondToTicketDto to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UserSubscriptionListDto other)
+        public bool Equals(RespondToTicketDto other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return 
                 (
-                    Subscriptions == other.Subscriptions ||
-                    Subscriptions != null &&
-                    other.Subscriptions != null &&
-                    Subscriptions.SequenceEqual(other.Subscriptions)
+                    Response == other.Response ||
+                    Response != null &&
+                    Response.Equals(other.Response)
                 );
         }
 
@@ -95,8 +95,8 @@ namespace WideIO.API.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    if (Subscriptions != null)
-                    hashCode = hashCode * 59 + Subscriptions.GetHashCode();
+                    if (Response != null)
+                    hashCode = hashCode * 59 + Response.GetHashCode();
                 return hashCode;
             }
         }
@@ -104,12 +104,12 @@ namespace WideIO.API.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(UserSubscriptionListDto left, UserSubscriptionListDto right)
+        public static bool operator ==(RespondToTicketDto left, RespondToTicketDto right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(UserSubscriptionListDto left, UserSubscriptionListDto right)
+        public static bool operator !=(RespondToTicketDto left, RespondToTicketDto right)
         {
             return !Equals(left, right);
         }

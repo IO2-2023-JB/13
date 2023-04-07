@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyWideIO.API", "MyWideIO.API\MyWideIO.API.csproj", "{FA157C52-C7FA-4D3F-B720-9D012194B680}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWideIO.API.Tests", "MyWideIO.API.Tests\MyWideIO.API.Tests.csproj", "{0D838884-B0DB-47AA-9134-D89FCD21FD96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWideIO.API.Tests", "MyWideIO.API.Tests\MyWideIO.API.Tests.csproj", "{C053C3F5-802A-4E6C-96DE-ED903951E55A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{FA157C52-C7FA-4D3F-B720-9D012194B680}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA157C52-C7FA-4D3F-B720-9D012194B680}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA157C52-C7FA-4D3F-B720-9D012194B680}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0D838884-B0DB-47AA-9134-D89FCD21FD96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D838884-B0DB-47AA-9134-D89FCD21FD96}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D838884-B0DB-47AA-9134-D89FCD21FD96}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D838884-B0DB-47AA-9134-D89FCD21FD96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C053C3F5-802A-4E6C-96DE-ED903951E55A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C053C3F5-802A-4E6C-96DE-ED903951E55A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C053C3F5-802A-4E6C-96DE-ED903951E55A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C053C3F5-802A-4E6C-96DE-ED903951E55A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

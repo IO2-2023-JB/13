@@ -1,22 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyVideIO.Data;
+using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
-using MyWideIO.API.Data;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
 using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
 
 namespace MyWideIO.API
 {

@@ -36,12 +36,12 @@ namespace WideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
-    [Authorize]
+    [Authorize] // musi byc poprawny jwt token w headerze, chyba ze metoda ma [AllowAnonymous]
     public class UserApiController : ControllerBase
     {
         private readonly IUserService _userService;
 
-        public UserApiController(IUserService userService, UserManager<ViewerModel> userManager)
+        public UserApiController(IUserService userService)
         {
             _userService = userService;
         }
@@ -83,11 +83,11 @@ namespace WideIO.API.Controllers
         /// <response code="401">Unauthorized</response>
         [HttpDelete("user")]
         //[Route("user")]
-        [ValidateModelState]
+        [ValidateModelState] // dzieki temu nie trzeba sprawdzac ModelState.IsValid(), ale chyba wiecej jeszcze robi
         [SwaggerOperation("DeleteUserData")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
-        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
+        [SwaggerResponse(statusCode: 401, description: "Unauthorized")] // jeszcze 404 i 403 by sie przydaly
         public virtual async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
@@ -96,7 +96,7 @@ namespace WideIO.API.Controllers
                 await _userService.DeleteUserAsync(id);
                 return Ok();
             }
-            //catch(UserNotFoundException e)
+            //catch(UserNotFoundException e) // nie ma 404 w specyfikacji
             //{
             //    return NotFound(e.Message);
             //}
@@ -198,7 +198,7 @@ namespace WideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("LoginUser")]
-        [AllowAnonymous]
+        [AllowAnonymous] // nadpisuje [Authorize]
         [SwaggerResponse(statusCode: 200, type: typeof(LoginResponseDto), description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         [SwaggerResponse(statusCode: 401, description: "Incorrect password")]

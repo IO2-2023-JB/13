@@ -91,13 +91,6 @@ namespace WideIO.API.Controllers
         public virtual async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(UserDto));
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(401);
-
             try
             {
                 await _userService.DeleteUserAsync(id);

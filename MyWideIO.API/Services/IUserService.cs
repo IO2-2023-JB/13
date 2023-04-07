@@ -9,9 +9,8 @@ namespace MyWideIO.API.Services
     {
         public Task RegisterUserAsync(RegisterDto registerDto);
         public Task<string> LoginUserAsync(LoginDto loginDto);
-        public Task<UserDto> EditUserDataAsync(UpdateUserDto updateUserDto, Guid id);
-        public Task<UserDto> GetUserAsync(Guid id);
         public Task DeleteUserAsync(Guid id);
-        //public Task<bool> PutUserData(UpdateUserDto dto, Guid id);
+        public Task<UserDto> EditUserDataAsync(UpdateUserDto userDto, Guid id);
+        public Task<UserDto?> GetUserAsync(Guid id);
     }
 }

@@ -1,21 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.IdentityModel.Tokens;
-using MyWideIO.API.Data;
-using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.WebSockets;
-using System.Security.Claims;
-using System.Text;
 using WideIO.API.Models;
-using Azure.Storage.Blobs;
-using System.Reflection.PortableExecutable;
-using Azure.Storage.Blobs.Specialized;
-using Azure.Storage.Blobs.Models;
-using Microsoft.Extensions.Azure;
 
 namespace MyWideIO.API.Services
 {

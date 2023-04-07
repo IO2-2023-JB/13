@@ -1,26 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
+using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
 using WideIO.API.Models;
-using System.Diagnostics;
-using Azure.Storage.Blobs;
-using MyWideIO.API.Data;
-using Xunit;
-using FluentAssertions;
-using Azure.Storage.Blobs.Models;
-using Azure;
-using System.Net;
-using MyWideIO.API.Exceptions;
 
 namespace MyWideIO.API.Tests
 {
@@ -50,7 +35,7 @@ namespace MyWideIO.API.Tests
         public async Task RegisterUserAsync_WithValidData_ShouldSucceed()
         {
             // Arrange
-            var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody
+            var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody (chyba)
             {
                 Email = "test@example.com",
                 Name = "Test",
@@ -83,7 +68,7 @@ namespace MyWideIO.API.Tests
         public async Task RegisterUserAsync_WithAlreadyTakenEmail_ShouldThrowEmailException()
         {
             // Arrange
-            var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody
+            var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody (chyba)
             {
                 Email = "test@example.com",
                 Name = "Test",
@@ -96,6 +81,7 @@ namespace MyWideIO.API.Tests
 
             _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ViewerModel>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityErrorDescriber().DuplicateEmail(registerDto.Email)));
+            // nie trzeba mockowac wiecej, RegisterUserAsync rzuci wyjatkiem na poczatku i inne metody sie nie wywolaja
 
             // Act
             Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);

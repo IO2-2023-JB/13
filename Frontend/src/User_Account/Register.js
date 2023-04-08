@@ -48,6 +48,8 @@ const Register = () => {
     const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
     const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
 
+    const [isCreatorChecked, setIsCreatorChecked] = useState(false);
+
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -130,7 +132,7 @@ const Register = () => {
                 setTimeout(async () => {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: 1, AvatarImage: base64String }),
+                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: base64String }),
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
@@ -142,7 +144,7 @@ const Register = () => {
             {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: 1, AvatarImage: "" }), //userType: "Simple"
+                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: "" }), //userType: "Simple"
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
@@ -356,6 +358,16 @@ const Register = () => {
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Must be image up to 5 MB!
                         </p>
+
+                        <label htmlFor="terms">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                onChange={() => setIsCreatorChecked(!isCreatorChecked)}
+                                checked={isCreatorChecked}
+                            />
+                            I want to become a Creator
+                        </label>
 
                         <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
                     </form>

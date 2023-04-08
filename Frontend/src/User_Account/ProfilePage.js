@@ -206,18 +206,9 @@ useEffect(() => {
       setAuth({});
       cookies.remove("accessToken");
       alert("Your account has been deleted.");
-      //navigate('/register');
+      navigate('/register');
     }
   };
-
-  function downloadURI(uri, name) 
-        {
-            var link = document.createElement("a");
-            link.download = name;
-            link.href = uri;
-            link.click();
-        }
-
   
   const handleCreatorClick = async () => {
     setUserData({
@@ -229,61 +220,75 @@ useEffect(() => {
       avatarImage: data?.avatarImage,
       userType: data?.userType,
     });
+    let changeType = '';
+    if(userData.userType === 'Viewer')
+      changeType = "Creator";
+    else if(userData.userType === 'Creator')
+    {
+      const result = window.confirm(
+        "Are you sure you don't want to be a creator any longer? Approval will delete all your uploaded videos and you will lose all your subscribers. Do you want to continue?"
+        );
+      if (!result) {
+        return;
+      }
+      changeType = "Viewer";
+    }
+    else
+      return;
     let base64data = null;
     if(userData.avatarImage){
-      console.log(userData.avatarImage)
+      //console.log(userData.avatarImage)
       const imageUrl = userData.avatarImage+"?time="+new Date();
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-
       const reader = new FileReader();
       reader.readAsDataURL(blob);
       reader.onloadend = () => {
         base64data = reader.result.split(",")[1];
       }
-  }
-  else
-  {
-    base64data = "";
-  }
-    setTimeout(async () => {
-      console.log("base64:")
-      console.log(base64data);
-    try{
-      console.log(userData.nickname, userData.firstName, userData.lastName);
-      const response = await axios.put(PROFILE_URL,
-      JSON.stringify({
-        nickname: userData.nickname, 
-        name: userData.firstName, 
-        surname: userData.lastName,
-        userType: "Creator",
-        avatarImage: base64data,
-      }),
-      {
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true //cred
-      }
-    );
-    } catch (err) {
-    if (!err?.response) {
-        setErrMsg('No Server Response');
-    } else if (err.response?.status === 401) {
-        setErrMsg('Unauthorized');
-    } else {
-        setErrMsg('Data Change Failed');
     }
-    errRef.current.focus();
+    else
+    {
+      base64data = "";
+    }
+      setTimeout(async () => {
+        console.log("base64:")
+        console.log(base64data);
+      try{
+        console.log(userData.nickname, userData.firstName, userData.lastName);
+        const response = await axios.put(PROFILE_URL,
+        JSON.stringify({
+          nickname: userData.nickname, 
+          name: userData.firstName, 
+          surname: userData.lastName,
+          userType: changeType,
+          avatarImage: base64data,
+        }),
+        {
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true //cred
+        }
+      );
+      } catch (err) {
+        if (!err?.response) {
+          setErrMsg('No Server Response');
+        } else if (err.response?.status === 401) {
+          setErrMsg('Unauthorized');
+        } else {
+          setErrMsg('Data Change Failed');
+        }
+        errRef.current.focus();
+      }
+      //setData(response?.data);
+      //handleCancelClick();
+      setAuth({});
+      cookies.remove("accessToken");
+      navigate('/login');
+      }, 100);
 }
-    //setData(response?.data);
-    //handleCancelClick();
-    setAuth({});
-    cookies.remove("accessToken");
-    navigate('/login');
-  }, 100);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -350,67 +355,52 @@ useEffect(() => {
       }
       else
       {
-        response = await axios.put(PROFILE_URL,
-          JSON.stringify({
-            nickname: user, 
-            name: name, 
-            surname: surname,
-            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-            avatarImage: ''
-          }),
-          {
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken}`
-              },
-              withCredentials: true //cred
+        let base64data = null;
+        if(userData.avatarImage){
+          //console.log(userData.avatarImage)
+          const imageUrl = userData.avatarImage+"?time="+new Date();
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => {
+            base64data = reader.result.split(",")[1];
           }
-      );
-      setData(response?.data);
-      setUserData({
-        firstName: data?.name,
-        lastName: data?.surname,
-        nickname: data?.nickname,
-        email: data?.email,
-        accountBalance: data?.accountBalance,
-        avatarImage: data?.avatarImage,
-        userType: data?.userType,
-      });
-      handleCancelClick();
+        }
+        else
+        {
+          base64data = "";
+        }
+        setTimeout(async () => {
+          response = await axios.put(PROFILE_URL,
+            JSON.stringify({
+              nickname: user, 
+              name: name, 
+              surname: surname,
+              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              avatarImage: base64data
+            }),
+            {
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${auth?.accessToken}`
+                },
+                withCredentials: true //cred
+            }
+          );
+          setData(response?.data);
+          setUserData({
+            firstName: data?.name,
+            lastName: data?.surname,
+            nickname: data?.nickname,
+            email: data?.email,
+            accountBalance: data?.accountBalance,
+            avatarImage: data?.avatarImage,
+            userType: data?.userType,
+          });
+          handleCancelClick();
+        }, 100);
       }
-      // setTimeout(() => {
-      //   //console.log(response?.data);
-      //   //console.log(response?.accessToken);
-      //   //console.log(JSON.stringify(response))
-      //   setSuccess(true);
-      //   //clear state and controlled inputs
-      //   //need value attrib on inputs for this
-      //   setUser('');
-      //   setEmail('')
-      //   setName('')
-      //   setSurname('')
-      //   setProfile_picture(null);
-      //   setProfile_picture_name('');
-      //   setValidprofile_picture(false);
-      //   setWrong_profile_picture(false);
-      //   axios.get(PROFILE_URL + "?id=" + auth?.id, {
-      //     headers: { 
-      //       'Content-Type': 'application/json',
-      //       "Authorization" : `Bearer ${auth?.accessToken}`
-      //     },
-      //     withCredentials: true 
-      //   })
-      //   .then(response => {
-      //     //console.log("success");
-      //     console.log(JSON.stringify(response?.data));
-      //     setData(response?.data);
-      //     //setUserData(response.data);
-      //   })
-      //   .catch(error => {
-      //     console.log("error: ", error);
-      //   });
-      //   handleCancelClick();
-      // }, 500);
     } catch (err) {
         if (!err?.response) {
             setErrMsg('No Server Response');
@@ -448,12 +438,16 @@ return (
 
             <div className="row">
               <div className="col">
-                <button style={{ whiteSpace: "nowrap" }} onClick={handleCreatorClick}>Become Creator</button>
+                {userType==='Creator'?(
+                  <button class="btn btn-danger" style={{ whiteSpace: "nowrap" }} onClick={handleCreatorClick}>Stop being a creator</button>
+                ):(<></>)
+                }
               </div>
             </div>
             <div className="row">
               <div className="col">
                 <button class="btn btn-danger" onClick={handleDeleteClick}>Delete account</button>
+                <div className="mt-5"></div>
               </div>
             </div>
 

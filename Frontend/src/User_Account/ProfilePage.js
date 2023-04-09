@@ -44,8 +44,7 @@ useEffect(() => {
     withCredentials: true 
   })
   .then(response => {
-    //console.log("success");
-    console.log(JSON.stringify(response?.data));
+    //console.log(JSON.stringify(response?.data));
     setData(response?.data);
   })
   .catch(error => {
@@ -258,10 +257,10 @@ useEffect(() => {
       base64data = "";
     }
       setTimeout(async () => {
-        console.log("base64:")
-        console.log(base64data);
+        //console.log("base64:")
+        //console.log(base64data);
       try{
-        console.log(userData.nickname, userData.firstName, userData.lastName);
+        //console.log(userData.nickname, userData.firstName, userData.lastName);
         const response = await axios.put(PROFILE_URL,
         JSON.stringify({
           nickname: userData.nickname, 
@@ -318,14 +317,7 @@ useEffect(() => {
           //console.log(reader.result);
           base64String = reader.result.split(",")[1];
           //console.log(base64String);
-          console.log(base64String);
-          console.log({
-            nickname: user, 
-            name: name, 
-            surname: surname,
-            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-            avatarImage: base64String
-          });
+          //console.log(base64String);
         };
         //reader.onloadend = () =>{};
         //base64String = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
@@ -419,9 +411,15 @@ useEffect(() => {
         errRef.current.focus();
     }
 }
+const handleClick = () => {
+  navigate('/videoplayer/122');
+} //todelete
 
 return (
   <div style={{marginTop: "200px"}} class="container">
+    <div>
+    <button onClick={handleClick}>GOTO</button>
+    </div>
     {!editMode ? (
       <div class="row">
         <h1 class="display-1">{userData.nickname}</h1>

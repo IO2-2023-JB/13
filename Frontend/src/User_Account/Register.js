@@ -57,7 +57,7 @@ const Register = () => {
 
     useEffect(() => {
         localStorage.setItem("lastVisitedPage", location.pathname);
-      })
+    })
 
     useEffect(() => {
         userRef.current.focus();
@@ -124,17 +124,12 @@ const Register = () => {
             let response;
             if(validprofile_picture)
             {
-                //console.log(profile_picture);
                 const reader = new FileReader();
                 reader.readAsDataURL(profile_picture);
                 let base64String;
                 reader.onload = () => {
-                    //console.log(reader.result);
                     base64String = reader.result.split(",")[1];
-                    //console.log(base64String);
                 };
-                
-                //console.log(base64String);
                 setTimeout(async () => {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
@@ -157,9 +152,9 @@ const Register = () => {
                     }
                 );
             }
-            console.log(response?.data);
-            console.log(response?.accessToken);
-            console.log(JSON.stringify(response))
+            //console.log(response?.data);
+            //console.log(response?.accessToken);
+            //console.log(JSON.stringify(response))
             setSuccess(true);
             setUser('');
             setPwd('');

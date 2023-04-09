@@ -50,7 +50,16 @@ function App() {
       //console.log(payload.sub)
       //console.log(roles);
       setAuth({user: email, pwd: "", roles, accessToken, id});
-      navigate(from, {replace: true});
+      const lastVisitedPage = localStorage.getItem("lastVisitedPage");
+      if(from!= "/home"){
+        navigate(from, {replace: true});
+      }
+      else if(lastVisitedPage){
+        navigate(lastVisitedPage);
+      }
+      else{
+        navigate(from, {replace: true});
+      }
     }
   }, []);
 

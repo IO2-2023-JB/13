@@ -5,6 +5,7 @@ import AuthContext from "./context/AuthProvider"
 import { useContext } from "react";
 import ReactHlsPlayer from 'react-hls-player';
 import { Player, ControlBar } from 'video-react';
+import {useLocation} from 'react-router-dom';
 import 'video-react/dist/video-react.css';
 
 
@@ -12,9 +13,14 @@ const GETVIDEO_URL = '/video';
 
 //const VideoPlayer = ({ url/id }) => {
 const VideoPlayer = () => {
-
+  const location = useLocation();
   const video_id = 'aasd';
   const { auth } = useContext(AuthContext);
+
+  useEffect(() => {
+    localStorage.setItem("lastVisitedPage", location.pathname);
+  })
+
   //const [video_url, setVideo_url] = useState(null);
   
   // useEffect(() => {

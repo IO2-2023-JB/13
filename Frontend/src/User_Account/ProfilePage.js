@@ -29,6 +29,12 @@ const ProfilePage = () => {
 
   const [data, setData] = useState(null);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    localStorage.setItem("lastVisitedPage", location.pathname);
+  })
+
 useEffect(() => {
   axios.get(PROFILE_URL + "?id=" + auth?.id, {
     headers: { 
@@ -206,7 +212,7 @@ useEffect(() => {
       setAuth({});
       cookies.remove("accessToken");
       alert("Your account has been deleted.");
-      navigate('/register');
+      navigate('/register', {replace: true});
     }
   };
   
@@ -286,6 +292,7 @@ useEffect(() => {
       //handleCancelClick();
       setAuth({});
       cookies.remove("accessToken");
+      location.state.form.pathname = location.pathname;
       navigate('/login');
       }, 100);
 }
@@ -438,9 +445,9 @@ return (
 
             <div className="row">
               <div className="col">
-                {userType==='Creator'?(
+                {userType==='Creator' && (
                   <button class="btn btn-danger" style={{ whiteSpace: "nowrap" }} onClick={handleCreatorClick}>Stop being a creator</button>
-                ):(<></>)
+                )
                 }
               </div>
             </div>

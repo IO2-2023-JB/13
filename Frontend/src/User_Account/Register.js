@@ -3,6 +3,7 @@ import {faCheck, faTimes, faInfoCircle  } from "@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
+import {useLocation} from 'react-router-dom';
 import axios from '../api/axios';
 config.autoAddCss = false;
 
@@ -13,6 +14,7 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const REGISTER_URL = '/register';
 
 const Register = () => {
+    const location = useLocation();
     const userRef = useRef();
     const nameRef = useRef();
     const surnameRef = useRef();
@@ -52,6 +54,10 @@ const Register = () => {
 
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem("lastVisitedPage", location.pathname);
+      })
 
     useEffect(() => {
         userRef.current.focus();

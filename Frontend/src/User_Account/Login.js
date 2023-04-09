@@ -23,6 +23,10 @@ const Login = () => {
     const [errMsg, setErrMsg] = useState('');
 
     useEffect(() => {
+        localStorage.setItem("lastVisitedPage", location.pathname);
+      })
+
+    useEffect(() => {
         emailRef.current.focus();
     }, [])
 
@@ -32,7 +36,6 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         try{
             const response = await axios.post(LOGIN_URL, 
                 JSON.stringify({email: email, password: pwd}),

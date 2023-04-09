@@ -47,8 +47,6 @@ function App() {
       const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       const email = "";
       const id = payload["sub"];
-      //console.log(payload.sub)
-      //console.log(roles);
       setAuth({user: email, pwd: "", roles, accessToken, id});
       const lastVisitedPage = localStorage.getItem("lastVisitedPage");
       if(from!= "/home"){
@@ -75,7 +73,7 @@ function App() {
   }
 
   const isLoggedIn = () =>{
-    console.log(auth?.accessToken ? "Logged In" : "Logged Out");
+    //console.log(auth?.accessToken ? "Logged In" : "Logged Out");
     return(
       auth?.accessToken
     )
@@ -163,8 +161,8 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path='/home' element={<Home/>}/>
           <Route path='/profile' element={<ProfilePage />} />
-          <Route path='/videoplayer' element={<VideoPlayer/>} />
         </Route>
+        <Route path='/videoplayer/:videoid?' element={<VideoPlayer/>} />
         <Route path='/department' element={<Department />} />
         <Route path='/employee' element={<Employee />} />
         <Route path='/login' element={<Login />} />

@@ -40,10 +40,10 @@ namespace MyWideIO.API.Services
             // dodawanie zdjecia
             if (registerDto.AvatarImage.Length > 0)
             {
-                string imagePrefix = @"data:image/png;base64,";
-                if (registerDto.AvatarImage.StartsWith(imagePrefix))
+                string imagePrefix = @"base64,";
+                if (registerDto.AvatarImage.Contains(imagePrefix))
                 {
-                    registerDto.AvatarImage = registerDto.AvatarImage.Substring(imagePrefix.Length);
+                    registerDto.AvatarImage = registerDto.AvatarImage.Split(imagePrefix)[1];
                 }
                 viewer.ProfilePicture = await _imageService.UploadImageAsync(registerDto.AvatarImage, viewer.Id.ToString() + ".png");
                 if (viewer.ProfilePicture.Length == 0)
@@ -74,7 +74,7 @@ namespace MyWideIO.API.Services
         public async Task<UserDto> EditUserDataAsync(UpdateUserDto updateUserDto, Guid id)
         {
             IdentityResult result;
-            string imagePrefix = @"data:image/png;base64,";
+            string imagePrefix = @"base64,";
             // zmiania danych
             var viewer = await _userManager.FindByIdAsync(id.ToString());
             viewer.Name = updateUserDto.Name;
@@ -82,9 +82,9 @@ namespace MyWideIO.API.Services
             viewer.UserName = updateUserDto.Nickname;
 
             // zmiana zdjecia
-            if(updateUserDto.AvatarImage.StartsWith(imagePrefix))
+            if(updateUserDto.AvatarImage.Contains(imagePrefix))
             {
-                updateUserDto.AvatarImage = updateUserDto.AvatarImage.Substring(imagePrefix.Length);
+                updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
             }
             viewer.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, viewer.Id.ToString() + ".png");
             if (viewer.ProfilePicture.Length == 0)

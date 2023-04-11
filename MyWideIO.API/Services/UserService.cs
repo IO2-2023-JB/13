@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using WideIO.API.Models;
@@ -39,6 +40,11 @@ namespace MyWideIO.API.Services
             // dodawanie zdjecia
             if (registerDto.AvatarImage.Length > 0)
             {
+                string imagePrefix = @"data:image/png;base64,";
+                if (registerDto.AvatarImage.StartsWith(imagePrefix))
+                {
+                    registerDto.AvatarImage = registerDto.AvatarImage.Substring(imagePrefix.Length);
+                }
                 viewer.ProfilePicture = await _imageService.UploadImageAsync(registerDto.AvatarImage, viewer.Id.ToString() + ".png");
                 if (viewer.ProfilePicture.Length == 0)
                     throw new UserException("Image upload error");
@@ -68,7 +74,7 @@ namespace MyWideIO.API.Services
         public async Task<UserDto> EditUserDataAsync(UpdateUserDto updateUserDto, Guid id)
         {
             IdentityResult result;
-
+            string imagePrefix = @"data:image/png;base64,";
             // zmiania danych
             var viewer = await _userManager.FindByIdAsync(id.ToString());
             viewer.Name = updateUserDto.Name;
@@ -76,6 +82,10 @@ namespace MyWideIO.API.Services
             viewer.UserName = updateUserDto.Nickname;
 
             // zmiana zdjecia
+            if(updateUserDto.AvatarImage.StartsWith(imagePrefix))
+            {
+                updateUserDto.AvatarImage = updateUserDto.AvatarImage.Substring(imagePrefix.Length);
+            }
             viewer.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, viewer.Id.ToString() + ".png");
             if (viewer.ProfilePicture.Length == 0)
                 throw new UserException("Image upload error");

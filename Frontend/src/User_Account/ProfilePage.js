@@ -314,13 +314,8 @@ useEffect(() => {
         await reader.readAsDataURL(profile_picture);
         let base64String;
         reader.onload = () => {
-          //console.log(reader.result);
-          base64String = reader.result.split(",")[1];
-          //console.log(base64String);
-          //console.log(base64String);
+          base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach
         };
-        //reader.onloadend = () =>{};
-        //base64String = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
         setTimeout(async () => {
         response = await axios.put(PROFILE_URL,
             JSON.stringify({

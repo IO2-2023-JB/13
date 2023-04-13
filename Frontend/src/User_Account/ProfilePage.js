@@ -413,7 +413,7 @@ const handleClick = () => {
 return (
   <div style={{marginTop: "200px"}} class="container">
     <div>
-    <button onClick={handleClick}>GOTO</button>
+    {/* <button onClick={handleClick}>Watch Video</button> */}
     </div>
     {!editMode ? (
       <div class="row">

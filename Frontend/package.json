@@ -21,6 +21,7 @@
     "react-hls-player": "^3.0.7",
     "react-html5video": "^2.5.1",
     "react-icons": "^4.8.0",
+    "react-player": "^2.12.0",
     "react-router-dom": "^6.9.0",
     "react-scripts": "5.0.1",
     "universal-cookie": "^4.0.4",

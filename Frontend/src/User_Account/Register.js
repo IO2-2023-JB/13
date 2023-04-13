@@ -367,7 +367,7 @@ const Register = () => {
                                 onChange={() => setIsCreatorChecked(!isCreatorChecked)}
                                 checked={isCreatorChecked}
                             />
-                            I want to become a Creator
+                            <text> I want to become a Creator</text>
                         </label>
 
                         <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>

@@ -17,6 +17,11 @@ namespace MyWideIO.API.Data.Repositories
         {
             return await _dbContext.Videos.FindAsync(id);
         }
+
+        public void RemoveVideo(VideoModel video)
+        {
+            _dbContext.Videos.Remove(video);
+        }
     }
 
 }

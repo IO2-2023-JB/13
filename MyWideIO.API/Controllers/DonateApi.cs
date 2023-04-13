@@ -10,6 +10,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("donate")]
     public class DonateApiController : ControllerBase
     {
         /// <summary>
@@ -19,7 +20,7 @@ namespace MyWideIO.API.Controllers
         /// <param name="amount">Amount of money to send</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
-        [HttpPost]
+        [HttpPost("send")]
         [ValidateModelState]
         [SwaggerOperation("SendDonation")]
         public virtual IActionResult SendDonation([FromQuery(Name = "id")][Required()] Guid id, [FromQuery(Name = "amount")][Required()] decimal amount)
@@ -33,7 +34,7 @@ namespace MyWideIO.API.Controllers
         /// <param name="amount">Amount of money to send</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
-        [HttpPost]
+        [HttpPost("withdraw")]
         [ValidateModelState]
         [SwaggerOperation("WithdrawFunds")]
         public virtual IActionResult WithdrawFunds([FromQuery(Name = "amount")][Required()] decimal amount)

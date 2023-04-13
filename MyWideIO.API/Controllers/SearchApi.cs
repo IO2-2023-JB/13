@@ -11,6 +11,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("search")]
     public class SearchApiController : ControllerBase
     {
         /// <summary>

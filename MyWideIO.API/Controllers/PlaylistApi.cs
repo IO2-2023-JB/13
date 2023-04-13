@@ -11,6 +11,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("playlist")]
     public class PlaylistApiController : ControllerBase
     {
         /// <summary>
@@ -21,7 +22,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPost]
+        [HttpPost("{id}/{videoId}")]
         [ValidateModelState]
         [SwaggerOperation("AddVideoToPlaylist")]
         public virtual IActionResult AddVideoToPlaylist([FromRoute(Name = "id")][Required] string id, [FromRoute(Name = "videoId")][Required] string videoId)
@@ -36,7 +37,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPost]
+        [HttpPost("details")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("CreatePlaylist")]
@@ -53,7 +54,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpDelete]
+        [HttpDelete("details")]
         [ValidateModelState]
         [SwaggerOperation("DeletePlaylist")]
         public virtual IActionResult DeletePlaylist([FromQuery(Name = "id")][Required()] Guid id)
@@ -69,7 +70,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPut]
+        [HttpPut("details")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("EditPlaylist")]
@@ -86,7 +87,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
+        [HttpGet("video")]
         [ValidateModelState]
         [SwaggerOperation("GetPlaylistContent")]
         [SwaggerResponse(statusCode: 200, type: typeof(PlaylistDto), description: "OK")]
@@ -102,7 +103,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
+        [HttpGet("user")]
         [ValidateModelState]
         [SwaggerOperation("GetPlaylistsForUser")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<PlaylistBaseDto>), description: "OK")]
@@ -117,7 +118,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
+        [HttpGet("recommended")]
         [ValidateModelState]
         [SwaggerOperation("GetRecommendedPlaylist")]
         [SwaggerResponse(statusCode: 200, type: typeof(PlaylistDto), description: "OK")]
@@ -135,7 +136,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="204">Video already removed</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpDelete]
+        [HttpDelete("{id}/{videoId}")]
         [ValidateModelState]
         [SwaggerOperation("RemoveVideoFromPlaylist")]
         public virtual IActionResult RemoveVideoFromPlaylist([FromRoute(Name = "id")][Required] string id, [FromRoute(Name = "videoId")][Required] string videoId)

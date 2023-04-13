@@ -11,6 +11,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("subscribtions")]
     public class SubscriptionsApiController : ControllerBase
     {
         /// <summary>

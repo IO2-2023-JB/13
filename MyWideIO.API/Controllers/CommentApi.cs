@@ -11,6 +11,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("comment")]
     public class CommentApiController : ControllerBase
     {
         /// <summary>
@@ -38,7 +39,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPost]
+        [HttpPost("response")]
         [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddResponseToComment")]
@@ -85,7 +86,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
+        [HttpGet("response")]
         [ValidateModelState]
         [SwaggerOperation("GetResponseData")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]

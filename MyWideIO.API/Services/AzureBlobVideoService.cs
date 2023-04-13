@@ -1,9 +1,11 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
+using System.ComponentModel;
 
 namespace MyWideIO.API.Services
 {
@@ -28,10 +30,23 @@ namespace MyWideIO.API.Services
 
         public async Task<Stream> GetVideo(Guid id)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new UserNotFoundException(); // nie user nowe trzeba zrobic wyjatki dla video
+            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new VideoNotFoundException();
             BlobClient blobClient = _blobContainerClient.GetBlobClient(video.fileName);
 
             return await blobClient.OpenReadAsync();
+        }
+
+        public async Task<bool> RemoveVideoIfExist(Guid id)
+        {
+            VideoModel? video = await _videoRepository.GetVideoAsync(id);
+            if (video == null)
+                return false;
+
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(video.fileName);
+            blobClient.DeleteIfExists();
+            _videoRepository.RemoveVideo(video);
+
+            return true;
         }
     }
 }

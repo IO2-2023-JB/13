@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
@@ -36,9 +37,12 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteVideo")]
-        public virtual IActionResult DeleteVideo([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> DeleteVideo([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            if (await _videoService.RemoveVideoIfExist(id))
+                return Ok();
+            else
+                return BadRequest("Video o podanym ID nie istnieje");
         }
 
         /// <summary>

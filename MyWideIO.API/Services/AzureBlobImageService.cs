@@ -24,9 +24,15 @@ namespace MyWideIO.API.Services
             _blobContainerClient.SetAccessPolicy(PublicAccessType.BlobContainer);
         }
 
-        public Task RemoveImageAsync(string fileName)
+        public async Task RemoveImageAsync(string fileName)
         {
-            throw new NotImplementedException();
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+
+            var response = await blobClient.DeleteAsync();
+            if (response.IsError)
+            {
+                throw new UserException("Image removal error");
+            }
         }
 
         public async Task<(string url, string fileName)> UploadImageAsync(string base64image, string id)

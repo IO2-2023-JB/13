@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
@@ -42,6 +43,7 @@ namespace MyWideIO.API.Services
                          new DuplicateEmailException() : new UserException(result.Errors.First()?.Code);
                 }
 
+
                 result = await _userManager.AddToRoleAsync(viewer, registerDto.UserType switch
                 {
                     UserTypeDto.Viewer => "viewer",
@@ -56,7 +58,12 @@ namespace MyWideIO.API.Services
 
                 if (registerDto.AvatarImage.Length > 0)
                 {
-                    (viewer.ProfilePicture, viewer.ProfilePictureFileName) = await _imageService.UploadImageAsync(registerDto.AvatarImage, viewer.Id.ToString() + ".png");
+                    string imagePrefix = @"base64,";
+                    if (registerDto.AvatarImage.Contains(imagePrefix))
+                    {
+                        registerDto.AvatarImage = registerDto.AvatarImage.Split(imagePrefix)[1];
+                    }
+                    (viewer.ProfilePicture, viewer.ProfilePictureFileName) = await _imageService.UploadImageAsync(registerDto.AvatarImage, viewer.Id.ToString());
                     if (viewer.ProfilePicture.Length == 0)
                     {
                         throw new UserException("Image upload error");
@@ -90,6 +97,7 @@ namespace MyWideIO.API.Services
             try
             {
                 IdentityResult result;
+                string imagePrefix = @"base64,";
                 // zmiania danych
                 viewer = await _userManager.FindByIdAsync(id.ToString());
                 viewer.Name = updateUserDto.Name;
@@ -97,7 +105,11 @@ namespace MyWideIO.API.Services
                 viewer.UserName = updateUserDto.Nickname;
 
                 // zmiana zdjecia
-                (viewer.ProfilePicture, viewer.ProfilePictureFileName) = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, viewer.Id.ToString() + ".png");
+                if (updateUserDto.AvatarImage.Contains(imagePrefix))
+                {
+                    updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
+                    (viewer.ProfilePicture, viewer.ProfilePictureFileName) = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, viewer.Id.ToString());
+                }
                 if (viewer.ProfilePicture.Length == 0)
                 {
                     throw new UserException("Image upload error");
@@ -181,13 +193,25 @@ namespace MyWideIO.API.Services
 
         public async Task DeleteUserAsync(Guid id)
         {
-            ViewerModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");// UserNotFoundException();
-
-            IdentityResult result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
+            await _transactionService.BeginTransactionAsync();
+            try
             {
-                throw new UserException(result.Errors.First()?.Code);
+                ViewerModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");// UserNotFoundException();
+
+                IdentityResult result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    throw new UserException(result.Errors.First()?.Code);
+                }
+                if (user.ProfilePictureFileName is not null)
+                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
             }
+            catch
+            {
+                await _transactionService.RollbackAsync();
+                throw;
+            }
+            await _transactionService.CommitAsync();
         }
     }
 }

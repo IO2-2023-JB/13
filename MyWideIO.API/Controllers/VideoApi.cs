@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -7,12 +8,21 @@ using WideIO.API.Models;
 
 namespace MyWideIO.API.Controllers
 {
+
+
     /// <summary>
     /// 
     /// </summary>
     [ApiController]
     public class VideoApiController : ControllerBase
     {
+        private readonly IVideoService _videoService;
+
+        public VideoApiController(IVideoService videoService)
+        {
+            _videoService = videoService;
+        }
+
         /// <summary>
         /// Video removal
         /// </summary>
@@ -75,10 +85,10 @@ namespace MyWideIO.API.Controllers
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(Stream), description: "OK")]
         [SwaggerResponse(statusCode: 206, type: typeof(Stream), description: "Partial Content")]
-        public virtual IActionResult GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromHeader] string range)
+        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromHeader] string range)
         {
-            throw new NotImplementedException();
-
+            var stream = await _videoService.GetVideo(id);
+            return File(stream, "video/mp4", true);
         }
 
         /// <summary>

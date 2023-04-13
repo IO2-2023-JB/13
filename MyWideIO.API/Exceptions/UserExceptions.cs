@@ -24,6 +24,13 @@
 
         }
     }
+    public class UserNotFoundExceptionDelete : UserException
+    {
+        public UserNotFoundExceptionDelete() : base("User not found ale 400 blad")
+        {
+
+        }
+    }
     public class IncorrectPasswordException : UserException
     {
         public IncorrectPasswordException() : base("Password was incorrect")

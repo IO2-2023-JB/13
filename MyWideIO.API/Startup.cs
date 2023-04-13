@@ -10,6 +10,7 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
+using MyWideIO.API.Services.Interfaces;
 using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
@@ -50,14 +51,17 @@ namespace MyWideIO.API
             {
                 clientBuilder.AddBlobServiceClient(Configuration.GetConnectionString("AzureBlobConnection"));
             });
+
             services.AddControllers();
             services.AddSingleton<IImageService, AzureBlobImageService>(); // singleton powinien byc ok
             services.AddSingleton<ITokenService, TokenService>(); // singleton powinien byc ok
 
             //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
-            services.AddScoped<IApiRepository, ApiRepository>();
+            
             services.AddScoped<IUserService, UserService>();
-            //services.AddScoped<IApiRepository, ApiRepository>();
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IVideoRepository, VideoRepository>();
+            services.AddScoped<IVideoService, AzureBlobVideoService>();
             // Add services to the container.
 
             // CORS
@@ -137,8 +141,21 @@ namespace MyWideIO.API
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
+            CreateRoles(services.BuildServiceProvider()).Wait();
         }
+        private async Task CreateRoles(IServiceProvider serviceProvider)
+        {
+            // role init
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
+            string[] roleNames = { "Viewer", "Creator", "Admin" };
 
+            foreach (var roleName in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                    await roleManager.CreateAsync(new UserRole(roleName));
+            }
+        }
         public void Configure(IApplicationBuilder app)
         {
             {
@@ -151,6 +168,7 @@ namespace MyWideIO.API
                     c.SwaggerEndpoint("/openapi/1.0.6/openapi.json", "VideIO API");
                 });
             }
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

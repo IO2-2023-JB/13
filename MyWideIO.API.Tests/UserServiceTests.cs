@@ -5,6 +5,7 @@ using Moq;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services;
+using MyWideIO.API.Services.Interfaces;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Tests
@@ -15,6 +16,7 @@ namespace MyWideIO.API.Tests
         private readonly Mock<SignInManager<ViewerModel>> _mockSignInManager;
         private readonly Mock<ITokenService> _mockTokenService;
         private readonly Mock<IImageService> _mockImageService;
+        private readonly Mock<ITransactionService> _mockTransactionService;
         private readonly UserService _userService;
 
         public UserServiceTests()
@@ -27,8 +29,8 @@ namespace MyWideIO.API.Tests
 
             _mockTokenService = new Mock<ITokenService>();
             _mockImageService = new Mock<IImageService>();
-
-            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object);
+            _mockTransactionService = new Mock<ITransactionService>();
+            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object,_mockTransactionService.Object);
         }
 
         [Fact]
@@ -56,7 +58,7 @@ namespace MyWideIO.API.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _mockImageService.Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync("url");
+                .ReturnsAsync(("url","filename"));
 
             // Act
             Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);

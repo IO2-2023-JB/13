@@ -1,5 +1,9 @@
-﻿using Azure.Storage.Blobs.Models;
+﻿using Azure;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using MyWideIO.API.Exceptions;
+using MyWideIO.API.Services.Interfaces;
+using SixLabors.ImageSharp.Formats;
 
 namespace MyWideIO.API.Services
 {
@@ -14,7 +18,10 @@ namespace MyWideIO.API.Services
             _blobServiceClient = blobServiceClient;
             _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
             if (!_blobContainerClient.Exists())
+            {
                 _blobContainerClient = _blobServiceClient.CreateBlobContainer(containerName);
+            }
+            _blobContainerClient.SetAccessPolicy(PublicAccessType.BlobContainer);
         }
 
         public Task RemoveImageAsync(string fileName)
@@ -22,20 +29,51 @@ namespace MyWideIO.API.Services
             throw new NotImplementedException();
         }
 
-        public async Task<string> UploadImageAsync(string base64image, string fileName)
+        public async Task<(string url, string fileName)> UploadImageAsync(string base64image, string id)
         {
-            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
-
-            byte[] buffer = Convert.FromBase64String(base64image);
-
-            BinaryData binaryData = new BinaryData(buffer);
-
-            await blobClient.UploadAsync(binaryData, true);
-            await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders
+            byte[] buffer;
+            try
             {
-                ContentType = "image/png"
-            });
-            return blobClient.Uri.AbsoluteUri;
+                buffer = Convert.FromBase64String(base64image);
+            }
+            catch (FormatException e)
+            {
+                throw new UserException(e.Message);
+            }
+
+            IImageFormat format;
+            using (MemoryStream ms = new(buffer))
+            {
+                try
+                {
+                    format = Image.DetectFormat(ms);
+                }
+                catch (InvalidImageContentException e)
+                {
+                    throw new UserException(e.Message);
+                }
+                catch (UnknownImageFormatException e)
+                {
+                    throw new UserException(e.Message);
+                }
+
+            }
+
+            string fileName = id + "." + format.Name.ToLower();
+            BinaryData binaryData = new(buffer);
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+            Response response;
+            response = (await blobClient.UploadAsync(binaryData, true)).GetRawResponse();
+            if (response.IsError)
+            {
+                throw new UserException("Image upload error");
+            }
+
+            response = (await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders
+            {
+                ContentType = format.DefaultMimeType,
+            })).GetRawResponse();
+            return response.IsError ? throw new UserException("Image upload error") : ((string url, string fileName))(blobClient.Uri.AbsoluteUri, fileName);
         }
     }
 }

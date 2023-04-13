@@ -25,13 +25,14 @@ namespace MyWideIO.API.Models.DB_Models
 
         public int NegativeReactions { get; set; }
 
-        
+
         public ICollection<CommentModel> Comments { get; set; }
 
         public Guid CreatorId { get; set; }
         public CreatorModel Creator { get; set; }
         public ICollection<VideoPlaylist> Playlists { get; set; }
         public ICollection<ViewerLike> LikedBy { get; set; }
+        public string fileName { get; set; }
 
 
     }

@@ -14,6 +14,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("video")]
     public class VideoApiController : ControllerBase
     {
         private readonly IVideoService _videoService;
@@ -32,7 +33,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="401">Unauthorised</response>
         /// <response code="403">Forbidden</response>
         /// <response code="404">Not found</response>
-        [HttpDelete("video")]
+        [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteVideo")]
         public virtual IActionResult DeleteVideo([FromQuery(Name = "id")][Required()] Guid id)
@@ -46,7 +47,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet("user/videos/subscribed")]
+        [HttpGet("/user/videos/subscribed")]
         [ValidateModelState]
         [SwaggerOperation("GetSubscribedVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
@@ -62,7 +63,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        [HttpGet]
+        [HttpGet("/user/videos")]
         [ValidateModelState]
         [SwaggerOperation("GetUserVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
@@ -80,7 +81,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="206">Partial Content</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="416">Range Not Satisfiable</response>
-        [HttpGet]
+        [HttpGet("{id}")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(Stream), description: "OK")]
@@ -90,7 +91,21 @@ namespace MyWideIO.API.Controllers
             var stream = await _videoService.GetVideo(id);
             return File(stream, "video/mp4", true);
         }
-
+        /// <summary>
+        /// Video upload
+        /// </summary>
+        /// <param name="videoUploadDto"></param>
+        /// <response code="200">OK</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="401">Unauthorised</response>
+        [HttpPost("{id}")]
+        [Consumes("application/json")]
+        [ValidateModelState]
+        [SwaggerOperation("UploadVideo")]
+        public virtual IActionResult UploadVideo([FromRoute(Name = "id")][Required] Guid id, [FromBody] VideoUploadDto videoUploadDto)
+        {
+            throw new NotImplementedException();
+        }
         /// <summary>
         /// Video metadata retreival
         /// </summary>
@@ -99,7 +114,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="404">Not found</response>
-        [HttpGet]
+        [HttpGet("/video-metadata")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoMetadata")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoMetadataDto), description: "OK")]
@@ -115,7 +130,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="404">Not found</response>
-        [HttpGet]
+        [HttpGet("/video-reaction")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoReactions")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoReactionDto), description: "OK")]
@@ -132,7 +147,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="404">Not found</response>
-        [HttpPut]
+        [HttpPut("/video-metadata")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
@@ -150,7 +165,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="404">Not found</response>
-        [HttpPost]
+        [HttpPost("/video-reaction")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoReaction")]
@@ -159,20 +174,6 @@ namespace MyWideIO.API.Controllers
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Video upload
-        /// </summary>
-        /// <param name="videoUploadDto"></param>
-        /// <response code="200">OK</response>
-        /// <response code="400">Bad request</response>
-        /// <response code="401">Unauthorised</response>
-        [HttpPost]
-        [Consumes("application/json")]
-        [ValidateModelState]
-        [SwaggerOperation("UploadVideo")]
-        public virtual IActionResult UploadVideo([FromBody] VideoUploadDto videoUploadDto)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

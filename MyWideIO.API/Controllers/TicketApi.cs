@@ -11,6 +11,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
+    [Route("ticket")]
     public class TicketApiController : ControllerBase
     {
         /// <summary>
@@ -33,7 +34,7 @@ namespace MyWideIO.API.Controllers
         /// </summary>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
-        [HttpGet]
+        [HttpGet("list")]
         [ValidateModelState]
         [SwaggerOperation("GetTicketList")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<GetTicketDto>), description: "OK")]
@@ -48,7 +49,7 @@ namespace MyWideIO.API.Controllers
         /// <param name="id">Ticket ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
-        [HttpGet]
+        [HttpGet("status")]
         [ValidateModelState]
         [SwaggerOperation("GetTicketStatus")]
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketStatusDto), description: "OK")]

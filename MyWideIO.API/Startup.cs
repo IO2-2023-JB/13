@@ -57,10 +57,11 @@ namespace MyWideIO.API
             services.AddSingleton<ITokenService, TokenService>(); // singleton powinien byc ok
 
             //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
-            services.AddScoped<IApiRepository, ApiRepository>();
+            
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITransactionService, TransactionService>();
-            //services.AddScoped<IApiRepository, ApiRepository>();
+            services.AddScoped<IVideoRepository, VideoRepository>();
+            services.AddScoped<IVideoService, AzureBlobVideoService>();
             // Add services to the container.
 
             // CORS

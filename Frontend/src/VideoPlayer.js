@@ -8,7 +8,7 @@ import { Player, ControlBar } from 'video-react';
 import {useLocation} from 'react-router-dom';
 import { useParams } from "react-router-dom";
 import 'video-react/dist/video-react.css';
-
+import ReactPlayer from 'react-player';
 
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
@@ -17,8 +17,12 @@ const VideoPlayer = () => {
   const params = useParams();
   const location = useLocation();
   const { auth } = useContext(AuthContext);
-  const video_id = params.videoid; //JSON.stringify(params.id)
-
+  //let video_id = params.videoid; //JSON.stringify(params.id)
+  const baseURL = 'https://io2test.azurewebsites.net';
+  console.log(auth.accessToken);
+  let video_id = "49FB7E85-23E3-47F3-904E-10170839F466"; //"ECF81211-C2B8-4A45-BC2A-61D339C29771";
+  let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
+  //const videoUrl = 'https://videioblob.blob.core.windows.net/video/sample-30s.mp4';
   const [errMsg, setErrMsg] = useState('');
   const [videoData, setVideoData] = useState({
     id: "",
@@ -40,87 +44,89 @@ const VideoPlayer = () => {
     localStorage.setItem("lastVisitedPage", location.pathname);
   })
 
-  useEffect(() => {
-    if(video_id){
-      console.log('video_id:');
-      console.log(video_id);
-      //get video
-
-      //get video metadata:
-      axios.get(METADATA_URL + "?id=" + video_id,
-          {
-            headers: { 
-              'Content-Type': 'application/json',
-              "Authorization" : `Bearer ${auth?.accessToken}`
-            },
-            withCredentials: true
-          }
-      ).then(response => {
-        setVideoData(response?.data);
-      }).catch(err => {
-        if(!err?.response) {
-            setErrMsg('No Server Response')
-        } else if(err.response?.status === 400) {
-            setErrMsg('Bad request');
-        } else if(err.response?.status === 401){
-            setErrMsg('Unauthorised');
-        } else if(err.response?.status === 403){
-            setErrMsg('Forbidden');
-        } else if(err.response?.status === 403){
-          setErrMsg('Not found');
-        } else {
-            setErrMsg('Getting metadata failed');
-        }
-      });
-    }
-  })
-
-  //const [video_url, setVideo_url] = useState(null);
-  
   // useEffect(() => {
-  //     setVideo_url(
-  //       'https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest(format=m3u8-cmaf)');
+  //   // if(!video_id)
+  //   // {
+  //   //   video_id = "ECF81211-C2B8-4A45-BC2A-61D339C29771";
+  //   //   videoUrl = VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
+  //   // }
+  //   if(video_id){
+  //     console.log('video_id:');
+  //     console.log(video_id);
+  //     //get video
 
+  //     //get video metadata:
+  //     axios.get(METADATA_URL + "?id=" + video_id,
+  //         {
+  //           headers: { 
+  //             'Content-Type': 'application/json',
+  //             "Authorization" : `Bearer ${auth?.accessToken}`
+  //           },
+  //           withCredentials: true
+  //         }
+  //     ).then(response => {
+  //       setVideoData(response?.data);
+  //     }).catch(err => {
+  //       if(!err?.response) {
+  //           setErrMsg('No Server Response')
+  //       } else if(err.response?.status === 400) {
+  //           setErrMsg('Bad request');
+  //       } else if(err.response?.status === 401){
+  //           setErrMsg('Unauthorised');
+  //       } else if(err.response?.status === 403){
+  //           setErrMsg('Forbidden');
+  //       } else if(err.response?.status === 403){
+  //         setErrMsg('Not found');
+  //       } else {
+  //           setErrMsg('Getting metadata failed');
+  //       }
+  //     });
+  //   }
   // })
 
-  // useEffect(() => {
-  //   axios.get(GETVIDEO_URL + "?id=" + video_id, {
-  //     headers: { 
-  //       'Content-Type': 'application/json',
-  //       "Authorization" : `Bearer ${auth?.accessToken}`
-  //     },
-  //     withCredentials: true 
-  //   })
-  //   .then(response => {
-  //     //console.log("success");
-  //     console.log(JSON.stringify(response?.data));
-  //     setVideo_url(response?.data);
-  //   })
-  //   .catch(error => {
-  //     console.log("error: ", error);
-  //   });
-  // }, [auth?.accessToken]);
-
-  const long_video_url = "https://videiomediaservices-usea.streaming.media.azure.net/d4a8a09e-b580-462a-a98b-430d109b71ad/videoplayback.ism/manifest(format=m3u8-cmaf)";
-  const video_url = 'https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest(format=m3u8-cmaf)';
-  const video_url_dash = "https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest(format=mpd-time-cmaf)"
-  const video_url_smoothstreaming = "https://videiomediaservices-usea.streaming.media.azure.net/bc3544a6-7c3b-4d10-b778-c2936c024b89/testvid.ism/manifest";
-  const video_url1 = "https://videiomediaservices-usea.streaming.media.azure.net/992730e7-a54f-4d4c-a167-155dd4d29baa/sample-30s.ism/manifest(format=m3u8-cmaf)"
   return (
     <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", marginTop: "200px", width: "900px"}}>
       <div class="container-fluid justify-content-center" style={{marginTop: "200px", width: "900px"}}>
-        <ReactHlsPlayer
-          src={video_url1}
-          autoPlay={false}
-          // loop = {true}
-          controls={true}
-          width="100%"
-          height="auto" />
 
-        {/* <Player ref={player => { this.player = player; }} autoPlay>
-            <source src={video_url} />
-            <ControlBar autoHide={false} />
-          </Player> */}
+        <video id="videoPlayer" width="650" controls autoplay>
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+        {/* <ReactPlayer
+          url={videoUrl}
+          playing={true}
+          controls={true}
+          width="650px"
+          height="auto"
+          config={{
+            file: {
+              attributes: {
+                controlsList: 'nodownload'
+              },
+              tracks: [],
+              forceVideo: true,
+              forceAudio: true,
+              hlsOptions: {
+                maxBufferLength: 2,
+                maxBufferSize: 1000,
+                liveSyncDurationCount: 2,
+                liveMaxLatencyDurationCount: 4,
+              }
+            },
+            youtube: {
+              playerVars: {
+                controls: 1,
+                modestbranding: 1,
+                rel: 0
+              }
+            },
+            attributes: {
+              autoPlay: true,
+              controls: true,
+              muted: true
+            }
+          }}
+        /> */}
+        
       </div>
       <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"0"}}>  {/*className="movie_title"*/}
         {videoData.title}

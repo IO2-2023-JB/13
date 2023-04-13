@@ -1,6 +1,6 @@
 ﻿using MyWideIO.API.Models.DB_Models;
 
-namespace MyWideIO.API.Services
+namespace MyWideIO.API.Services.Interfaces
 {
     public interface ITokenService
     {

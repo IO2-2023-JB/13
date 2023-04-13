@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Services.Interfaces;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
@@ -11,59 +12,77 @@ namespace MyWideIO.API.Services
         private readonly UserManager<ViewerModel> _userManager;
         private readonly SignInManager<ViewerModel> _signInManager;
         private readonly ITokenService _authenticationService;
+        private readonly ITransactionService _transactionService;
         private readonly IImageService _imageService;
 
-        public UserService(UserManager<ViewerModel> userManager, IImageService imageService, SignInManager<ViewerModel> signInManager, ITokenService authenticationService)
+        public UserService(UserManager<ViewerModel> userManager, IImageService imageService, SignInManager<ViewerModel> signInManager, ITokenService authenticationService, ITransactionService transactionService)
         {
             _imageService = imageService;
             _userManager = userManager;
             _signInManager = signInManager;
             _authenticationService = authenticationService;
+            _transactionService = transactionService;
         }
         public async Task RegisterUserAsync(RegisterDto registerDto)
         {
             IdentityResult result;
-
-            // tworzenie uzytkownika
-            ViewerModel viewer = new ViewerModel
+            await _transactionService.BeginTransactionAsync();
+            try
             {
-                Email = registerDto.Email,
-                Name = registerDto.Name,
-                UserName = registerDto.Nickname,
-                Surname = registerDto.Surname
-            };
-            result = await _userManager.CreateAsync(viewer, registerDto.Password);
-            if (!result.Succeeded)
-                throw (_userManager.ErrorDescriber.DuplicateEmail(registerDto.Email).Code == result.Errors.First().Code) ?
-                     new DuplicateEmailException() : new UserException(result.Errors.First()?.Code);
-
-            // dodawanie zdjecia
-            if (registerDto.AvatarImage.Length > 0)
-            {
-                string imagePrefix = @"base64,";
-                if (registerDto.AvatarImage.Contains(imagePrefix))
+                ViewerModel viewer = new()
                 {
-                    registerDto.AvatarImage = registerDto.AvatarImage.Split(imagePrefix)[1];
-                }
-                viewer.ProfilePicture = await _imageService.UploadImageAsync(registerDto.AvatarImage, viewer.Id.ToString() + ".png");
-                if (viewer.ProfilePicture.Length == 0)
-                    throw new UserException("Image upload error");
-                await _userManager.UpdateAsync(viewer);
+                    Email = registerDto.Email,
+                    Name = registerDto.Name,
+                    UserName = registerDto.Nickname,
+                    Surname = registerDto.Surname
+                };
+                result = await _userManager.CreateAsync(viewer, registerDto.Password);
                 if (!result.Succeeded)
+                {
+                    throw (_userManager.ErrorDescriber.DuplicateEmail(registerDto.Email).Code == result.Errors.First().Code) ?
+                         new DuplicateEmailException() : new UserException(result.Errors.First()?.Code);
+                }
+
+
+                result = await _userManager.AddToRoleAsync(viewer, registerDto.UserType switch
+                {
+                    UserTypeDto.Viewer => "viewer",
+                    UserTypeDto.Creator => "creator",
+                    UserTypeDto.Administrator => "admin",
+                    _ => throw new UserException("Invalid user type")
+                });
+                if (!result.Succeeded)
+                {
                     throw new UserException(result.Errors.First()?.Code);
+                }
+
+                if (registerDto.AvatarImage.Length > 0)
+                {
+                    string imagePrefix = @"base64,";
+                    if (registerDto.AvatarImage.Contains(imagePrefix))
+                    {
+                        registerDto.AvatarImage = registerDto.AvatarImage.Split(imagePrefix)[1];
+                    }
+                    (viewer.ProfilePicture, viewer.ProfilePictureFileName) = await _imageService.UploadImageAsync(registerDto.AvatarImage, viewer.Id.ToString());
+                    if (viewer.ProfilePicture.Length == 0)
+                    {
+                        throw new UserException("Image upload error");
+                    }
+
+                    result = await _userManager.UpdateAsync(viewer);
+                    if (!result.Succeeded)
+                    {
+                        throw new UserException(result.Errors.First()?.Code);
+                    }
+                }
             }
-
-
-            // dodawanie roli
-            await _userManager.AddToRoleAsync(viewer, registerDto.UserType switch
+            catch
             {
-                UserTypeDto.Viewer => "viewer",
-                UserTypeDto.Creator => "creator",
-                UserTypeDto.Administrator => "admin",
-                _ => throw new UserException("Invalid user type") // jest walidacja w kontrolerze wiec nigdy nie bedzie
-            });
-            if (!result.Succeeded)
-                throw new UserException(result.Errors.First()?.Code);
+                await _transactionService.RollbackAsync();
+                throw;
+            }
+            await _transactionService.CommitAsync();
+
         }
         private readonly Dictionary<UserTypeDto, string> _roleDictionary = new()
         {
@@ -73,46 +92,65 @@ namespace MyWideIO.API.Services
         };
         public async Task<UserDto> EditUserDataAsync(UpdateUserDto updateUserDto, Guid id)
         {
-            IdentityResult result;
-            string imagePrefix = @"base64,";
-            // zmiania danych
-            var viewer = await _userManager.FindByIdAsync(id.ToString());
-            viewer.Name = updateUserDto.Name;
-            viewer.Surname = updateUserDto.Surname;
-            viewer.UserName = updateUserDto.Nickname;
-
-            // zmiana zdjecia
-            if(updateUserDto.AvatarImage.Contains(imagePrefix))
+            ViewerModel viewer;
+            await _transactionService.BeginTransactionAsync();
+            try
             {
-                updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
+                IdentityResult result;
+                string imagePrefix = @"base64,";
+                // zmiania danych
+                viewer = await _userManager.FindByIdAsync(id.ToString());
+                viewer.Name = updateUserDto.Name;
+                viewer.Surname = updateUserDto.Surname;
+                viewer.UserName = updateUserDto.Nickname;
+
+                // zmiana zdjecia
+                if (updateUserDto.AvatarImage.Contains(imagePrefix))
+                {
+                    updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
+                    (viewer.ProfilePicture, viewer.ProfilePictureFileName) = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, viewer.Id.ToString());
+                }
+                if (viewer.ProfilePicture.Length == 0)
+                {
+                    throw new UserException("Image upload error");
+                }
+
+                result = await _userManager.UpdateAsync(viewer); // tutaj zapisanie zmian w bazie
+                if (!result.Succeeded)
+                {
+                    throw new UserException(result.Errors.First()?.Code);
+                }
+
+                // zmiana roli
+                string role = (await _userManager.GetRolesAsync(viewer)).First() ?? throw new UserException("User has no role");
+                string newRole = _roleDictionary[updateUserDto.UserType];
+                if (newRole != role)
+                {
+                    result = await _userManager.RemoveFromRoleAsync(viewer, role);
+                    if (!result.Succeeded)
+                    {
+                        throw new UserException(result.Errors.First()?.Code);
+                    }
+
+                    result = await _userManager.AddToRoleAsync(viewer, newRole);
+                    if (!result.Succeeded)
+                    {
+                        throw new UserException(result.Errors.First()?.Code);
+                    }
+                }
             }
-            viewer.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, viewer.Id.ToString() + ".png");
-            if (viewer.ProfilePicture.Length == 0)
-                throw new UserException("Image upload error");
-
-            result = await _userManager.UpdateAsync(viewer); // tutaj zapisanie zmian w bazie
-            if (!result.Succeeded)
-                throw new UserException(result.Errors.First()?.Code);
-
-            // zmiana roli
-            var role = (await _userManager.GetRolesAsync(viewer)).First() ?? throw new UserException("User has no role");
-            var newRole = _roleDictionary[updateUserDto.UserType];
-            if (newRole != role)
+            catch
             {
-                result = await _userManager.RemoveFromRoleAsync(viewer, role);
-                if (!result.Succeeded)
-                    throw new UserException(result.Errors.First()?.Code);
-                result = await _userManager.AddToRoleAsync(viewer, newRole);
-                if (!result.Succeeded)
-                    throw new UserException(result.Errors.First()?.Code);
+                await _transactionService.RollbackAsync();
+                throw;
             }
-
+            await _transactionService.CommitAsync();
             return await ConvertUserModelToDto(viewer);
         }
 
         public async Task<UserDto> GetUserAsync(Guid id)
         {
-            var viewer = await _userManager.FindByIdAsync(id.ToString());
+            ViewerModel viewer = await _userManager.FindByIdAsync(id.ToString());
             return viewer == null
                 ? throw new UserNotFoundException() // dziwne ze sie kompiluje
                 : await ConvertUserModelToDto(viewer);
@@ -133,31 +171,47 @@ namespace MyWideIO.API.Services
                     "Creator" => UserTypeDto.Creator,
                     "Admin" => UserTypeDto.Administrator
                 },
-                AvatarImage = viewer.ProfilePicture == null ? "" : viewer.ProfilePicture
+                AvatarImage = viewer.ProfilePicture ?? ""
             };
         }
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
         {
-            var user = (await _userManager.FindByEmailAsync(loginDto.Email)) ??
+            ViewerModel user = (await _userManager.FindByEmailAsync(loginDto.Email)) ??
                 throw new UserNotFoundException();
 
             if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
+            {
                 throw new IncorrectPasswordException();
+            }
 
-            if (!(await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false)).Succeeded)
-                throw new UserException("Couldn't sign in");
+            // if (!(await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false)).Succeeded)
+            //   throw new UserException("Couldn't sign in");
 
             return _authenticationService.GenerateToken(user, await _userManager.GetRolesAsync(user));
         }
 
         public async Task DeleteUserAsync(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserNotFoundException();
+            await _transactionService.BeginTransactionAsync();
+            try
+            {
+                ViewerModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");// UserNotFoundException();
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-                throw new UserException(result.Errors.First()?.Code);
+                IdentityResult result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    throw new UserException(result.Errors.First()?.Code);
+                }
+                if (user.ProfilePictureFileName is not null)
+                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
+            }
+            catch
+            {
+                await _transactionService.RollbackAsync();
+                throw;
+            }
+            await _transactionService.CommitAsync();
         }
     }
 }

@@ -83,18 +83,13 @@ function App() {
               Home
             </NavLink>
           </li>
-          {/* {isLoggedIn() &&
+          {isLoggedIn() &&
           <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/profile'>
               Profile
             </NavLink>
           </li>
-          } */}
-          <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/profile'>
-              Profile
-            </NavLink>
-          </li>
+          }
           <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/videoplayer'>
                 Play video

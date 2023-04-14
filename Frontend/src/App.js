@@ -26,6 +26,7 @@ import { SidebarData } from './SidebarData';
 import './Sidebar.css';
 import whitelogo from './images/logo2.png'
 import { IconContext } from 'react-icons';
+import AddVideo from './AddVideo';
 
 export const cookies = new Cookies();
 
@@ -82,13 +83,18 @@ function App() {
               Home
             </NavLink>
           </li>
-          {isLoggedIn() &&
+          {/* {isLoggedIn() &&
           <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/profile'>
               Profile
             </NavLink>
           </li>
-          }
+          } */}
+          <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/profile'>
+              Profile
+            </NavLink>
+          </li>
           <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/videoplayer'>
                 Play video
@@ -162,6 +168,7 @@ function App() {
         <Route path="/administrator" element={<Administrator />}/>
         <Route path='/register' element={<Register />} />
         <Route path='/employee' element={<Employee />} />
+        <Route path='/video' element={<AddVideo />} />
       </Routes>
     </div>
   );

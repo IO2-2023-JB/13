@@ -44,6 +44,7 @@ const VideoPlayer = () => {
     localStorage.setItem("lastVisitedPage", location.pathname);
   })
 
+  // DOBRE
   // useEffect(() => {
   //   // if(!video_id)
   //   // {
@@ -88,7 +89,7 @@ const VideoPlayer = () => {
     <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", marginTop: "200px", width: "900px"}}>
       <div class="container-fluid justify-content-center" style={{marginTop: "200px", width: "900px"}}>
 
-        <video id="videoPlayer" width="650" controls autoplay>
+        <video id="videoPlayer" width="650" controls>
           <source src={videoUrl} type="video/mp4" />
         </video>
         {/* <ReactPlayer

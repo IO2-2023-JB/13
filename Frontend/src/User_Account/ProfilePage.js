@@ -68,7 +68,7 @@ useEffect(() => {
   }
 }, [data]);
 
-
+const navigate = useNavigate();
 const userRef = useRef();
 const nameRef = useRef();
 const surnameRef = useRef();
@@ -149,6 +149,10 @@ useEffect(() => {
         setWrong_profile_picture(true);
         alert("Choose a file format .jpg or .png with a maximum size of 5MB.");
     }
+  }
+
+  const handelAddNewVideoClick = () => {
+    navigate('/video');
   }
 
   const handleEditClick = () => {
@@ -292,7 +296,7 @@ return (
         <div class ="mt-2 row">
           <div class="col-sm">
             <h2>Data</h2>
-            <section>
+            <section style={{color: "white"}}>
               <label>Name:</label>
               <div>{userData.firstName}</div>
               <label>Surname:</label>
@@ -308,7 +312,7 @@ return (
           </div>
           <div class="col-sm">
             <h2>Avatar Image</h2>
-            <section>
+            <section style={{color: "white"}}>
               <img key={userData.avatarImage} src = {userData.avatarImage} alt="No avatar image"/>
             </section>
           </div>
@@ -317,6 +321,37 @@ return (
             <section>
               <ul style={{padding:"0px"}}>
                 <li style={{listStyleType: "none"}}>
+                  <div className="box" style={{width:"300px", height:"170px"}}>
+                    <div className="box2" style={{width:"280px", height:"150px"}} onClick={handelAddNewVideoClick}>
+                        <div className="movie_thumbnail" style={{width:"280px", height:"150px"}}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                          </svg>
+                        </div>
+                      </div> 
+                  </div>
+                </li>
+                {/* <li style={{listStyleType: "none"}}>
+              <div className="box" style={{width:"300px", height:"170px"}}>
+                <div className="box2" style={{width:"280px", height:"150px"}}>
+                    <table>
+                        <tr>
+                        <div className="movie_title" style={{width:"280px", height:"50px", fontSize:"10px", marginTop:"0"}}>
+                            Test video title for non-existing video
+                        </div>
+                        </tr>
+                        <tr>
+                        <div className="movie_thumbnail" style={{width:"280px", height:"100px"}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                            </svg>
+                        </div>
+                        </tr>
+                    </table>
+                    </div> 
+                </div>
+                </li> */}
+                {/* <li style={{listStyleType: "none"}}>
               <div className="box" style={{width:"300px", height:"170px"}}>
                 <div className="box2" style={{width:"280px", height:"150px"}}>
                     <table>
@@ -375,27 +410,7 @@ return (
                     </table>
                     </div> 
                 </div>
-                </li>
-                <li style={{listStyleType: "none"}}>
-              <div className="box" style={{width:"300px", height:"170px"}}>
-                <div className="box2" style={{width:"280px", height:"150px"}}>
-                    <table>
-                        <tr>
-                        <div className="movie_title" style={{width:"280px", height:"50px", fontSize:"10px", marginTop:"0"}}>
-                            Test video title for non-existing video
-                        </div>
-                        </tr>
-                        <tr>
-                        <div className="movie_thumbnail" style={{width:"280px", height:"100px"}}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                            </svg>
-                        </div>
-                        </tr>
-                    </table>
-                    </div> 
-                </div>
-                </li>
+                </li> */}
               </ul>
             </section>
           </div>

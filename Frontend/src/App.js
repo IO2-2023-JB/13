@@ -26,6 +26,7 @@ import { SidebarData } from './SidebarData';
 import './Sidebar.css';
 import whitelogo from './images/logo2.png'
 import { IconContext } from 'react-icons';
+import AddVideo from './AddVideo';
 
 export const cookies = new Cookies();
 
@@ -162,6 +163,7 @@ function App() {
         <Route path="/administrator" element={<Administrator />}/>
         <Route path='/register' element={<Register />} />
         <Route path='/employee' element={<Employee />} />
+        <Route path='/video' element={<AddVideo />} />
       </Routes>
     </div>
   );

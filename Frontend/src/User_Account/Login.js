@@ -23,6 +23,10 @@ const Login = () => {
     const [errMsg, setErrMsg] = useState('');
 
     useEffect(() => {
+        localStorage.setItem("lastVisitedPage", location.pathname);
+      })
+
+    useEffect(() => {
         emailRef.current.focus();
     }, [])
 
@@ -32,7 +36,6 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         try{
             const response = await axios.post(LOGIN_URL, 
                 JSON.stringify({email: email, password: pwd}),
@@ -50,7 +53,8 @@ const Login = () => {
             //console.log(roles);
             const accessToken = token;
             setAuth({user: email, pwd, roles, accessToken, id});
-            cookies.set("accessToken", accessToken, { expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)});
+            //Date.now() + 1 * 24 * 60 * 60 * 1000
+            cookies.set("accessToken", accessToken, { expires: new Date(payload["exp"] * 1000)});
             //console.log(cookies.get("accessToken"));
             setUser('');
             setPwd('');

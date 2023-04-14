@@ -9,6 +9,7 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import logo from '../images/happy.jpg'
 import { useNavigate, useLocation } from 'react-router-dom';
+import {cookies} from '../App'
 
 config.autoAddCss = false;
 
@@ -23,10 +24,16 @@ const ProfilePage = () => {
   const { auth } = useContext(AuthContext);
   const [errMsg, setErrMsg] = useState('');
   const errRef = useRef();
-
+  const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
 
   const [data, setData] = useState(null);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    localStorage.setItem("lastVisitedPage", location.pathname);
+  })
 
 useEffect(() => {
   axios.get(PROFILE_URL + "?id=" + auth?.id, {
@@ -37,8 +44,7 @@ useEffect(() => {
     withCredentials: true 
   })
   .then(response => {
-    //console.log("success");
-    console.log(JSON.stringify(response?.data));
+    //console.log(JSON.stringify(response?.data));
     setData(response?.data);
   })
   .catch(error => {
@@ -53,6 +59,7 @@ const [userData, setUserData] = useState({
   email: "Loading...",
   accountBalance: 0,
   avatarImage: '',
+  userType: '',
 });
 
 useEffect(() => {
@@ -64,11 +71,11 @@ useEffect(() => {
       email: data?.email,
       accountBalance: data?.accountBalance,
       avatarImage: data?.avatarImage,
+      userType: data?.userType,
     });
   }
 }, [data]);
 
-const navigate = useNavigate();
 const userRef = useRef();
 const nameRef = useRef();
 const surnameRef = useRef();
@@ -91,6 +98,10 @@ const [validprofile_picture, setValidprofile_picture] = useState(false);
 const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
 const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
 
+const [userType, setUserType] = useState('');
+
+
+
 useEffect(() => {
   setName(userData.firstName);
 }, [userData.firstName]);
@@ -103,6 +114,9 @@ useEffect(() => {
 useEffect(() => {
   setEmail(userData.email);
 }, [userData.email]);
+useEffect(() => {
+  setUserType(userData.userType);
+}, [userData.userType]);
 
   useEffect(() => {
     setValidNickname(USER_REGEX.test(user));
@@ -165,8 +179,125 @@ useEffect(() => {
     setSurname(userData.lastName);
     setUser(userData.nickname);
     setEmail(userData.email);
+    setUserType(userData.userType);
     //setProfile_picture(userData.avatarImage);
   };
+
+  const handleDeleteClick = async () => {
+    const result = window.confirm("Are you sure you want to delete your account?");
+    if (result) {
+      try{
+        const response = await axios.delete(PROFILE_URL + "?id=" + auth?.id,
+            {
+              headers: { 
+                'Content-Type': 'application/json',
+                "Authorization" : `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true
+            }
+        );
+      }catch(err){
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+            //setErrMsg('No Server Response');
+        } else if(err.response?.status === 400) {
+            setErrMsg('Login Failed');
+        } else if(err.response?.status === 404){
+            setErrMsg('Account does not exist');
+        } else if(err.response?.status === 401 ){
+            setErrMsg('Incorrect password');
+        } else {
+            setErrMsg('Login Failed');
+        }
+        errRef.current.focus();
+      }
+      setAuth({});
+      cookies.remove("accessToken");
+      alert("Your account has been deleted.");
+      navigate('/register', {replace: true});
+    }
+  };
+  
+  const handleCreatorClick = async () => {
+    setUserData({
+      firstName: data?.name,
+      lastName: data?.surname,
+      nickname: data?.nickname,
+      email: data?.email,
+      accountBalance: data?.accountBalance,
+      avatarImage: data?.avatarImage,
+      userType: data?.userType,
+    });
+    let changeType = '';
+    if(userData.userType === 'Viewer')
+      changeType = "Creator";
+    else if(userData.userType === 'Creator')
+    {
+      const result = window.confirm(
+        "Are you sure you don't want to be a creator any longer? Approval will delete all your uploaded videos and you will lose all your subscribers. Do you want to continue?"
+        );
+      if (!result) {
+        return;
+      }
+      changeType = "Viewer";
+    }
+    else
+      return;
+    let base64data = null;
+    if(userData.avatarImage){
+      //console.log(userData.avatarImage)
+      const imageUrl = userData.avatarImage+"?time="+new Date();
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        base64data = reader.result.split(",")[1];
+      }
+    }
+    else
+    {
+      base64data = "";
+    }
+      setTimeout(async () => {
+        //console.log("base64:")
+        //console.log(base64data);
+      try{
+        //console.log(userData.nickname, userData.firstName, userData.lastName);
+        const response = await axios.put(PROFILE_URL,
+        JSON.stringify({
+          nickname: userData.nickname, 
+          name: userData.firstName, 
+          surname: userData.lastName,
+          userType: changeType,
+          avatarImage: base64data,
+        }),
+        {
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true //cred
+        }
+      );
+      } catch (err) {
+        if (!err?.response) {
+          setErrMsg('No Server Response');
+        } else if (err.response?.status === 401) {
+          setErrMsg('Unauthorized');
+        } else {
+          setErrMsg('Data Change Failed');
+        }
+        errRef.current.focus();
+      }
+      //setData(response?.data);
+      //handleCancelClick();
+      setAuth({});
+      cookies.remove("accessToken");
+      location.state.form.pathname = location.pathname;
+      navigate('/login');
+      }, 100);
+}
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -186,20 +317,8 @@ useEffect(() => {
         await reader.readAsDataURL(profile_picture);
         let base64String;
         reader.onload = () => {
-          //console.log(reader.result);
-          base64String = reader.result.split(",")[1];
-          //console.log(base64String);
-          console.log(base64String);
-          console.log({
-            nickname: user, 
-            name: name, 
-            surname: surname,
-            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-            avatarImage: base64String
-          });
+          base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach
         };
-        //reader.onloadend = () =>{};
-        //base64String = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
         setTimeout(async () => {
         response = await axios.put(PROFILE_URL,
             JSON.stringify({
@@ -218,64 +337,67 @@ useEffect(() => {
             }
         );
         setData(response?.data);
+        setUserData({
+          firstName: data?.name,
+          lastName: data?.surname,
+          nickname: data?.nickname,
+          email: data?.email,
+          accountBalance: data?.accountBalance,
+          avatarImage: data?.avatarImage,
+          userType: data?.userType,
+        });
         handleCancelClick();
         window.location.reload()
       }, 100);
       }
       else
       {
-        response = await axios.put(PROFILE_URL,
-          JSON.stringify({
-            nickname: user, 
-            name: name, 
-            surname: surname,
-            userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-            avatarImage: ""
-          }),
-          {
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken}`
-              },
-              withCredentials: true //cred
+        let base64data = null;
+        if(userData.avatarImage){
+          //console.log(userData.avatarImage)
+          const imageUrl = userData.avatarImage+"?time="+new Date();
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => {
+            base64data = reader.result.split(",")[1];
           }
-      );
-      setData(response?.data);
-      handleCancelClick();
+        }
+        else
+        {
+          base64data = "";
+        }
+        setTimeout(async () => {
+          response = await axios.put(PROFILE_URL,
+            JSON.stringify({
+              nickname: user, 
+              name: name, 
+              surname: surname,
+              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              avatarImage: base64data
+            }),
+            {
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${auth?.accessToken}`
+                },
+                withCredentials: true //cred
+            }
+          );
+          setData(response?.data);
+          setUserData({
+            firstName: data?.name,
+            lastName: data?.surname,
+            nickname: data?.nickname,
+            email: data?.email,
+            accountBalance: data?.accountBalance,
+            avatarImage: data?.avatarImage,
+            userType: data?.userType,
+          });
+          handleCancelClick();
+        }, 100);
       }
-      // setTimeout(() => {
-      //   //console.log(response?.data);
-      //   //console.log(response?.accessToken);
-      //   //console.log(JSON.stringify(response))
-      //   setSuccess(true);
-      //   //clear state and controlled inputs
-      //   //need value attrib on inputs for this
-      //   setUser('');
-      //   setEmail('')
-      //   setName('')
-      //   setSurname('')
-      //   setProfile_picture(null);
-      //   setProfile_picture_name('');
-      //   setValidprofile_picture(false);
-      //   setWrong_profile_picture(false);
-      //   axios.get(PROFILE_URL + "?id=" + auth?.id, {
-      //     headers: { 
-      //       'Content-Type': 'application/json',
-      //       "Authorization" : `Bearer ${auth?.accessToken}`
-      //     },
-      //     withCredentials: true 
-      //   })
-      //   .then(response => {
-      //     //console.log("success");
-      //     console.log(JSON.stringify(response?.data));
-      //     setData(response?.data);
-      //     //setUserData(response.data);
-      //   })
-      //   .catch(error => {
-      //     console.log("error: ", error);
-      //   });
-      //   handleCancelClick();
-      // }, 500);
     } catch (err) {
         if (!err?.response) {
             setErrMsg('No Server Response');
@@ -287,9 +409,15 @@ useEffect(() => {
         errRef.current.focus();
     }
 }
+const handleClick = () => {
+  navigate('/videoplayer/122');
+} //todelete
 
 return (
   <div style={{marginTop: "200px"}} class="container">
+    <div>
+    {/* <button onClick={handleClick}>Watch Video</button> */}
+    </div>
     {!editMode ? (
       <div class="row">
         <h1 class="display-1">{userData.nickname}</h1>
@@ -309,13 +437,31 @@ return (
                 <button onClick={handleEditClick}>Edit</button>
               </div>
             </section>
+
+
+            <div className="row">
+              <div className="col">
+                {userType==='Creator' && (
+                  <button class="btn btn-danger" style={{ whiteSpace: "nowrap" }} onClick={handleCreatorClick}>Stop being a creator</button>
+                )
+                }
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <button class="btn btn-danger" onClick={handleDeleteClick}>Delete account</button>
+                <div className="mt-5"></div>
+              </div>
+            </div>
+
           </div>
           <div class="col-sm">
             <h2>Avatar Image</h2>
             <section style={{color: "white"}}>
-              <img key={userData.avatarImage} src = {userData.avatarImage} alt="No avatar image"/>
+              <img key={userData.avatarImage} src = {userData.avatarImage+"?time="+new Date()} alt="No avatar image"/>
             </section>
           </div>
+          {userType==='Creator'?(
           <div class="col-sm">
           <h2>Your Videos</h2>
             <section>
@@ -414,6 +560,11 @@ return (
               </ul>
             </section>
           </div>
+          ):(
+            <div class="col-sm">
+              <button onClick={handleCreatorClick}>Become Creator</button>
+            </div>
+          )}
         </div>
       </div>
     ) : (

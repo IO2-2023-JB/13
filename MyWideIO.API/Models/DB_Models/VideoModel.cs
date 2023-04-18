@@ -27,12 +27,16 @@ namespace MyWideIO.API.Models.DB_Models
 
 
         public ICollection<CommentModel> Comments { get; set; }
+        public ICollection<string> Tags { get; set; }
 
         public Guid CreatorId { get; set; }
         public CreatorModel Creator { get; set; }
         public ICollection<VideoPlaylist> Playlists { get; set; }
         public ICollection<ViewerLike> LikedBy { get; set; }
+
         public string fileName { get; set; }
+        public string Thumbnail { get; set; }
+        public bool IsVisible { get; set; }
 
 
     }

@@ -143,6 +143,7 @@ namespace MyWideIO.API.Controllers
         /// Video metadata update
         /// </summary>
         /// <param name="videoUploadDto"></param>
+        /// <param name="id"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
@@ -151,9 +152,16 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
-        public virtual IActionResult UpdateVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
+        public virtual async Task<IActionResult> UpdateVideoMetadata([FromBody] VideoUploadDto videoUploadDto, Guid id)
         {
-            throw new NotImplementedException();
+            if (await _videoService.UpdateVideo(id, videoUploadDto))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("No such video");
+            }
         }
 
         /// <summary>

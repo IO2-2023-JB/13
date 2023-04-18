@@ -44,7 +44,7 @@ namespace WideIO.API.Models
         /// Gets or Sets Thumbnail
         /// </summary>
         [DataMember(Name="thumbnail", EmitDefaultValue=false)]
-        public System.IO.Stream Thumbnail { get; set; }
+        public string Thumbnail { get; set; }
 
         /// <summary>
         /// Gets or Sets Tags

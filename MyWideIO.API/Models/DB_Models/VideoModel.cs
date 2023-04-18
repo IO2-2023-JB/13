@@ -27,7 +27,7 @@ namespace MyWideIO.API.Models.DB_Models
 
 
         public ICollection<CommentModel> Comments { get; set; }
-        public ICollection<string> Tags { get; set; }
+        public ICollection<TagModel> Tags { get; set; }
 
         public Guid CreatorId { get; set; }
         public CreatorModel Creator { get; set; }

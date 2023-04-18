@@ -141,7 +141,7 @@ namespace MyWideIO.API
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
-            CreateRoles(services.BuildServiceProvider()).Wait();
+            //CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {

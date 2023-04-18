@@ -31,7 +31,8 @@ namespace MyWideIO.API.Data.Repositories
                 return false;
             model.Title = videoData.Title;
             model.Description = videoData.Description;
-            model.Tags = videoData.Tags;
+            model.Tags = new List<TagModel>();
+            videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t }));
             model.IsVisible = videoData.Visibility == VisibilityDto.PublicEnum;
             
             // TODO Thumbnail

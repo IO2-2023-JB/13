@@ -4,6 +4,8 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
+using System.ComponentModel;
+using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -32,6 +34,24 @@ namespace MyWideIO.API.Services
             BlobClient blobClient = _blobContainerClient.GetBlobClient(video.fileName);
 
             return await blobClient.OpenReadAsync();
+        }
+
+        public async Task<bool> RemoveVideoIfExist(Guid id)
+        {
+            VideoModel? video = await _videoRepository.GetVideoAsync(id);
+            if (video == null)
+                return false;
+
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(video.fileName);
+            blobClient.DeleteIfExists();
+            _videoRepository.RemoveVideo(video);
+
+            return true;
+        }
+
+        public async Task<bool> UpdateVideo(Guid id, VideoUploadDto dto)
+        {
+            return await _videoRepository.PutVideoData(id, dto);
         }
     }
 }

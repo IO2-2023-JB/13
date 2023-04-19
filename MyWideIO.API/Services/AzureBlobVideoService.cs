@@ -56,8 +56,10 @@ namespace MyWideIO.API.Services
             return await _videoRepository.PutVideoData(id, dto);
         }
 
-        public async Task<bool> UploadVideoAsync(Guid id, string video)
+        public async Task<bool> UploadVideoAsync(Guid id, string video) // raczej Stream video
         {
+            // w zaleznosci od enuma rocessingProgressDto 
+            // np jak jest Uploading
 
             string fileName = id.ToString();
             BinaryData binaryData = BinaryData.FromString(video);
@@ -66,11 +68,11 @@ namespace MyWideIO.API.Services
             response = (await blobClient.UploadAsync(binaryData, true)).GetRawResponse();
             if (response.IsError)
             {
-                throw new UserException("Image upload error");
+                throw new UserException("Image upload error"); // image?
             }
 
-            response = (await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders())).GetRawResponse();
-            return response.IsError ? throw new UserException("Video upload error") : true;
+            response = (await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders())).GetRawResponse(); // ?
+            return response.IsError ? throw new UserException("Video upload error") : true; // nigdy nie zwraca false, to po co Task<bool>
         }
         
         public async Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto dto, Guid creatorId)

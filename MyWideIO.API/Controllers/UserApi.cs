@@ -81,7 +81,7 @@ namespace MyWideIO.API.Controllers
         public async Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
             id ??= Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
+            
             UserDto userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
             return Ok(userDto);// po co sie zwraca to 
         }

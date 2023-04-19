@@ -1,4 +1,5 @@
-﻿using MyWideIO.API.Models.DB_Models;
+﻿using MyWideIO.API.Models;
+using MyWideIO.API.Models.DB_Models;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Data.IRepositories
@@ -8,5 +9,6 @@ namespace MyWideIO.API.Data.IRepositories
         public Task<VideoModel?> GetVideoAsync(Guid id);
         public void RemoveVideo(VideoModel video);
         public Task<bool> PutVideoData(Guid id, VideoUploadDto videoData);
+        public Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto videoData, Guid creatorId);
     }
 }

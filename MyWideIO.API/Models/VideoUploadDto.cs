@@ -19,43 +19,44 @@ using Newtonsoft.Json;
 using WideIO.API.Converters;
 
 namespace WideIO.API.Models
-{ 
+{
     /// <summary>
     /// 
     /// </summary>
     [DataContract]
     public partial class VideoUploadDto : IEquatable<VideoUploadDto>
     {
+
         /// <summary>
         /// Gets or Sets Title
         /// </summary>
         /// <example>&quot;How to wash dishes&quot;</example>
-        [DataMember(Name="title", EmitDefaultValue=false)]
+        [DataMember(Name = "title", EmitDefaultValue = false)]
         public string Title { get; set; }
 
         /// <summary>
         /// Gets or Sets Description
         /// </summary>
         /// <example>&quot;I&#39;ll teach you how to wash your dishes! All you need is a sponge and dishwashing soap&quot;</example>
-        [DataMember(Name="description", EmitDefaultValue=false)]
+        [DataMember(Name = "description", EmitDefaultValue = false)]
         public string Description { get; set; }
 
         /// <summary>
         /// Gets or Sets Thumbnail
         /// </summary>
-        [DataMember(Name="thumbnail", EmitDefaultValue=false)]
+        [DataMember(Name = "thumbnail", EmitDefaultValue = false)]
         public string Thumbnail { get; set; }
 
         /// <summary>
         /// Gets or Sets Tags
         /// </summary>
-        [DataMember(Name="tags", EmitDefaultValue=false)]
+        [DataMember(Name = "tags", EmitDefaultValue = false)]
         public List<string> Tags { get; set; }
 
         /// <summary>
         /// Gets or Sets Visibility
         /// </summary>
-        [DataMember(Name="visibility", EmitDefaultValue=true)]
+        [DataMember(Name = "visibility", EmitDefaultValue = true)]
         public VisibilityDto Visibility { get; set; }
 
         /// <summary>
@@ -106,31 +107,31 @@ namespace WideIO.API.Models
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return 
+            return
                 (
                     Title == other.Title ||
                     Title != null &&
                     Title.Equals(other.Title)
-                ) && 
+                ) &&
                 (
                     Description == other.Description ||
                     Description != null &&
                     Description.Equals(other.Description)
-                ) && 
+                ) &&
                 (
                     Thumbnail == other.Thumbnail ||
                     Thumbnail != null &&
                     Thumbnail.Equals(other.Thumbnail)
-                ) && 
+                ) &&
                 (
                     Tags == other.Tags ||
                     Tags != null &&
                     other.Tags != null &&
                     Tags.SequenceEqual(other.Tags)
-                ) && 
+                ) &&
                 (
                     Visibility == other.Visibility ||
-                    
+
                     Visibility.Equals(other.Visibility)
                 );
         }
@@ -145,22 +146,22 @@ namespace WideIO.API.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    if (Title != null)
+                if (Title != null)
                     hashCode = hashCode * 59 + Title.GetHashCode();
-                    if (Description != null)
+                if (Description != null)
                     hashCode = hashCode * 59 + Description.GetHashCode();
-                    if (Thumbnail != null)
+                if (Thumbnail != null)
                     hashCode = hashCode * 59 + Thumbnail.GetHashCode();
-                    if (Tags != null)
+                if (Tags != null)
                     hashCode = hashCode * 59 + Tags.GetHashCode();
-                    
-                    hashCode = hashCode * 59 + Visibility.GetHashCode();
+
+                hashCode = hashCode * 59 + Visibility.GetHashCode();
                 return hashCode;
             }
         }
 
         #region Operators
-        #pragma warning disable 1591
+#pragma warning disable 1591
 
         public static bool operator ==(VideoUploadDto left, VideoUploadDto right)
         {
@@ -172,7 +173,8 @@ namespace WideIO.API.Models
             return !Equals(left, right);
         }
 
-        #pragma warning restore 1591
+#pragma warning restore 1591
         #endregion Operators
+
     }
 }

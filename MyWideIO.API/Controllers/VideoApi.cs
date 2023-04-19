@@ -3,6 +3,7 @@ using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using WideIO.API.Attributes;
 using WideIO.API.Models;
 
@@ -91,6 +92,32 @@ namespace MyWideIO.API.Controllers
             var stream = await _videoService.GetVideo(id);
             return File(stream, "video/mp4", true);
         }
+
+        /// <summary>
+        /// Video metadata upload
+        /// </summary>
+        /// <param name="videoUploadDto"></param>
+        /// <param name="id"></param>
+        /// <response code="200">OK</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="401">Unauthorised</response>
+        [HttpPost("/video-metadata")]
+        [Consumes("application/json")]
+        [ValidateModelState]
+        [SwaggerOperation("UpdateVideoMetadata")]
+        [SwaggerResponse(statusCode: 200, type: typeof(VideoUploadResponseDto), description: "OK")]
+        [SwaggerResponse(statusCode: 400, description: "Bad request")]
+        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
+        public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
+        {
+            VideoUploadResponseDto result;
+            Guid CreatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            result = await _videoService.UploadVideoMetadata(videoUploadDto, CreatorId);
+
+            return Ok(result);
+
+        }
+
         /// <summary>
         /// Video upload
         /// </summary>

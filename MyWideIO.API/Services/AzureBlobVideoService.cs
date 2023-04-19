@@ -1,7 +1,9 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
+using MyWideIO.API.Models;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using System.ComponentModel;
@@ -53,5 +55,28 @@ namespace MyWideIO.API.Services
         {
             return await _videoRepository.PutVideoData(id, dto);
         }
+
+        public async Task<bool> UploadVideoAsync(Guid id, string video)
+        {
+
+            string fileName = id.ToString();
+            BinaryData binaryData = BinaryData.FromString(video);
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+            Response response;
+            response = (await blobClient.UploadAsync(binaryData, true)).GetRawResponse();
+            if (response.IsError)
+            {
+                throw new UserException("Image upload error");
+            }
+
+            response = (await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders())).GetRawResponse();
+            return response.IsError ? throw new UserException("Video upload error") : true;
+        }
+        
+        public async Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto dto, Guid creatorId)
+        {
+            return await _videoRepository.UploadVideoMetadata(dto, creatorId);
+        }
+
     }
 }

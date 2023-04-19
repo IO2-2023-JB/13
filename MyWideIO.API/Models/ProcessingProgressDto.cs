@@ -19,31 +19,49 @@ using Newtonsoft.Json;
 using WideIO.API.Converters;
 
 namespace WideIO.API.Models
-{ 
+{
+    /// <summary>
+    /// Gets or Sets ProcessingProgressDto
+    /// </summary>
+    [TypeConverter(typeof(CustomEnumConverter<ProcessingProgressDto>))]
+    [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+    public enum ProcessingProgressDto
+    {
+
         /// <summary>
-        /// Gets or Sets ProcessingProgressDto
+        /// Enum MetadataRecordCreatedEnum for MetadataRecordCreated
         /// </summary>
-        [TypeConverter(typeof(CustomEnumConverter<ProcessingProgressDto>))]
-        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public enum ProcessingProgressDto
-        {
-            
-            /// <summary>
-            /// Enum QueuedEnum for Queued
-            /// </summary>
-            [EnumMember(Value = "Queued")]
-            QueuedEnum = 1,
-            
-            /// <summary>
-            /// Enum ProcessingEnum for Processing
-            /// </summary>
-            [EnumMember(Value = "Processing")]
-            ProcessingEnum = 2,
-            
-            /// <summary>
-            /// Enum DoneEnum for Done
-            /// </summary>
-            [EnumMember(Value = "Done")]
-            DoneEnum = 3
-        }
+        [EnumMember(Value = "MetadataRecordCreated")]
+        MetadataRecordCreated = 1,
+
+        /// <summary>
+        /// Enum UploadingEnum for Uploading
+        /// </summary>
+        [EnumMember(Value = "Uploading")]
+        UploadingEnum = 2,
+
+        /// <summary>
+        /// Enum UploadedEnum for Uploaded
+        /// </summary>
+        [EnumMember(Value = "Uploaded")]
+        UploadedEnum = 3,
+
+        /// <summary>
+        /// Enum FailedToUploadEnum for FailedToUpload
+        /// </summary>
+        [EnumMember(Value = "FailedToUpload")]
+        FailedToUploadEnum = 4,
+
+        /// <summary>
+        /// Enum ProcessingEnum for Processing
+        /// </summary>
+        [EnumMember(Value = "Processing")]
+        ProcessingEnum = 5,
+
+        /// <summary>
+        /// Enum ReadyEnum for Ready
+        /// </summary>
+        [EnumMember(Value = "Ready")]
+        ReadyEnum = 6
+    }
 }

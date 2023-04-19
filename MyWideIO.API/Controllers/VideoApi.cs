@@ -77,6 +77,7 @@ namespace MyWideIO.API.Controllers
         /// Video file retreival
         /// </summary>
         /// <param name="id">Video ID</param>
+        /// <param name="accessToken">Access token</param>
         /// <param name="range">VideoFileRange</param>
         /// <response code="200">OK</response>
         /// <response code="206">Partial Content</response>
@@ -87,8 +88,9 @@ namespace MyWideIO.API.Controllers
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(Stream), description: "OK")]
         [SwaggerResponse(statusCode: 206, type: typeof(Stream), description: "Partial Content")]
-        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromHeader] string range)
+        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
         {
+            // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
             var stream = await _videoService.GetVideo(id);
             return File(stream, "video/mp4", true);
         }
@@ -119,18 +121,20 @@ namespace MyWideIO.API.Controllers
         }
 
         /// <summary>
-        /// Video upload
+        /// Video file upload
         /// </summary>
-        /// <param name="videoUploadDto"></param>
+        /// <param name="id">Video ID</param>
+        /// <param name="videoFile"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         [HttpPost("{id}")]
         [Consumes("application/json")]
         [ValidateModelState]
-        [SwaggerOperation("UploadVideo")]
-        public virtual IActionResult UploadVideo([FromRoute(Name = "id")][Required] Guid id, [FromBody] VideoUploadDto videoUploadDto)
+        [SwaggerOperation("PostVideoFile")]
+        public virtual IActionResult PostVideoFile([FromRoute(Name = "id")][Required] Guid id, IFormFile videoFile) // cos w tym stylu
         {
+            // Stream s = videoFile.OpenReadStream();
             throw new NotImplementedException();
         }
         /// <summary>
@@ -179,7 +183,7 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
-        public virtual async Task<IActionResult> UpdateVideoMetadata([FromBody] VideoUploadDto videoUploadDto, Guid id)
+        public virtual async Task<IActionResult> UpdateVideoMetadata([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoUploadDto videoUploadDto)
         {
             if (await _videoService.UpdateVideo(id, videoUploadDto))
             {
@@ -189,6 +193,8 @@ namespace MyWideIO.API.Controllers
             {
                 return BadRequest("No such video");
             }
+            // await _videoService.UpdateVideo(id, videoUploadDto);
+            // return Ok();
         }
 
         /// <summary>

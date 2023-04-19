@@ -6,7 +6,7 @@ namespace MyWideIO.API.Services.Interfaces
     public interface IVideoService
     {
         public Task<Stream> GetVideo(Guid id);
-        public Task<bool> RemoveVideoIfExist(Guid id);
+        public Task<bool> RemoveVideoIfExist(Guid id); // po co te boole
         public Task<bool> UpdateVideo(Guid id, VideoUploadDto dto);
         public Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto dto, Guid creatorId);
         public Task<bool> UploadVideoAsync(Guid id, string videoFile);

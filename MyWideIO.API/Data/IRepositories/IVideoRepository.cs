@@ -10,5 +10,6 @@ namespace MyWideIO.API.Data.IRepositories
         public void RemoveVideo(VideoModel video);
         public Task<bool> PutVideoData(Guid id, VideoUploadDto videoData);
         public Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto videoData, Guid creatorId);
+        public Task<bool> ModifyProcessingState(Guid id, ProcessingProgressDto state);
     }
 }

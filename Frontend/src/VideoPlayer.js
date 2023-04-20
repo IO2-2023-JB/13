@@ -21,7 +21,7 @@ const VideoPlayer = () => {
   //let video_id = params.videoid; //JSON.stringify(params.id)
   const baseURL = 'https://io2test.azurewebsites.net';
   console.log(auth.accessToken);
-  let video_id = "49FB7E85-23E3-47F3-904E-10170839F466"; //"ECF81211-C2B8-4A45-BC2A-61D339C29771";
+  let video_id = "1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   //const videoUrl = 'https://videioblob.blob.core.windows.net/video/sample-30s.mp4';
   const [errMsg, setErrMsg] = useState('');
@@ -108,8 +108,31 @@ const VideoPlayer = () => {
   };
 
   const handleDeleteClick = () => {
-    //usuwanie filmu
-
+    axios.delete(VIDEO_URL + "?id=" + video_id,
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true
+          }
+      ).then(response => {
+        navigate('/profile');
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+            setErrMsg('Unauthorised');
+        } else if(err.response?.status === 403){
+            setErrMsg('Forbidden');
+        } else if(err.response?.status === 404){
+          setErrMsg('Not found');
+        } else {
+            setErrMsg('Deleting video failed');
+        }
+      });
   };
 
   const handleCancelClick = () => {
@@ -120,8 +143,117 @@ const VideoPlayer = () => {
   };
 
   const handleSubmit = async (e) => {
-    
+    // e.preventDefault();
+    // const v1 = USER_REGEX.test(user);
+    // const v2 = NAME_REGEX.test(name)
+    // const v3 = NAME_REGEX.test(surname)
+    // const v4 = EMAIL_REGEX.test(email)
+    // if (!v1 || !v2 || !v3 || !v4) {
+    //     setErrMsg("Invalid Entry");
+    //     return;
+    // }
+    // try {
+    //   let response;
+    //   if(validprofile_picture)
+    //   {
+    //     const reader = new FileReader();
+    //     await reader.readAsDataURL(profile_picture);
+    //     let base64String;
+    //     reader.onload = () => {
+    //       base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach
+    //     };
+    //     setTimeout(async () => {
+    //     response = await axios.put(PROFILE_URL,
+    //         JSON.stringify({
+    //           nickname: user, 
+    //           name: name, 
+    //           surname: surname,
+    //           userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+    //           avatarImage: base64String
+    //         }),
+    //         {
+    //             headers: { 
+    //               'Content-Type': 'application/json',
+    //               'Authorization': `Bearer ${auth?.accessToken}`
+    //             },
+    //             withCredentials: true //cred
+    //         }
+    //     );
+    //     setData(response?.data);
+    //     setUserData({
+    //       firstName: data?.name,
+    //       lastName: data?.surname,
+    //       nickname: data?.nickname,
+    //       email: data?.email,
+    //       accountBalance: data?.accountBalance,
+    //       avatarImage: data?.avatarImage,
+    //       userType: data?.userType,
+    //     });
+    //     handleCancelClick();
+    //     window.location.reload()
+    //   }, 100);
+    //   }
+    //   else
+    //   {
+    //     let base64data = null;
+    //     if(userData.avatarImage){
+    //       //console.log(userData.avatarImage)
+    //       const imageUrl = userData.avatarImage+"?time="+new Date();
+    //       const response = await fetch(imageUrl);
+    //       const blob = await response.blob();
+    //       const reader = new FileReader();
+    //       reader.readAsDataURL(blob);
+    //       reader.onloadend = () => {
+    //         base64data = reader.result.split(",")[1];
+    //       }
+    //     }
+    //     else
+    //     {
+    //       base64data = "";
+    //     }
+    //     setTimeout(async () => {
+    //       response = await axios.put(PROFILE_URL,
+    //         JSON.stringify({
+    //           nickname: user, 
+    //           name: name, 
+    //           surname: surname,
+    //           userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+    //           avatarImage: base64data
+    //         }),
+    //         {
+    //             headers: { 
+    //               'Content-Type': 'application/json',
+    //               'Authorization': `Bearer ${auth?.accessToken}`
+    //             },
+    //             withCredentials: true //cred
+    //         }
+    //       );
+    //       setData(response?.data);
+    //       setUserData({
+    //         firstName: data?.name,
+    //         lastName: data?.surname,
+    //         nickname: data?.nickname,
+    //         email: data?.email,
+    //         accountBalance: data?.accountBalance,
+    //         avatarImage: data?.avatarImage,
+    //         userType: data?.userType,
+    //       });
+    //       handleCancelClick();
+    //     }, 100);
+    //   }
+    // } catch (err) {
+    //     if (!err?.response) {
+    //         setErrMsg('No Server Response');
+    //     } else if (err.response?.status === 401) {
+    //         setErrMsg('Unauthorized');
+    //     } else {
+    //         setErrMsg('Data Change Failed');
+    //     }
+    //     errRef.current.focus();
+    // }
   };
+
+  
 
   const handle_picture = (event) => {
 
@@ -133,7 +265,6 @@ const VideoPlayer = () => {
         setThumbnail_picture_name(file.name);
         setValidthumbnail_picture(true);
         setWrong_thumbnail_picture(false);
-        //}
     } else {
         setThumbnail_picture(null);
         setThumbnail_picture_name('');
@@ -172,7 +303,7 @@ const VideoPlayer = () => {
       <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0", marginBottom:"200px"}}>
         {videoData.description}
       </div>
-      {videoData.authorId == auth.id &&(
+      {!(videoData.authorId == auth.id) &&(
         <div>
         <button onClick={handleEditClick}>Edit video metadata</button>
         <button onClick={handleDeleteClick}>Delete video</button>

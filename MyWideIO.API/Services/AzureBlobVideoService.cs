@@ -62,8 +62,8 @@ namespace MyWideIO.API.Services
             // np jak jest Uploading
 
 
-            VideoModel video = await _videoRepository.GetVideoAsync(id); // nie user nowe trzeba zrobic wyjatki dla video
-            //VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new UserNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new UserNotFoundException(); // nie user nowe trzeba zrobic wyjatki dla video
+            
             switch (video.ProcessingProgress)
             {
                 case ProcessingProgressDto.MetadataRecordCreated:
@@ -105,6 +105,16 @@ namespace MyWideIO.API.Services
         public async Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto dto, Guid creatorId)
         {
             return await _videoRepository.UploadVideoMetadata(dto, creatorId);
+        }
+
+        public async Task UpdateVideoReaction(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto)
+        {
+            await _videoRepository.UpdateVideoReaction(videoId, viewerId, videoReactionUpdateDto);
+        }
+
+        public async Task<VideoReactionDto> GetVideoReaction(Guid videoId, Guid viewerId)
+        {
+            return await _videoRepository.GetVideoReaction(videoId, viewerId);
         }
 
     }

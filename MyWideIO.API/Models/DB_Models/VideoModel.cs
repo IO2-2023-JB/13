@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
+using WideIO.API.Models;
 
 namespace MyWideIO.API.Models.DB_Models
 {
@@ -25,7 +26,6 @@ namespace MyWideIO.API.Models.DB_Models
 
         public int NegativeReactions { get; set; }
 
-
         public ICollection<CommentModel> Comments { get; set; }
         public ICollection<TagModel> Tags { get; set; }
 
@@ -37,7 +37,7 @@ namespace MyWideIO.API.Models.DB_Models
         public string fileName { get; set; }
         public string Thumbnail { get; set; }
         public bool IsVisible { get; set; }
-
+        public ProcessingProgressDto ProcessingProgress { get; set; }
 
     }
 }

@@ -19,7 +19,16 @@ namespace MyWideIO.API.Data.Repositories
         {
             return await _dbContext.Videos.FindAsync(id);
         }
+        public async Task<bool> ModifyProcessingState(Guid id, ProcessingProgressDto state)
+        {
+            VideoModel? model = await GetVideoAsync(id);
+            if (model == null)
+                return false;
+            model.ProcessingProgress = state;
 
+            _dbContext.Update(model);
+            return true;
+        }
         public void RemoveVideo(VideoModel video)
         {
             _dbContext.Videos.Remove(video);
@@ -54,30 +63,32 @@ namespace MyWideIO.API.Data.Repositories
                 IsVisible = videoData.Visibility == VisibilityDto.PublicEnum,
                 PositiveReactions = 0,
                 NegativeReactions = 0,
-                fileName = "test",
+                fileName = "test", //TODO do poprawki
                 CreatorId = creatorId,
                 Thumbnail = "1",
+                ProcessingProgress = ProcessingProgressDto.MetadataRecordCreated,
             };
             videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t }));
-            
-            //VideoModel model2 = new VideoModel()
-            //{
-            //    Title = "a",
-            //    Description = "b",
-            //    Duration = 3,
-            //    IsVisible = true,
-            //    PositiveReactions = 0,
-            //    NegativeReactions = 0,
-            //    CreatorId = creatorId,
-            //    fileName = "asdf",
-            //    Thumbnail = "1",
-            //}; // for testing
+
+            /*VideoModel model2 = new VideoModel()
+            {
+                Title = "a",
+                Description = "b",
+                Duration = 3,
+                IsVisible = true,
+                PositiveReactions = 0,
+                NegativeReactions = 0,
+                CreatorId = creatorId,
+                fileName = "asdf",
+                Thumbnail = "1",
+            }; // for testing
+            */
 
             await _dbContext.AddAsync(model);
             await _dbContext.SaveChangesAsync();
 
             //( Title, Description, Duration, IsVisible, PositiveReactions, NegativeReactions,CreatorId, fileName, Thumbnail)
-            return new VideoUploadResponseDto(ProcessingProgressDto.ReadyEnum, model.Id);
+            return new VideoUploadResponseDto(model.ProcessingProgress, model.Id);
         }
     }
 

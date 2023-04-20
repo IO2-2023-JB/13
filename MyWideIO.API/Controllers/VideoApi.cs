@@ -132,13 +132,26 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         [HttpPost("{id}")]
-        [Consumes("application/json")]
+        [Consumes("multipart/form-data")]
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
-        public virtual IActionResult PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile) // cos w tym stylu
+        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile) // cos w tym stylu
         {
-            Stream s = videoFile.OpenReadStream();
-            throw new NotImplementedException();
+            
+            Stream vidStream = videoFile.OpenReadStream();
+            try
+            {
+                 await _videoService.UploadVideoAsync(id, vidStream);
+            }
+            catch (ApplicationException ex) // already uploading
+            {
+                return BadRequest(ex.Message); //BadRequest wtedy?
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
         }
         /// <summary>
         /// Video metadata retreival
@@ -182,6 +195,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="404">Not found</response>
+        /// <response code="500">Internal server error</response>
         [HttpPut("/video-metadata")]
         [Consumes("application/json")]
         [ValidateModelState]
@@ -194,6 +208,7 @@ namespace MyWideIO.API.Controllers
             }
             else
             {
+                
                 return BadRequest("No such video");
             }
             // await _videoService.UpdateVideo(id, videoUploadDto);

@@ -370,7 +370,7 @@ const Register = () => {
                             <text> I want to become a Creator</text>
                         </label>
 
-                        <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
+                        <button id="btn_submit" disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
                     </form>
                     <p>
                         Already registered? <br/>

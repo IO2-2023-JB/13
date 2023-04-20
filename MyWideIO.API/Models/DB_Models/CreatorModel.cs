@@ -4,7 +4,7 @@ using System.Data.SqlTypes;
 
 namespace MyWideIO.API.Models.DB_Models
 {
-    public class CreatorModel : ViewerModel
+    public class CreatorModel : AppUserModel
     {
         public ICollection<VideoModel> OwnedVideos { get; set; }
 

@@ -1,5 +1,7 @@
-﻿using MyVideIO.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using MyVideIO.Data;
 using MyWideIO.API.Data.IRepositories;
+using MyWideIO.API.Extensions;
 using MyWideIO.API.Models;
 using MyWideIO.API.Models.DB_Models;
 using WideIO.API.Models;
@@ -44,7 +46,7 @@ namespace MyWideIO.API.Data.Repositories
             model.Tags = new List<TagModel>();
             videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t }));
             model.IsVisible = videoData.Visibility == VisibilityDto.PublicEnum;
-            
+
             // TODO Thumbnail
 
             _dbContext.Update(model);
@@ -89,6 +91,52 @@ namespace MyWideIO.API.Data.Repositories
 
             //( Title, Description, Duration, IsVisible, PositiveReactions, NegativeReactions,CreatorId, fileName, Thumbnail)
             return new VideoUploadResponseDto(model.ProcessingProgress, model.Id);
+        }
+
+        public async Task UpdateVideoReaction(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto)
+        {
+            //ViewerLike viewerLike = await _dbContext.Likes
+            //.SingleOrDefaultAsync(vl => vl.ViewerId == viewerId && vl.VideoId == videoId);
+
+            var list = _dbContext.Likes
+            .Where(dbItem => (videoId == dbItem.VideoId && viewerId == dbItem.ViewerId)).ToList();
+
+            if (list != null)
+            {
+                list.ForEach(l => _dbContext.Likes.Remove(l));
+            }
+            ViewerLike viewerLike = new ViewerLike() { VideoId = videoId, ViewerId = viewerId, Reaction = videoReactionUpdateDto.Value };
+            _dbContext.Add(viewerLike);
+            _dbContext.SaveChanges();
+
+        }
+
+        public async Task<VideoReactionDto> GetVideoReaction(Guid videoId, Guid viewerId)
+        {
+            ReactionDto currUserReaction;
+            // CurrUser
+            var list = _dbContext.Likes
+            .Where(dbItem => (videoId == dbItem.VideoId && viewerId == dbItem.ViewerId)).ToList();
+            if (list != null)
+            {
+                list.ForEach(l => { if ((int)l.Reaction == 3) _dbContext.Likes.Remove(l); });
+            }
+            if (list != null) { currUserReaction = list[0].Reaction; }
+            else { currUserReaction = ReactionDto.None; }
+            _dbContext.SaveChanges();
+            //Count 
+            int positiveReviews = 0, negativeReviews = 0;
+            list = _dbContext.Likes
+           .Where(dbItem => (videoId == dbItem.VideoId)).ToList();
+            if (list != null)
+            {
+                list.ForEach(l =>
+                {
+                    if (((int)l.Reaction) % 2 != 0) { positiveReviews++; } else { negativeReviews++; } // założenie że ~E l.Reaction == 3
+                });
+            }
+
+            return new VideoReactionDto() { PositiveCount = positiveReviews, NegativeCount = negativeReviews, CurrentUserReaction = currUserReaction };
         }
     }
 

@@ -19,7 +19,7 @@ using Newtonsoft.Json;
 using WideIO.API.Converters;
 
 namespace WideIO.API.Models
-{ 
+{
     /// <summary>
     /// 
     /// </summary>
@@ -29,14 +29,20 @@ namespace WideIO.API.Models
         /// <summary>
         /// Gets or Sets PositiveCount
         /// </summary>
-        [DataMember(Name="positiveCount", EmitDefaultValue=true)]
+        [DataMember(Name = "positiveCount", EmitDefaultValue = true)]
         public int PositiveCount { get; set; }
 
         /// <summary>
         /// Gets or Sets NegativeCount
         /// </summary>
-        [DataMember(Name="negativeCount", EmitDefaultValue=true)]
+        [DataMember(Name = "negativeCount", EmitDefaultValue = true)]
         public int NegativeCount { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CurrentUserReaction
+        /// </summary>
+        [DataMember(Name = "currentUserReaction", EmitDefaultValue = true)]
+        public ReactionDto CurrentUserReaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -48,6 +54,7 @@ namespace WideIO.API.Models
             sb.Append("class VideoReactionDto {\n");
             sb.Append("  PositiveCount: ").Append(PositiveCount).Append("\n");
             sb.Append("  NegativeCount: ").Append(NegativeCount).Append("\n");
+            sb.Append("  CurrentUserReaction: ").Append(CurrentUserReaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -83,16 +90,21 @@ namespace WideIO.API.Models
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return 
+            return
                 (
                     PositiveCount == other.PositiveCount ||
-                    
+
                     PositiveCount.Equals(other.PositiveCount)
-                ) && 
+                ) &&
                 (
                     NegativeCount == other.NegativeCount ||
-                    
+
                     NegativeCount.Equals(other.NegativeCount)
+                ) &&
+                (
+                    CurrentUserReaction == other.CurrentUserReaction ||
+
+                    CurrentUserReaction.Equals(other.CurrentUserReaction)
                 );
         }
 
@@ -106,16 +118,18 @@ namespace WideIO.API.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    
-                    hashCode = hashCode * 59 + PositiveCount.GetHashCode();
-                    
-                    hashCode = hashCode * 59 + NegativeCount.GetHashCode();
+
+                hashCode = hashCode * 59 + PositiveCount.GetHashCode();
+
+                hashCode = hashCode * 59 + NegativeCount.GetHashCode();
+
+                hashCode = hashCode * 59 + CurrentUserReaction.GetHashCode();
                 return hashCode;
             }
         }
 
         #region Operators
-        #pragma warning disable 1591
+#pragma warning disable 1591
 
         public static bool operator ==(VideoReactionDto left, VideoReactionDto right)
         {
@@ -127,7 +141,7 @@ namespace WideIO.API.Models
             return !Equals(left, right);
         }
 
-        #pragma warning restore 1591
+#pragma warning restore 1591
         #endregion Operators
     }
 }

@@ -181,9 +181,21 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoReactions")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoReactionDto), description: "OK")]
-        public virtual IActionResult GetVideoReactions([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetVideoReactions([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            try
+            {
+               var a = await _videoService.GetVideoReaction(id, viewerId);
+                return Ok(a);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return BadRequest();
         }
 
         /// <summary>
@@ -208,7 +220,6 @@ namespace MyWideIO.API.Controllers
             }
             else
             {
-                
                 return BadRequest("No such video");
             }
             // await _videoService.UpdateVideo(id, videoUploadDto);
@@ -228,9 +239,20 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoReaction")]
-        public virtual IActionResult UpdateVideoReaction([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoReactionUpdateDto videoReactionUpdateDto)
+        public virtual async Task<IActionResult> UpdateVideoReaction([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoReactionUpdateDto videoReactionUpdateDto)
         {
-            throw new NotImplementedException();
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            try
+            {
+                await _videoService.UpdateVideoReaction(id, viewerId, videoReactionUpdateDto);
+            }
+            catch(Exception ex) 
+            {
+            
+            }
+
+
+            return Ok();
         }
 
         

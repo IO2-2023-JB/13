@@ -30,7 +30,7 @@ namespace MyWideIO.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ApiDbConnection")));
-            services.AddIdentity<ViewerModel, UserRole>(config =>
+            services.AddIdentity<AppUserModel, UserRole>(config =>
             {
                 config.SignIn.RequireConfirmedEmail = false;
                 config.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
@@ -40,12 +40,12 @@ namespace MyWideIO.API
             .AddDefaultTokenProviders();
             services.Configure<IdentityOptions>(options =>
             {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequiredUniqueChars = 1;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 4;
+                options.Password.RequiredUniqueChars = 0;
 
             });
             services.AddAzureClients(clientBuilder =>
@@ -142,7 +142,7 @@ namespace MyWideIO.API
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
-            var a = Enum.GetValues(typeof(UserTypeDto)).Cast<UserTypeDto>().Select(t=>t.ToString()).ToArray();
+
             CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
@@ -150,7 +150,7 @@ namespace MyWideIO.API
             // role init
             var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
             
-            string[] roleNames = { "Viewer", "Creator", "Admin" };
+            string[] roleNames = Enum.GetValues(typeof(UserTypeDto)).Cast<UserTypeDto>().Select(t => t.ToString()).ToArray();
 
             foreach (var roleName in roleNames)
             {

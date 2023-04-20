@@ -6,7 +6,7 @@ namespace MyWideIO.API.Models.DB_Models
 {
 
 
-    public class ViewerModel : IdentityUser<Guid>
+    public class AppUserModel : IdentityUser<Guid>
     {
         [Required]
         public string Name { get; set; } = string.Empty;

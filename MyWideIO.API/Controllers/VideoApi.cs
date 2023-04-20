@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using WideIO.API.Attributes;
 using WideIO.API.Models;
 
@@ -76,35 +78,80 @@ namespace MyWideIO.API.Controllers
         /// Video file retreival
         /// </summary>
         /// <param name="id">Video ID</param>
+        /// <param name="accessToken">Access token</param>
         /// <param name="range">VideoFileRange</param>
         /// <response code="200">OK</response>
         /// <response code="206">Partial Content</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="416">Range Not Satisfiable</response>
+        [AllowAnonymous]
         [HttpGet("{id}")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(Stream), description: "OK")]
         [SwaggerResponse(statusCode: 206, type: typeof(Stream), description: "Partial Content")]
-        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromHeader] string range)
+        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
         {
+            
+            // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
             var stream = await _videoService.GetVideo(id);
             return File(stream, "video/mp4", true);
         }
+
         /// <summary>
-        /// Video upload
+        /// Video metadata upload
         /// </summary>
         /// <param name="videoUploadDto"></param>
+        /// <param name="id"></param>
+        /// <response code="200">OK</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="401">Unauthorised</response>
+        [HttpPost("/video-metadata")]
+        [Consumes("application/json")]
+        [ValidateModelState]
+        [SwaggerOperation("UpdateVideoMetadata")]
+        [SwaggerResponse(statusCode: 200, type: typeof(VideoUploadResponseDto), description: "OK")]
+        [SwaggerResponse(statusCode: 400, description: "Bad request")]
+        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
+        public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
+        {
+            VideoUploadResponseDto result;
+            Guid CreatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            result = await _videoService.UploadVideoMetadata(videoUploadDto, CreatorId);
+
+            return Ok(result);
+
+        }
+
+        /// <summary>
+        /// Video file upload
+        /// </summary>
+        /// <param name="id">Video ID</param>
+        /// <param name="videoFile"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         [HttpPost("{id}")]
-        [Consumes("application/json")]
+        [Consumes("multipart/form-data")]
         [ValidateModelState]
-        [SwaggerOperation("UploadVideo")]
-        public virtual IActionResult UploadVideo([FromRoute(Name = "id")][Required] Guid id, [FromBody] VideoUploadDto videoUploadDto)
+        [SwaggerOperation("PostVideoFile")]
+        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile) // cos w tym stylu
         {
-            throw new NotImplementedException();
+            
+            Stream vidStream = videoFile.OpenReadStream();
+            try
+            {
+                 await _videoService.UploadVideoAsync(id, vidStream);
+            }
+            catch (ApplicationException ex) // already uploading
+            {
+                return BadRequest(ex.Message); //BadRequest wtedy?
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
         }
         /// <summary>
         /// Video metadata retreival
@@ -134,26 +181,49 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoReactions")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoReactionDto), description: "OK")]
-        public virtual IActionResult GetVideoReactions([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetVideoReactions([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            try
+            {
+               var a = await _videoService.GetVideoReaction(id, viewerId);
+                return Ok(a);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return BadRequest();
         }
 
         /// <summary>
         /// Video metadata update
         /// </summary>
         /// <param name="videoUploadDto"></param>
+        /// <param name="id"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="404">Not found</response>
+        /// <response code="500">Internal server error</response>
         [HttpPut("/video-metadata")]
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
-        public virtual IActionResult UpdateVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
+        public virtual async Task<IActionResult> UpdateVideoMetadata([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoUploadDto videoUploadDto)
         {
-            throw new NotImplementedException();
+            if (await _videoService.UpdateVideo(id, videoUploadDto))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("No such video");
+            }
+            // await _videoService.UpdateVideo(id, videoUploadDto);
+            // return Ok();
         }
 
         /// <summary>
@@ -169,9 +239,20 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoReaction")]
-        public virtual IActionResult UpdateVideoReaction([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoReactionUpdateDto videoReactionUpdateDto)
+        public virtual async Task<IActionResult> UpdateVideoReaction([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoReactionUpdateDto videoReactionUpdateDto)
         {
-            throw new NotImplementedException();
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            try
+            {
+                await _videoService.UpdateVideoReaction(id, viewerId, videoReactionUpdateDto);
+            }
+            catch(Exception ex) 
+            {
+            
+            }
+
+
+            return Ok();
         }
 
         

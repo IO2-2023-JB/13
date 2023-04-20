@@ -15,11 +15,11 @@ namespace MyWideIO.API.Services
         {
             _configuration = configuration;
         }
-        public string GenerateToken(ViewerModel viewer, IList<string> roles)
+        public string GenerateToken(AppUserModel user, IList<string> roles)
         {
             List<Claim> claims = new()
             {
-                new Claim(JwtRegisteredClaimNames.Sub,viewer.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub,user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()),
             };

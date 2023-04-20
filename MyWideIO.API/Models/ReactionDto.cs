@@ -15,35 +15,34 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using WideIO.API.Converters;
+using System.Text.Json.Serialization;
 
 namespace WideIO.API.Models
-{ 
+{
+    /// <summary>
+    /// Gets or Sets ReactionDto
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum ReactionDto
+    {
+
         /// <summary>
-        /// Gets or Sets ReactionDto
+        /// Enum Positive for Positive
         /// </summary>
-        [TypeConverter(typeof(CustomEnumConverter<ReactionDto>))]
-        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public enum ReactionDto
-        {
-            
-            /// <summary>
-            /// Enum PositiveEnum for Positive
-            /// </summary>
-            [EnumMember(Value = "Positive")]
-            PositiveEnum = 1,
-            
-            /// <summary>
-            /// Enum NegativeEnum for Negative
-            /// </summary>
-            [EnumMember(Value = "Negative")]
-            NegativeEnum = 2,
-            
-            /// <summary>
-            /// Enum NoneEnum for None
-            /// </summary>
-            [EnumMember(Value = "None")]
-            NoneEnum = 3
-        }
+        [EnumMember(Value = "Positive")]
+        Positive = 1,
+
+        /// <summary>
+        /// Enum Negative for Negative
+        /// </summary>
+        [EnumMember(Value = "Negative")]
+        Negative = 2,
+
+        /// <summary>
+        /// Enum None for None
+        /// </summary>
+        [EnumMember(Value = "None")]
+        None = 3
+    }
 }

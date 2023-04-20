@@ -50,7 +50,7 @@ namespace MyWideIO.API.Services
                     throw new UserException(result.Errors.First()?.Code);
                 }
 
-                if (registerDto.AvatarImage.Length > 0)
+                if (registerDto.AvatarImage is not null)
                 {
                     string imagePrefix = @"base64,";
                     if (registerDto.AvatarImage.Contains(imagePrefix))
@@ -93,14 +93,23 @@ namespace MyWideIO.API.Services
                 user.UserName = updateUserDto.Nickname;
 
                 // zmiana zdjecia
-                if (updateUserDto.AvatarImage.Contains(imagePrefix))
+                if (updateUserDto.AvatarImage is not null)
                 {
-                    updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
+                    if (updateUserDto.AvatarImage.Contains(imagePrefix))
+                    {
+                        updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
+                    }
                     (user.ProfilePicture, user.ProfilePictureFileName) = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
+                    if (user.ProfilePicture.Length == 0)
+                    {
+                        throw new UserException("Image upload error");
+                    }
                 }
-                if (user.ProfilePicture.Length == 0)
+                else if(user.ProfilePictureFileName is not null)
                 {
-                    throw new UserException("Image upload error");
+                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
+                    user.ProfilePictureFileName = null;
+                    user.ProfilePicture = null;
                 }
 
                 result = await _userManager.UpdateAsync(user); // tutaj zapisanie zmian w bazie
@@ -111,7 +120,7 @@ namespace MyWideIO.API.Services
 
                 // zmiana roli
                 string role = (await _userManager.GetRolesAsync(user)).First() ?? throw new UserException("User has no role");
-                string newRole =updateUserDto.UserType.ToString();
+                string newRole = updateUserDto.UserType.ToString();
                 if (newRole != role)
                 {
                     result = await _userManager.RemoveFromRoleAsync(user, role);
@@ -153,8 +162,8 @@ namespace MyWideIO.API.Services
                 Surname = user.Surname,
                 Email = user.Email,
                 Nickname = user.UserName,
-                UserType = (UserTypeDto)Enum.Parse(typeof(UserTypeDto),(await _userManager.GetRolesAsync(user)).First()),
-                AvatarImage = user.ProfilePicture ?? ""
+                UserType = (UserTypeDto)Enum.Parse(typeof(UserTypeDto), (await _userManager.GetRolesAsync(user)).First()),
+                AvatarImage = user.ProfilePicture
             };
         }
 

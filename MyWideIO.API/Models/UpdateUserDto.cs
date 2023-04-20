@@ -58,7 +58,7 @@ namespace WideIO.API.Models
         /// </summary>
         /// <example>&quot;https://example.com/avatar/user-id&quot;</example>
         [DataMember(Name="avatarImage", EmitDefaultValue=true)]
-        public string AvatarImage { get; set; }
+        public string? AvatarImage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

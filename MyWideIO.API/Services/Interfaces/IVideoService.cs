@@ -13,5 +13,6 @@ namespace MyWideIO.API.Services.Interfaces
         public Task UploadVideoAsync(Guid id, Stream videoFile);
         public Task UpdateVideoReaction(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto);
         public Task<VideoReactionDto> GetVideoReaction(Guid videoId, Guid viewerId);
+        public Task<VideoListDto> GetUserVideosAsync(Guid id);
     }
 }

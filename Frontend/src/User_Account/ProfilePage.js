@@ -229,7 +229,7 @@ useEffect(() => {
       userType: data?.userType,
     });
     let changeType = '';
-    if(userData.userType === 'Viewer')
+    if(userData.userType === 'Simple')
       changeType = "Creator";
     else if(userData.userType === 'Creator')
     {
@@ -239,7 +239,7 @@ useEffect(() => {
       if (!result) {
         return;
       }
-      changeType = "Viewer";
+      changeType = "Simple";
     }
     else
       return;
@@ -257,7 +257,7 @@ useEffect(() => {
     }
     else
     {
-      base64data = "";
+      base64data = null;
     }
       setTimeout(async () => {
         //console.log("base64:")
@@ -325,7 +325,7 @@ useEffect(() => {
               nickname: user, 
               name: name, 
               surname: surname,
-              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              userType: auth?.roles === "Simple" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
               avatarImage: base64String
             }),
             {
@@ -366,7 +366,7 @@ useEffect(() => {
         }
         else
         {
-          base64data = "";
+          base64data = null;
         }
         setTimeout(async () => {
           response = await axios.put(PROFILE_URL,
@@ -374,7 +374,7 @@ useEffect(() => {
               nickname: user, 
               name: name, 
               surname: surname,
-              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              userType: auth?.roles === "Simple" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
               avatarImage: base64data
             }),
             {
@@ -409,6 +409,7 @@ useEffect(() => {
         errRef.current.focus();
     }
 }
+
 const handleClick = () => {
   navigate('/videoplayer/122');
 } //todelete

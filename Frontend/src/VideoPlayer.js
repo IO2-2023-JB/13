@@ -21,7 +21,7 @@ const VideoPlayer = () => {
   //let video_id = params.videoid; //JSON.stringify(params.id)
   const baseURL = 'https://io2test.azurewebsites.net';
   console.log(auth.accessToken);
-  let video_id = "1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
+  let video_id = "30E78CA4-2238-4841-A48C-08DB41EB9486";//"1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   //const videoUrl = 'https://videioblob.blob.core.windows.net/video/sample-30s.mp4';
   const [errMsg, setErrMsg] = useState('');
@@ -52,6 +52,8 @@ const VideoPlayer = () => {
   const [titleFocus, setTitleFocus] = useState(false)
   const [description, setDescription] = useState('');
   const [descriptionFocus, setDescriptionFocus] = useState(false)
+  const [visibility, setVisibility] = useState(false);
+  const [visibilityFocus, setVisibilityFocus] = useState(false)
 
   const [thumbnail_picture, setThumbnail_picture] = useState(null);
   const [thumbnail_picture_name, setThumbnail_picture_name] = useState('');
@@ -143,106 +145,87 @@ const VideoPlayer = () => {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
-    // try {
-    //   let response;
-    //   if(validthumbnail_picture)
-    //   {
-    //     const reader = new FileReader();
-    //     await reader.readAsDataURL(thumbnail_picture);
-    //     let base64String;
-    //     reader.onload = () => {
-    //       base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach
-    //     };
-    //     setTimeout(async () => {
-    //     response = await axios.put(PROFILE_URL,
-    //         JSON.stringify({
-    //           nickname: user, 
-    //           name: name, 
-    //           surname: surname,
-    //           userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-    //           avatarImage: base64String
-    //         }),
-    //         {
-    //             headers: { 
-    //               'Content-Type': 'application/json',
-    //               'Authorization': `Bearer ${auth?.accessToken}`
-    //             },
-    //             withCredentials: true //cred
-    //         }
-    //     );
-    //     setData(response?.data);
-    //     setUserData({
-    //       firstName: data?.name,
-    //       lastName: data?.surname,
-    //       nickname: data?.nickname,
-    //       email: data?.email,
-    //       accountBalance: data?.accountBalance,
-    //       avatarImage: data?.avatarImage,
-    //       userType: data?.userType,
-    //     });
-    //     handleCancelClick();
-    //     window.location.reload()
-    //   }, 100);
-    //   }
-    //   else
-    //   {
-    //     let base64data = null;
-    //     if(userData.avatarImage){
-    //       //console.log(userData.avatarImage)
-    //       const imageUrl = userData.avatarImage+"?time="+new Date();
-    //       const response = await fetch(imageUrl);
-    //       const blob = await response.blob();
-    //       const reader = new FileReader();
-    //       reader.readAsDataURL(blob);
-    //       reader.onloadend = () => {
-    //         base64data = reader.result.split(",")[1];
-    //       }
-    //     }
-    //     else
-    //     {
-    //       base64data = "";
-    //     }
-    //     setTimeout(async () => {
-    //       response = await axios.put(PROFILE_URL,
-    //         JSON.stringify({
-    //           nickname: user, 
-    //           name: name, 
-    //           surname: surname,
-    //           userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
-    //           avatarImage: base64data
-    //         }),
-    //         {
-    //             headers: { 
-    //               'Content-Type': 'application/json',
-    //               'Authorization': `Bearer ${auth?.accessToken}`
-    //             },
-    //             withCredentials: true //cred
-    //         }
-    //       );
-    //       setData(response?.data);
-    //       setUserData({
-    //         firstName: data?.name,
-    //         lastName: data?.surname,
-    //         nickname: data?.nickname,
-    //         email: data?.email,
-    //         accountBalance: data?.accountBalance,
-    //         avatarImage: data?.avatarImage,
-    //         userType: data?.userType,
-    //       });
-    //       handleCancelClick();
-    //     }, 100);
-    //   }
-    // } catch (err) {
-    //     if (!err?.response) {
-    //         setErrMsg('No Server Response');
-    //     } else if (err.response?.status === 401) {
-    //         setErrMsg('Unauthorized');
-    //     } else {
-    //         setErrMsg('Data Change Failed');
-    //     }
-    //     errRef.current.focus();
-    // }
+    e.preventDefault();
+    try {
+      let response;
+      if(validthumbnail_picture)
+      {
+        const reader = new FileReader();
+        await reader.readAsDataURL(thumbnail_picture);
+        let base64String;
+        reader.onload = () => {
+          base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach
+        };
+        setTimeout(async () => {
+        response = await axios.put(METADATA_URL + "?id=" + video_id,
+            JSON.stringify({
+              title: title, 
+              description: description,
+              thumbnail: base64String,
+              tags: tags,
+              visibility: visibility?0:1
+            }),
+            {
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${auth?.accessToken}`
+                },
+                withCredentials: true //cred
+            }
+        );
+        //setVideoData(response?.data);
+        handleCancelClick();
+        window.location.reload()
+      }, 100);
+      }
+      else
+      {
+        let base64data = null;
+        if(videoData.thumbnail){
+          const imageUrl = videoData.thumbnail+"?time="+new Date();
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => {
+            base64data = reader.result.split(",")[1];
+          }
+        }
+        else
+        {
+          base64data = "";
+        }
+        setTimeout(async () => {
+          response = await axios.put(METADATA_URL + "?id=" + video_id,
+            JSON.stringify({
+              title: title, 
+              description: description,
+              thumbnail: base64data,
+              tags: tags,
+              visibility: visibility?0:1
+            }),
+            {
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${auth?.accessToken}`
+                },
+                withCredentials: true //cred
+            }
+          );
+          //setVideoData(response?.data);
+          handleCancelClick();
+        }, 100);
+      }
+    } catch (err) {
+        if (!err?.response) {
+            setErrMsg('No Server Response');
+        } else if (err.response?.status === 401) {
+            setErrMsg('Unauthorized');
+        } else {
+            setErrMsg('Data Change Failed');
+        }
+        errRef.current.focus();
+    }
   };
 
   
@@ -310,8 +293,6 @@ const VideoPlayer = () => {
             <form onSubmit={handleSubmit}>
                         <label htmlFor="title">
                             Title:
-                            <FontAwesomeIcon icon={faCheck} className={title ? "valid" : "hide"} />
-                            <FontAwesomeIcon icon={faTimes} className={!title ? "hide" : "invalid"} />
                         </label>
                         <input
                             type="text"
@@ -328,8 +309,6 @@ const VideoPlayer = () => {
 
                         <label htmlFor="description">
                             Description:
-                            <FontAwesomeIcon icon={faCheck} className={description ? "valid" : "hide"} />
-                            <FontAwesomeIcon icon={faTimes} className={!description ? "hide" : "invalid"} />
                         </label>
                         <input
                             type="text"
@@ -346,8 +325,6 @@ const VideoPlayer = () => {
 
                         <label htmlFor="tags">
                             Tags:
-                            <FontAwesomeIcon icon={faCheck} className={tags ? "valid" : "hide"} />
-                            <FontAwesomeIcon icon={faTimes} className={!tags ? "hide" : "invalid"} />
                         </label>
                         <input
                             type="text"
@@ -363,9 +340,7 @@ const VideoPlayer = () => {
                         />
 
                         <label htmlFor="thumbnail_picture">
-                            New Thumbnail (Optional):
-                            <FontAwesomeIcon icon={faCheck} className={validthumbnail_picture && thumbnail_picture ? "valid" : "hide"} />
-                            <FontAwesomeIcon icon={faTimes} className={!wrong_thumbnail_picture ? "hide" : "invalid"} />
+                            Thumbnail (Optional):
                         </label>
                         <input
                             type="file"
@@ -385,6 +360,15 @@ const VideoPlayer = () => {
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Must be image up to 5 MB!
                         </p>
+                        <label htmlFor="terms">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                onChange={() => setVisibility(!visibility)}
+                                checked={visibility}
+                            />
+                            <text> I want my video to be public</text>
+                        </label>
 
                         <button disabled={!tags || !title || !description ? true : false}>Submit</button>
                     </form>

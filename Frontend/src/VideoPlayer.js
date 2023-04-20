@@ -267,40 +267,45 @@ const VideoPlayer = () => {
   }
 
   return (
-    <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", marginTop: "200px", width: "900px"}}>
-      <div class="container-fluid justify-content-center" style={{marginTop: "200px", width: "900px"}}>
+    <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
+      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+      <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
 
-        <video id="videoPlayer" width="650" controls>
+        <video id="videoPlayer" width="830" controls>
           <source src={videoUrl} type="video/mp4" />
         </video>
         
       </div>
       {!editMode?(
-        <div>
-      <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"0"}}>  {/*className="movie_title"*/}
-        {videoData.title}
-      </div>
-      <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"0"}}>
-        Author: {videoData.authorNickname}
-      </div>
-      <div class="container-fluid justify-content-center" style={{fontSize:"25px", marginTop:"0"}}>
-        Views: {videoData.viewCount}
-      </div>
-      <div class="container-fluid justify-content-center" style={{fontSize:"25px", marginTop:"0"}}>
-        Upload date: {videoData.uploadDate}
-      </div>
-      <div class="container-fluid justify-content-center" style={{fontSize:"25px", marginTop:"0"}}>
-        Tags: {videoData.tags.join(", ")}
-      </div>
-      <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0", marginBottom:"200px"}}>
-        {videoData.description}
-      </div>
-      {!(videoData.authorId == auth.id) &&(
-        <div>
-        <button onClick={handleEditClick}>Edit video metadata</button>
-        <button onClick={handleDeleteClick}>Delete video</button>
-        </div>
-      )}
+      <div class="container-fluid" style={{backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+          <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
+            <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>  {/*className="movie_title"*/}
+              {videoData.title}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0px", paddingTop:"12px", height:"60px"}}>
+              Author: {videoData.authorNickname}
+            </div>
+          </div>
+          <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
+              Views: {videoData.viewCount}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
+              Upload date: {videoData.uploadDate}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
+              Tags: {videoData.tags.join(", ")}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0", marginBottom:"200px"}}>
+              {videoData.description}
+            </div>
+          </div>
+          {!(videoData.authorId == auth.id) &&(
+            <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+              <button onClick={handleEditClick} style={{marginRight:"20px"}}>Edit video metadata</button>
+              <button onClick={handleDeleteClick}>Delete video</button>
+            </div>
+          )}
       </div>
       ):(
         <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 

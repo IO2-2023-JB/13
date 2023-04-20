@@ -144,20 +144,12 @@ const VideoPlayer = () => {
 
   const handleSubmit = async (e) => {
     // e.preventDefault();
-    // const v1 = USER_REGEX.test(user);
-    // const v2 = NAME_REGEX.test(name)
-    // const v3 = NAME_REGEX.test(surname)
-    // const v4 = EMAIL_REGEX.test(email)
-    // if (!v1 || !v2 || !v3 || !v4) {
-    //     setErrMsg("Invalid Entry");
-    //     return;
-    // }
     // try {
     //   let response;
-    //   if(validprofile_picture)
+    //   if(validthumbnail_picture)
     //   {
     //     const reader = new FileReader();
-    //     await reader.readAsDataURL(profile_picture);
+    //     await reader.readAsDataURL(thumbnail_picture);
     //     let base64String;
     //     reader.onload = () => {
     //       base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach

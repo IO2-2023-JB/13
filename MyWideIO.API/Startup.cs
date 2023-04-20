@@ -14,6 +14,7 @@ using MyWideIO.API.Services.Interfaces;
 using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
+using WideIO.API.Models;
 
 namespace MyWideIO.API
 {
@@ -141,12 +142,14 @@ namespace MyWideIO.API
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
-            //CreateRoles(services.BuildServiceProvider()).Wait();
+            var a = Enum.GetValues(typeof(UserTypeDto)).Cast<UserTypeDto>().Select(t=>t.ToString()).ToArray();
+            CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {
             // role init
             var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
+            
             string[] roleNames = { "Viewer", "Creator", "Admin" };
 
             foreach (var roleName in roleNames)
@@ -158,19 +161,26 @@ namespace MyWideIO.API
         }
         public void Configure(IApplicationBuilder app)
         {
+
             {
-                app.UseSwagger(c =>
-                {
-                    c.RouteTemplate = "openapi/{documentName}/openapi.json";
-                });
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/openapi/1.0.6/openapi.json", "VideIO API");
+                });
+                app.UseSwagger(c =>
+                {
+                    c.RouteTemplate = "openapi/{documentName}/openapi.json";
+                    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+                    {
+                        swaggerDoc.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/api" } };
+                    });
                 });
             }
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
+
+            app.UsePathBase("/api");
 
             app.UseRouting();
 

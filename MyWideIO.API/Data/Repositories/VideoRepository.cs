@@ -43,7 +43,7 @@ namespace MyWideIO.API.Data.Repositories
             return true;
         }
 
-        Task<VideoUploadResponseDto> IVideoRepository.UploadVideoMetadata(VideoUploadDto videoData, Guid creatorId)
+        public async Task<VideoUploadResponseDto> UploadVideoMetadata(VideoUploadDto videoData, Guid creatorId)
         {
             VideoModel model = new VideoModel()
             {
@@ -73,11 +73,11 @@ namespace MyWideIO.API.Data.Repositories
             //    Thumbnail = "1",
             //}; // for testing
 
-            _dbContext.Add(model);
-            _dbContext.SaveChanges();
+            await _dbContext.AddAsync(model);
+            await _dbContext.SaveChangesAsync();
 
             //( Title, Description, Duration, IsVisible, PositiveReactions, NegativeReactions,CreatorId, fileName, Thumbnail)
-            return Task.FromResult(new VideoUploadResponseDto(ProcessingProgressDto.ReadyEnum, model.Id));
+            return new VideoUploadResponseDto(ProcessingProgressDto.ReadyEnum, model.Id);
         }
     }
 

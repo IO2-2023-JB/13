@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
@@ -83,6 +84,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="206">Partial Content</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="416">Range Not Satisfiable</response>
+        [AllowAnonymous]
         [HttpGet("{id}")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
@@ -90,6 +92,7 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 206, type: typeof(Stream), description: "Partial Content")]
         public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
         {
+            
             // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
             var stream = await _videoService.GetVideo(id);
             return File(stream, "video/mp4", true);
@@ -132,9 +135,9 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
-        public virtual IActionResult PostVideoFile([FromRoute(Name = "id")][Required] Guid id, IFormFile videoFile) // cos w tym stylu
+        public virtual IActionResult PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile) // cos w tym stylu
         {
-            // Stream s = videoFile.OpenReadStream();
+            Stream s = videoFile.OpenReadStream();
             throw new NotImplementedException();
         }
         /// <summary>

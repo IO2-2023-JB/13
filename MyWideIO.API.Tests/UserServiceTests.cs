@@ -12,8 +12,8 @@ namespace MyWideIO.API.Tests
 {
     public class UserServiceTests
     {
-        private readonly Mock<UserManager<ViewerModel>> _mockUserManager;
-        private readonly Mock<SignInManager<ViewerModel>> _mockSignInManager;
+        private readonly Mock<UserManager<AppUserModel>> _mockUserManager;
+        private readonly Mock<SignInManager<AppUserModel>> _mockSignInManager;
         private readonly Mock<ITokenService> _mockTokenService;
         private readonly Mock<IImageService> _mockImageService;
         private readonly Mock<ITransactionService> _mockTransactionService;
@@ -21,11 +21,11 @@ namespace MyWideIO.API.Tests
 
         public UserServiceTests()
         {
-            _mockUserManager = new Mock<UserManager<ViewerModel>>(
-                Mock.Of<IUserStore<ViewerModel>>(), null, null, null, null, null, new IdentityErrorDescriber(), null, null);
+            _mockUserManager = new Mock<UserManager<AppUserModel>>(
+                Mock.Of<IUserStore<AppUserModel>>(), null, null, null, null, null, new IdentityErrorDescriber(), null, null);
 
-            _mockSignInManager = new Mock<SignInManager<ViewerModel>>(
-                _mockUserManager.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<ViewerModel>>(), null, null, null, null);
+            _mockSignInManager = new Mock<SignInManager<AppUserModel>>(
+                _mockUserManager.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<AppUserModel>>(), null, null, null, null);
 
             _mockTokenService = new Mock<ITokenService>();
             _mockImageService = new Mock<IImageService>();
@@ -44,17 +44,17 @@ namespace MyWideIO.API.Tests
                 Surname = "User",
                 Nickname = "testuser",
                 Password = "password",
-                UserType = UserTypeDto.Viewer,
+                UserType = UserTypeDto.Simple,
                 AvatarImage = "base64-image"
             };
 
-            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ViewerModel>(), It.IsAny<string>()))
+            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
 
-            _mockUserManager.Setup(x => x.UpdateAsync(It.IsAny<ViewerModel>()))
+            _mockUserManager.Setup(x => x.UpdateAsync(It.IsAny<AppUserModel>()))
                 .ReturnsAsync(IdentityResult.Success);
 
-            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ViewerModel>(), It.IsAny<string>()))
+            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
 
             _mockImageService.Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -77,11 +77,11 @@ namespace MyWideIO.API.Tests
                 Surname = "User",
                 Nickname = "testuser",
                 Password = "password",
-                UserType = UserTypeDto.Viewer,
+                UserType = UserTypeDto.Simple,
                 AvatarImage = "base64-image"
             };
 
-            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ViewerModel>(), It.IsAny<string>()))
+            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityErrorDescriber().DuplicateEmail(registerDto.Email)));
             // nie trzeba mockowac wiecej, RegisterUserAsync rzuci wyjatkiem na poczatku i inne metody sie nie wywolaja
 

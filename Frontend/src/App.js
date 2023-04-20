@@ -139,7 +139,7 @@ function App() {
         </button>
       </nav>
       <nav style={{marginTop: "80px"}} className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-        <ul className='nav-menu-items' onClick={showSidebar}>
+        <ul style={{paddingLeft:"0px"}} className='nav-menu-items' onClick={showSidebar}>
           <li className='navbar-toggle'>
             <Link to='#' className='menu-bars'>
               <AiIcons.AiOutlineClose />
@@ -149,8 +149,8 @@ function App() {
             return (
               <li key={index} className={item.cName}>
                 <Link to={item.path}>
+                  <span style={{marginRight:"10px"}}>{item.title}</span>
                   {item.icon}
-                  <span>{item.title}</span>
                 </Link>
               </li>
             );

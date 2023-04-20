@@ -157,7 +157,7 @@ namespace MyWideIO.API.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)
         {
             await _userService.RegisterUserAsync(registerDto);
-            return Ok();
+            return StatusCode(201);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace MyWideIO.API.Models.DB_Models
     public class ViewerWatchLater
     {
         public Guid ViewerId { get; set; }
-        public ViewerModel Viewer { get; set; }
+        public AppUserModel Viewer { get; set; }
 
         public Guid VideoId { get; set; }
         public VideoModel Video { get; set; }
@@ -15,7 +15,7 @@ namespace MyWideIO.API.Models.DB_Models
     public class ViewerSubscription
     {
         public Guid ViewerId { get; set; }
-        public ViewerModel Viewer { get; set; }
+        public AppUserModel Viewer { get; set; }
 
         public Guid CreatorId { get; set; }
         public CreatorModel Creator { get; set; }
@@ -26,7 +26,8 @@ namespace MyWideIO.API.Models.DB_Models
     public class ViewerLike
     {
         public Guid ViewerId { get; set; }
-        public ViewerModel Viewer { get; set; }
+        public AppUserModel Viewer { get; set; }
+
         public Guid VideoId { get; set; }
         public VideoModel Video { get; set; }
         public ReactionDto Reaction { get; set; }

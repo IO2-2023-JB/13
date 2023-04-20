@@ -434,7 +434,7 @@ return (
               <label>Email:</label>
               <div>{userData.email}</div>
               <div>
-                <button onClick={handleEditClick}>Edit</button>
+                <button onClick={handleEditClick} class="btn btn-dark">Edit</button>
               </div>
             </section>
 

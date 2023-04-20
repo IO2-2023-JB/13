@@ -1,4 +1,7 @@
-﻿namespace MyWideIO.API.Models.DB_Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using WideIO.API.Models;
+
+namespace MyWideIO.API.Models.DB_Models
 {
     public class ViewerWatchLater
     {
@@ -27,6 +30,8 @@
 
         public Guid VideoId { get; set; }
         public VideoModel Video { get; set; }
+        public ReactionDto Reaction { get; set; }
+
     }
 
     public class VideoPlaylist

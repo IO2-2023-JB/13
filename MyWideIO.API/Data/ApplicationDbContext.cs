@@ -14,6 +14,7 @@ namespace MyVideIO.Data
         public DbSet<VideoModel> Videos { get; set; }
         public DbSet<PlaylistModel> Playlists { get; set; }
         public DbSet<CommentModel> Comments { get; set; }
+        public DbSet<ViewerLike> Likes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 

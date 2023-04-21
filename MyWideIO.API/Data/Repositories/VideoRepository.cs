@@ -32,9 +32,18 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext.Update(model);
             return true;
         }
+
         public void RemoveVideo(VideoModel video)
         {
-            _dbContext.Videos.Remove(video);
+            try
+            {
+                _dbContext.Videos.Remove(video);
+                _dbContext.SaveChanges();
+            }
+            catch(Exception e)
+            {
+
+            }
         }
 
         public async Task<bool> PutVideoData(Guid id, VideoUploadDto videoData, IImageService imageService)
@@ -45,7 +54,7 @@ namespace MyWideIO.API.Data.Repositories
             model.Title = videoData.Title;
             model.Description = videoData.Description;
             model.Tags = new List<TagModel>();
-            videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t }));
+            videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t, Parent=model }));
             model.IsVisible = videoData.Visibility == VisibilityDto.PublicEnum;
 
             // TODO Thumbnail
@@ -73,7 +82,7 @@ namespace MyWideIO.API.Data.Repositories
                 Thumbnail = "1",
                 ProcessingProgress = ProcessingProgressDto.MetadataRecordCreated,
             };
-            videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t }));
+            videoData.Tags.ForEach(t => model.Tags.Add(new TagModel() { Id = new Guid(), Content = t, Parent=model }));
 
             /*VideoModel model2 = new VideoModel()
             {

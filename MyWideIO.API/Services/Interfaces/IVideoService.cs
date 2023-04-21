@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using MyWideIO.API.Models.DB_Models;
+using Microsoft.AspNetCore.Mvc;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Services.Interfaces

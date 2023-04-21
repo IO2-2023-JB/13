@@ -8,5 +8,7 @@ namespace MyWideIO.API.Models.DB_Models
 
         [StringLength(500)]
         public string Content { get; set; }
+
+        public VideoModel Parent { get; set; }
     }
 }

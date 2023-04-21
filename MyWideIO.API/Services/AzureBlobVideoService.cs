@@ -150,5 +150,27 @@ namespace MyWideIO.API.Services
             return await _videoRepository.GetVideoReaction(videoId, viewerId);
         }
 
+        public async Task<VideoListDto> GetUserVideosAsync(Guid id)
+        {
+            return new VideoListDto
+            {
+                Videos = (await _videoRepository.GetUserVideosAsync(id)).Select(v => new VideoMetadataDto
+                {
+                    Id = v.Id,
+                    Title = v.Title,
+                    Description = v.Description,
+                    Thumbnail = v.Thumbnail,
+                    AuthorId = v.CreatorId,
+                    //AuthorNickname = v?.Creator.UserName,
+                    ViewCount = 0, // ??
+                    Visibility = v.IsVisible?VisibilityDto.PublicEnum:VisibilityDto.PrivateEnum,
+                    ProcessingProgress = v.ProcessingProgress,
+                    //Tags = v?.Tags.Select(t=>t.Content).ToList(),
+                    UploadDate = DateTime.Now, // ??
+                    EditDate = DateTime.Now, // ??
+                    Duration = v.Duration.ToString() // ??
+                }).ToList()
+            };
+        }
     }
 }

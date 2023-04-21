@@ -133,7 +133,7 @@ const Register = () => {
                 setTimeout(async () => {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: base64String }),
+                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Simple", AvatarImage: base64String }),
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
@@ -145,7 +145,7 @@ const Register = () => {
             {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: "" }), //userType: "Simple"
+                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Simple", AvatarImage: null }), //userType: "Simple"
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred

@@ -130,7 +130,7 @@ const AddVideo = () => {
             //setVideoData(response?.data);
             const formData = new FormData();
             formData.append('videoFile', selectedFile);
-            const response2 = await axios.post(VIDEO_URL + "?id=" + response?.data.id, 
+            const response2 = await axios.post(VIDEO_URL + "/" + response?.data.id, 
                 formData,
                 {
                     headers: { 

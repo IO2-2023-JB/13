@@ -13,5 +13,6 @@ namespace MyWideIO.API.Data.IRepositories
         public Task<bool> ModifyProcessingState(Guid id, ProcessingProgressDto state);
         public Task UpdateVideoReaction(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto);
         public Task<VideoReactionDto> GetVideoReaction(Guid videoId, Guid viewerId);
+        public Task<List<VideoModel>> GetUserVideosAsync(Guid id);
     }
 }

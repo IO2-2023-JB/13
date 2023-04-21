@@ -231,8 +231,9 @@ const AddVideo = () => {
 
     return (
         <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
-    <h1>Edit video metadata</h1>
-    <section>
+    <h1 class="display-3" style={{marginBottom:"60px"}}>Upload your video</h1>
+    <section class="container-fluid justify-content-center mb-5" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
         <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
         <form onSubmit={handleSubmit}>
                     <label htmlFor="title">
@@ -284,6 +285,7 @@ const AddVideo = () => {
                         New Thumbnail (Optional):
                     </label>
                     <input
+                        class="btn btn-dark"
                         type="file"
                         accept="image/*"
                         id="thumbnail_picture"
@@ -311,9 +313,11 @@ const AddVideo = () => {
                         <text> I want my video to be public</text>
                     </label>
 
-                    <h1 style={{color: "white"}}>Upload your video</h1>
+                    <label htmlFor="video">
+                        Video File:
+                    </label>
                     <input
-                        style ={{marginTop:"100px"}}
+                        class="btn btn-dark"
                         type="file"
                         accept="video/*"
                         id="video"
@@ -321,9 +325,9 @@ const AddVideo = () => {
                     />
 
 
-                    <button disabled={!tags || !title || !description ? true : false}>Submit</button>
+                    <button class="btn btn-dark" disabled={!tags || !title || !description ? true : false}>Submit</button>
                 </form>
-                <button onClick={handleCancelClick}>Cancel</button>
+                <button class="btn btn-dark" onClick={handleCancelClick}>Cancel</button>
     
   
         {/* <section class="container-fluid justify-content-center" style={{marginTop:"200px"}}>

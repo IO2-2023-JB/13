@@ -7,19 +7,19 @@ export class Administrator extends Component{
         return(
             <div class="col-xs-1"style={{marginTop:"200px"}}>
                 <div class="row mt-5">
-                    <h1 class="display-1 mx-5">Reported users</h1>
+                    <h1 class="display-3 mx-5">Reported users</h1>
                     <section>
 
                     </section>
                 </div>
                 <div class="row mt-5">
-                    <h1 class="display-1 mx-5">Reported videos</h1>
+                    <h1 class="display-3 mx-5">Reported videos</h1>
                     <section>
                         
                     </section>
                 </div>
                 <div class="row mt-5">
-                    <h1 class="display-1 mx-5">Requests for support ticket</h1>
+                    <h1 class="display-3 mx-5">Requests for support ticket</h1>
                     <section>
 
                     </section>

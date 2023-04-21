@@ -13,6 +13,6 @@ namespace MyWideIO.API.Models.DB_Models
         public ICollection<VideoPlaylist> VideoPlaylists { get; set; }
 
         public Guid ViewerId { get; set; }
-        public ViewerModel Viewer { get; set; }
+        public AppUserModel Viewer { get; set; }
     }
 }

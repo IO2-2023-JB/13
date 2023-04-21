@@ -7,13 +7,14 @@ using MyWideIO.API.Data;
 
 namespace MyVideIO.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ViewerModel, UserRole, Guid>
+    public class ApplicationDbContext : IdentityDbContext<AppUserModel, UserRole, Guid>
     {
-        public DbSet<ViewerModel> Viewers { get; set; }
+        public DbSet<AppUserModel> Users { get; set; }
         public DbSet<CreatorModel> Creators { get; set; }
         public DbSet<VideoModel> Videos { get; set; }
         public DbSet<PlaylistModel> Playlists { get; set; }
         public DbSet<CommentModel> Comments { get; set; }
+        public DbSet<ViewerLike> Likes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -99,7 +100,12 @@ namespace MyVideIO.Data
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            
+            modelBuilder.Entity<VideoModel>()
+                .HasMany(v => v.Tags)
+                .WithOne(v => v.Parent)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         }
     }
 }

@@ -3,6 +3,7 @@ import {faCheck, faTimes, faInfoCircle  } from "@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
+import {useLocation} from 'react-router-dom';
 import axios from '../api/axios';
 config.autoAddCss = false;
 
@@ -13,6 +14,7 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const REGISTER_URL = '/register';
 
 const Register = () => {
+    const location = useLocation();
     const userRef = useRef();
     const nameRef = useRef();
     const surnameRef = useRef();
@@ -48,8 +50,14 @@ const Register = () => {
     const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
     const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
 
+    const [isCreatorChecked, setIsCreatorChecked] = useState(false);
+
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem("lastVisitedPage", location.pathname);
+    })
 
     useEffect(() => {
         userRef.current.focus();
@@ -116,21 +124,16 @@ const Register = () => {
             let response;
             if(validprofile_picture)
             {
-                //console.log(profile_picture);
                 const reader = new FileReader();
                 reader.readAsDataURL(profile_picture);
                 let base64String;
                 reader.onload = () => {
-                    //console.log(reader.result);
                     base64String = reader.result.split(",")[1];
-                    //console.log(base64String);
                 };
-                
-                //console.log(base64String);
                 setTimeout(async () => {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: 1, AvatarImage: base64String }),
+                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: base64String }),
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
@@ -142,16 +145,16 @@ const Register = () => {
             {
                 response = await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: 1, AvatarImage: "" }), //userType: "Simple"
+                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: "" }), //userType: "Simple"
                     {
                         headers: { 'Content-Type': 'application/json' },
                         withCredentials: true //cred
                     }
                 );
             }
-            console.log(response?.data);
-            console.log(response?.accessToken);
-            console.log(JSON.stringify(response))
+            //console.log(response?.data);
+            //console.log(response?.accessToken);
+            //console.log(JSON.stringify(response))
             setSuccess(true);
             setUser('');
             setPwd('');
@@ -185,7 +188,7 @@ const Register = () => {
                 </p>
             </section>
         ): (
-        <section class="container-fluid justify-content-center" style={{marginTop:"200px"}}>
+        <section class="container-fluid justify-content-center" style={{marginTop:"200px", color: "white"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
@@ -357,7 +360,17 @@ const Register = () => {
                             Must be image up to 5 MB!
                         </p>
 
-                        <button disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
+                        <label htmlFor="terms">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                onChange={() => setIsCreatorChecked(!isCreatorChecked)}
+                                checked={isCreatorChecked}
+                            />
+                            <text> I want to become a Creator</text>
+                        </label>
+
+                        <button id="btn_submit" disabled={!validNickname || !validName || !validSurname || !validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
                     </form>
                     <p>
                         Already registered? <br/>

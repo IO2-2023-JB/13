@@ -15,7 +15,7 @@ namespace MyWideIO.API.Models.DB_Models
 
 
         public Guid AuthorId { get; set; }
-        public ViewerModel Author { get; set; }
+        public AppUserModel Author { get; set; }
 
         public Guid? ParentCommentId { get; set; }
         public CommentModel ParentComment { get; set; }

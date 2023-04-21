@@ -1,310 +1,345 @@
-import {useRef, useState, useEffect } from "react"
-import {faCheck, faTimes, faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import '@fortawesome/fontawesome-svg-core/styles.css';
-import { config } from '@fortawesome/fontawesome-svg-core';
-import {useLocation} from 'react-router-dom';
+import React, { Component } from 'react';
 import axios from './api/axios';
-config.autoAddCss = false;
-
-const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
-const NAME_REGEX = /^[A-Z][a-z]{2,17}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const REGISTER_URL = '/register';
+import {faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import {useRef, useState, useEffect } from "react"
+import AuthContext from "./context/AuthProvider"
+import { useContext } from "react";
+import {useLocation, useNavigate} from 'react-router-dom';
+import { useParams } from "react-router-dom";
 const VIDEO_URL = '/video';
 
+const METADATA_URL = '/video-metadata';
+
 const AddVideo = () => {
-
+    const [selectedFile, setSelectedFile] = useState(null);
+    
+    
+    const params = useParams();
     const location = useLocation();
-    const userRef = useRef();
-    const nameRef = useRef();
-    const surnameRef = useRef();
-    const emailRef = useRef();
-    const errRef = useRef();
-    const [user, setUser] = useState('');
-    const [validNickname, setValidNickname] = useState(false);
-    const [userFocus, setUserFocus] = useState(false);
+    const { auth } = useContext(AuthContext);
+    const navigate = useNavigate();
+    //let video_id = params.videoid; //JSON.stringify(params.id)
+    const baseURL = 'https://io2test.azurewebsites.net';
+    console.log(auth.accessToken);
+    let video_id = "1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
+    let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
+    //const videoUrl = 'https://videioblob.blob.core.windows.net/video/sample-30s.mp4';
 
-    const [pwd, setPwd] = useState('');
-    const [validPwd, setValidPwd] = useState(false);
-    const [pwdFocus, setPwdFocus] = useState(false);
-
-    const [matchPwd, setMatchPwd] = useState('');
-    const [validMatch, setValidMatch] = useState(false);
-    const [matchFocus, setMatchFocus] = useState(false);
-
-    const [name, setName] = useState('');
-    const [validName, setValidName] = useState(false);
-    const [nameFocus, setNameFocus] = useState(false);
-
-    const [surname, setSurname] = useState('');
-    const [validSurname, setValidSurname] = useState(false);
-    const [surnameFocus, setSurnameFocus] = useState(false);
-
-    const [email, setEmail] = useState('');
-    const [validEmail, setValidEmail] = useState(false);
-    const [emailFocus, setEmailFocus] = useState(false);
-
-    const [profile_picture, setProfile_picture] = useState(null);
-    const [profile_picture_name, setProfile_picture_name] = useState('');
-    const [validprofile_picture, setValidprofile_picture] = useState(false);
-    const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
-    const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
-
-    const [isCreatorChecked, setIsCreatorChecked] = useState(false);
+    const tagsRef = useRef();
+    const titleRef = useRef();
+    const descriptionRef = useRef();
 
     const [errMsg, setErrMsg] = useState('');
-    const [success, setSuccess] = useState(false);
+    const errRef = useRef();
+    const [videoData, setVideoData] = useState({
+      id: "",
+      title: "Loading...",
+      description: "Loading...",
+      thumbnail: "",
+      authorId: "",
+      authorNickname: "Loading...",
+      viewCount: 0,
+      tags:  [
+        "tag1"
+      ],
+      visibility: "Private",
+      processingProgress: "",
+      uploadDate: "",
+      editDate: "",
+      duration: "",
 
-    useEffect(() => {
-        localStorage.setItem("lastVisitedPage", location.pathname);
-    })
+    });
+    
 
-    useEffect(() => {
-        userRef.current.focus();
-    }, [])
+    const [tags, setTags] = useState(["tag1"]);
+    const [tagsFocus, setTagsFocus] = useState(false)
+    const [title, setTitle] = useState("");
+    const [titleFocus, setTitleFocus] = useState(false)
+    const [description, setDescription] = useState('');
+    const [descriptionFocus, setDescriptionFocus] = useState(false)
+    const [visibility, setVisibility] = useState(false);
+    const [visibilityFocus, setVisibilityFocus] = useState(false)
 
-    useEffect(() => {
-        setValidNickname(USER_REGEX.test(user));
-    }, [user])
-
-    useEffect(() => {
-        setValidPwd(PWD_REGEX.test(pwd));
-        setValidMatch(pwd === matchPwd);
-    }, [pwd, matchPwd])
-
-    useEffect(() => {
-        setErrMsg('');
-    }, [user, pwd, matchPwd])
-
-    useEffect(() => {
-        setValidName(NAME_REGEX.test(name));
-    }, [name])
-
-    useEffect(() => {
-        setValidSurname(NAME_REGEX.test(surname));
-    }, [surname])
-
-    useEffect(() => {
-        setValidEmail(EMAIL_REGEX.test(email));
-    }, [email])
+    const [thumbnail_picture, setThumbnail_picture] = useState(null);
+    const [thumbnail_picture_name, setThumbnail_picture_name] = useState('');
+    const [validthumbnail_picture, setValidthumbnail_picture] = useState(false);
+    const [thumbnail_pictureFocus, setThumbnail_pictureFocus] = useState(false);
+    const [wrong_thumbnail_picture, setWrong_thumbnail_picture] = useState(false);
 
     const onChangeHandler = (event) => {
-        this.setState({
-            selectedFile: event.target.files[0],
-            loaded: 0,
-        });
+        setSelectedFile(event.target.files[0]);
         console.log(event.target.files[0]);
     };
+    const handleCancelClick = () => {
+        setTitle(videoData.title);
+        setDescription(videoData.description);
+        setTags(videoData.tags);
+        navigate('/profile');
+    };
     
+
     const handle_picture = (event) => {
 
         const file = event.target.files[0];
         const maxSize = 5 * 1024 * 1024; // 5 MB
-
+    
         if (file && file.size <= maxSize) {
-            //console.log(file.type);
-            setProfile_picture(file);
-            setProfile_picture_name(file.name);
-            setValidprofile_picture(true);
-            setWrong_profile_picture(false);
+            setThumbnail_picture(file);
+            setThumbnail_picture_name(file.name);
+            setValidthumbnail_picture(true);
+            setWrong_thumbnail_picture(false);
         } else {
-            setProfile_picture(null);
-            setProfile_picture_name('');
-            setValidprofile_picture(false);
-            setWrong_profile_picture(true);
+            setThumbnail_picture(null);
+            setThumbnail_picture_name('');
+            setValidthumbnail_picture(false);
+            setWrong_thumbnail_picture(true);
             alert("Choose a file format .jpg or .png with a maximum size of 5MB.");
         }
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // if button enabled with JS hack
-        const v1 = USER_REGEX.test(user);
-        const v2 = PWD_REGEX.test(pwd);
-        const v3 = NAME_REGEX.test(name)
-        const v4 = NAME_REGEX.test(surname)
-        const v5 = EMAIL_REGEX.test(email)
-        if (!v1 || !v2 || !v3 || !v4 || !v5) {
-            setErrMsg("Invalid Entry");
-            return;
-        }
         try {
-            let response;
-            if(validprofile_picture)
-            {
-                const reader = new FileReader();
-                reader.readAsDataURL(profile_picture);
-                let base64String;
-                reader.onload = () => {
-                    base64String = reader.result.split(",")[1];
-                };
-                setTimeout(async () => {
-                response = await axios.post(REGISTER_URL,
-                    JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: base64String }),
-                    {
-                        headers: { 'Content-Type': 'application/json' },
-                        withCredentials: true //cred
-                    }
-                );
-                }, 1000);
+          let response;
+          if(validthumbnail_picture)
+          {
+            const reader = new FileReader();
+            await reader.readAsDataURL(thumbnail_picture);
+            let base64String;
+            reader.onload = () => {
+              base64String = reader.result.split(",")[1]; //to może być nie ucięte w innych grupach
+            };
+            setTimeout(async () => {
+            response = await axios.post(METADATA_URL,
+                JSON.stringify({
+                  title: title, 
+                  description: description,
+                  thumbnail: base64String,
+                  tags: tags,
+                  visibility: visibility?0:1
+                }),
+                {
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${auth?.accessToken}`
+                    },
+                    withCredentials: true //cred
+                }
+            );
+            //setVideoData(response?.data);
+            const formData = new FormData();
+            formData.append('videoFile', selectedFile);
+            const response2 = await axios.post(VIDEO_URL + "?id=" + response?.data.id, 
+                formData,
+                {
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${auth?.accessToken}`
+                    },
+                    withCredentials: true //cred
+                }
+              );
+            handleCancelClick();
+            //window.location.reload()
+          }, 100);
+          }
+          else
+          {
+            let base64data = null;
+            if(videoData.thumbnail){
+              const imageUrl = videoData.thumbnail+"?time="+new Date();
+              const response = await fetch(imageUrl);
+              const blob = await response.blob();
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                base64data = reader.result.split(",")[1];
+              }
             }
             else
             {
-                response = await axios.post(REGISTER_URL,
-                    JSON.stringify({ email: email, nickname: user, name: name, 
-                        surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Viewer", AvatarImage: "" }), //userType: "Simple"
-                    {
-                        headers: { 'Content-Type': 'application/json' },
-                        withCredentials: true //cred
-                    }
-                );
+              base64data = "";
             }
-            //console.log(response?.data);
-            //console.log(response?.accessToken);
-            //console.log(JSON.stringify(response))
-            setSuccess(true);
-            setUser('');
-            setPwd('');
-            setMatchPwd('');
-            setEmail('')
-            setName('')
-            setSurname('')
+            setTimeout(async () => {
+              response = await axios.post(METADATA_URL,
+                JSON.stringify({
+                  title: title, 
+                  description: description,
+                  thumbnail: base64data,
+                  tags: tags,
+                  visibility: visibility?0:1
+                }),
+                {
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${auth?.accessToken}`
+                    },
+                    withCredentials: true //cred
+                }
+              );
+              const formData = new FormData();
+            formData.append('videoFile', selectedFile);
+            const response2 = await axios.post(VIDEO_URL + "/" + response?.data.id,
+                formData,
+                {
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${auth?.accessToken}`
+                    },
+                    withCredentials: true //cred
+                }
+              );
+              //setVideoData(response?.data);
+              handleCancelClick();
+            }, 100);
+          }
+
+            
+
         } catch (err) {
             if (!err?.response) {
                 setErrMsg('No Server Response');
-            } else if (err.response?.status === 400) {
-                setErrMsg('Registration Failed');
-            } else if(err?.status === 409){
-                setErrMsg('A user with this e-mail address already exists');
+            } else if (err.response?.status === 401) {
+                setErrMsg('Unauthorized');
             } else {
-                setErrMsg('Registration Failed')
+                setErrMsg('Data Change Failed');
             }
             errRef.current.focus();
         }
-    }
+      };
+
+    // const handleSubmit = (event) => {
+    //     event.preventDefault();
+    //     const formData = new FormData();
+    //     const { selectedFile } = this.state;
+    //     formData.append('title', 'test');
+    //     formData.append('description', 'test');
+    //     formData.append('thumbnail', {  position: 0,
+    //                                     readTimeout: 0,
+    //                                     writeTimeout: 0 });
+    //     formData.append('tags', ["xD"]);
+    //     formData.append('inputFile', selectedFile);
+    //     fetch(VIDEO_URL, {
+    //         method: 'POST',
+    //         body: formData,
+    //     });
+    // }
+
+
+
 
     return (
-        <section class="container-fluid justify-content-center" style={{marginTop:"200px"}}>
+        <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
+    <h1>Edit video metadata</h1>
+    <section>
+        <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
+        <form onSubmit={handleSubmit}>
+                    <label htmlFor="title">
+                        Title:
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        ref={titleRef}
+                        autoComplete="off"
+                        onChange={(e) => setTitle(e.target.value)}
+                        value={title}
+                        required
+                        aria-describedby="uidnote"
+                        onFocus={() => setTitleFocus(true)}
+                        onBlur={() => setTitleFocus(false)}
+                    />
+                    <label htmlFor="description">
+                        Description:
+                    </label>
+                    <input
+                        type="text"
+                        id="description"
+                        ref={descriptionRef}
+                        autoComplete="off"
+                        onChange={(e) => setDescription(e.target.value)}
+                        value={description}
+                        required
+                        aria-describedby="uidnote"
+                        onFocus={() => setDescriptionFocus(true)}
+                        onBlur={() => setDescriptionFocus(false)}
+                    />
+                    <label htmlFor="tags">
+                        Tags:
+                    </label>
+                    <input
+                        type="text"
+                        id="tags"
+                        ref={tagsRef}
+                        autoComplete="off"
+                        onChange={(e) => setTags(e.target.value)}
+                        value={tags}
+                        required
+                        aria-describedby="uidnote"
+                        onFocus={() => setTagsFocus(true)}
+                        onBlur={() => setTagsFocus(false)}
+                    />
+                    <label htmlFor="thumbnail_picture">
+                        New Thumbnail (Optional):
+                    </label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="thumbnail_picture"
+                        //key={profile_picture}
+                        onChange={handle_picture}
+                        defaultValue={thumbnail_picture_name}
+                        //value={profile_picture_name}
+                        //required
+                        //aria-invalid={validMatch ? "false" : "true"}//
+                        aria-describedby="confirmnote"
+                        onFocus={() => setThumbnail_pictureFocus(true)}
+                        onBlur={() => setThumbnail_pictureFocus(false)}
+                    />
+                    <p id="confirmnote" className={!validthumbnail_picture ? "instructions" : "offscreen"}>
+                        <FontAwesomeIcon icon={faInfoCircle} />
+                        Must be image up to 5 MB!
+                    </p>
+                    <label htmlFor="terms">
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            onChange={() => setVisibility(!visibility)}
+                            checked={visibility}
+                        />
+                        <text> I want my video to be public</text>
+                    </label>
+
+                    <h1 style={{color: "white"}}>Upload your video</h1>
+                    <input
+                        style ={{marginTop:"100px"}}
+                        type="file"
+                        accept="video/*"
+                        id="video"
+                        onChange={onChangeHandler}
+                    />
+
+
+                    <button disabled={!tags || !title || !description ? true : false}>Submit</button>
+                </form>
+                <button onClick={handleCancelClick}>Cancel</button>
+    
+  
+        {/* <section class="container-fluid justify-content-center" style={{marginTop:"200px"}}>
             <h1 style={{color: "white"}}>Upload your video</h1>
             
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="name">
-                    Title:
-                    <FontAwesomeIcon icon={faCheck} className={validName ? "valid" : "hide"} />
-                    <FontAwesomeIcon icon={faTimes} className={validName || !name ? "hide" : "invalid"} />
-                </label>
-                <input
-                    type="text"
-                    id="name"
-                    ref={nameRef}
-                    autoComplete="off"
-                    onChange={(e) => setName(e.target.value)}
-                    value={name}
-                    required
-                    aria-invalid={validName ? "false" : "true"}
-                    aria-describedby="uidnote"
-                    onFocus={() => setNameFocus(true)}
-                    onBlur={() => setNameFocus(false)}
-                />
-                <p id="uidnote" className={nameFocus && name && !validName ? "instructions" : "offscreen"}>
-                    <FontAwesomeIcon icon={faInfoCircle} />
-                    3 to 18 characters.<br />
-                    Must begin with a capital letter.<br />
-                    Only letters allowed.
-                </p>
-
-                <label htmlFor="surname">
-                    Description:
-                    <FontAwesomeIcon icon={faCheck} className={validSurname ? "valid" : "hide"} />
-                    <FontAwesomeIcon icon={faTimes} className={validSurname || !surname ? "hide" : "invalid"} />
-                </label>
-                <input
-                    type="text"
-                    id="surname"
-                    ref={surnameRef}
-                    autoComplete="off"
-                    onChange={(e) => setSurname(e.target.value)}
-                    value={surname}
-                    required
-                    aria-invalid={validSurname ? "false" : "true"}
-                    aria-describedby="uidnote"
-                    onFocus={() => setSurnameFocus(true)}
-                    onBlur={() => setSurnameFocus(false)}
-                />
-                <p id="uidnote" className={surnameFocus && surname && !validSurname ? "instructions" : "offscreen"}>
-                    <FontAwesomeIcon icon={faInfoCircle} />
-                    3 to 18 characters.<br />
-                    Must begin with a capital letter.<br />
-                    Only letters allowed.
-                </p>
-
-                <label htmlFor="username">
-                    Tags:
-                    <FontAwesomeIcon icon={faCheck} className={validNickname ? "valid" : "hide"} />
-                    <FontAwesomeIcon icon={faTimes} className={validNickname || !user ? "hide" : "invalid"} />
-                </label>
-                <input
-                    type="text"
-                    id="username"
-                    ref={userRef}
-                    autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
-                    required
-                    aria-invalid={validNickname ? "false" : "true"}
-                    aria-describedby="uidnote"
-                    onFocus={() => setUserFocus(true)}
-                    onBlur={() => setUserFocus(false)}
-                />
-                <p id="uidnote" className={userFocus && user && !validNickname ? "instructions" : "offscreen"}>
-                    <FontAwesomeIcon icon={faInfoCircle} />
-                    4 to 24 characters.<br />
-                    Must begin with a letter.<br />
-                    Letters, numbers, underscores, hyphens allowed.
-                </p>
-
-                <label htmlFor="profile_picture">
-                    Thumbnail:
-                    <FontAwesomeIcon icon={faCheck} className={validprofile_picture && profile_picture ? "valid" : "hide"} />
-                    <FontAwesomeIcon icon={faTimes} className={!wrong_profile_picture ? "hide" : "invalid"} /> {/* validprofile_picture || !profile_picture */}
-                </label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    id="profile_picture"
-                    //key={profile_picture}
-                    onChange={handle_picture}
-                    defaultValue={profile_picture_name}
-                    //value={profile_picture_name}
-                    //required
-                    aria-invalid={!wrong_profile_picture ? "false" : "true"}//
-                    aria-describedby="confirmnote"
-                    onFocus={() => setProfile_pictureFocus(true)}
-                    onBlur={() => setProfile_pictureFocus(false)}
-                />
-                <p id="confirmnote" className={!validprofile_picture ? "instructions" : "offscreen"}> {/*profile_pictureFocus && */ }
-                    <FontAwesomeIcon icon={faInfoCircle} />
-                    Must be image up to 5 MB!
-                </p>
-
-                <label htmlFor="video_file">
-                    Video file:
-                    <FontAwesomeIcon icon={faCheck} className={validprofile_picture && profile_picture ? "valid" : "hide"} />
-                    <FontAwesomeIcon icon={faTimes} className={!wrong_profile_picture ? "hide" : "invalid"} /> {/* validprofile_picture || !profile_picture */}
-                </label>
-                <input
-                    type="file"
-                    accept="video/*"
-                    id="video"
-                    onChange={onChangeHandler}
-                />
-                <button onClick={handleSubmit}>Upload</button>
-            </form>
+            <input 
+                style ={{marginTop:"100px"}}
+                type="file"
+                accept="video/*"
+                id="video"
+                onChange={onChangeHandler}
+            />
+            <button onClick={handleSubmit}>Upload</button>
+        </section> */}
         </section>
+    </div>
     )
 }
-
 export default AddVideo

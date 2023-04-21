@@ -14,9 +14,12 @@ import {cookies} from '../App'
 config.autoAddCss = false;
 
 const PROFILE_URL = '/user';
+const VIDEO_URL = '/video';
+const USER_VIDEOS_URL = '/user/videos'
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const NAME_REGEX = /^[A-Z][a-z]{2,17}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 
 const ProfilePage = () => {
 
@@ -28,6 +31,8 @@ const ProfilePage = () => {
   const [success, setSuccess] = useState(false);
 
   const [data, setData] = useState(null);
+
+  const [videosdata, setVideosdata] = useState(null); //dane z filmami w formacie takim w jakim wysyła je api
 
   const location = useLocation();
 
@@ -50,6 +55,21 @@ useEffect(() => {
   .catch(error => {
     console.log("error: ", error);
   });
+
+  axios.get(USER_VIDEOS_URL + "?id=" + auth?.id, {
+    headers: { 
+      'Content-Type': 'application/json',
+      "Authorization" : `Bearer ${auth?.accessToken}`
+    },
+    withCredentials: true 
+  })
+  .then(response => {
+    setVideosdata(response?.data);
+  })
+  .catch(error => {
+    console.log("error: ", error);
+  });
+
 }, [auth?.accessToken, auth?.id]);
 
 const [userData, setUserData] = useState({
@@ -229,7 +249,7 @@ useEffect(() => {
       userType: data?.userType,
     });
     let changeType = '';
-    if(userData.userType === 'Viewer')
+    if(userData.userType === 'Simple')
       changeType = "Creator";
     else if(userData.userType === 'Creator')
     {
@@ -239,7 +259,7 @@ useEffect(() => {
       if (!result) {
         return;
       }
-      changeType = "Viewer";
+      changeType = "Simple";
     }
     else
       return;
@@ -257,7 +277,7 @@ useEffect(() => {
     }
     else
     {
-      base64data = "";
+      base64data = null;
     }
       setTimeout(async () => {
         //console.log("base64:")
@@ -325,7 +345,7 @@ useEffect(() => {
               nickname: user, 
               name: name, 
               surname: surname,
-              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              userType: auth?.roles === "Simple" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
               avatarImage: base64String
             }),
             {
@@ -366,7 +386,7 @@ useEffect(() => {
         }
         else
         {
-          base64data = "";
+          base64data = null;
         }
         setTimeout(async () => {
           response = await axios.put(PROFILE_URL,
@@ -374,7 +394,7 @@ useEffect(() => {
               nickname: user, 
               name: name, 
               surname: surname,
-              userType: auth?.roles === "Viewer" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
+              userType: auth?.roles === "Simple" ? 1 : (auth?.roles === "Creator" ? 2 : 3),
               avatarImage: base64data
             }),
             {
@@ -409,6 +429,7 @@ useEffect(() => {
         errRef.current.focus();
     }
 }
+
 const handleClick = () => {
   navigate('/videoplayer/122');
 } //todelete

@@ -18,12 +18,12 @@ const VideoPlayer = () => {
   const location = useLocation();
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
-  //let video_id = params.videoid; //JSON.stringify(params.id)
+  let video_id = params.videoid; //JSON.stringify(params.id)
   const baseURL = 'https://io2test.azurewebsites.net';
   console.log(auth.accessToken);
-  let video_id = "DEB7E530-5E54-4373-4F4C-08DB4206C401";//"1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
+  //let video_id;// = "7373CB25-946C-460A-F7C8-08DB425CABE3";//"1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
-  //const videoUrl = 'https://videioblob.blob.core.windows.net/video/sample-30s.mp4';
+  const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
   const errRef = useRef();
   const [videoData, setVideoData] = useState({
@@ -34,7 +34,7 @@ const VideoPlayer = () => {
     authorId: "",
     authorNickname: "Loading...",
     viewCount: 0,
-    tags: ["tag1", "tag2", "tag3"],
+    tags: ["loading"],
     visibility: "Private",
     processingProgress: "",
     uploadDate: "",
@@ -46,7 +46,7 @@ const VideoPlayer = () => {
   const titleRef = useRef();
   const descriptionRef = useRef();
 
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState([]);
   const [tagsFocus, setTagsFocus] = useState(false)
   const [title, setTitle] = useState("");
   const [titleFocus, setTitleFocus] = useState(false)
@@ -66,16 +66,20 @@ const VideoPlayer = () => {
   })
 
   useEffect(() => {
-    // if(!video_id)
-    // {
-    //   video_id = "ECF81211-C2B8-4A45-BC2A-61D339C29771";
-    //   videoUrl = VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
-    // }
+    if(params.videoid)
+    {
+      video_id = params.videoid;
+      videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
+    }
+    else
+    {
+      video_id = "7373CB25-946C-460A-F7C8-08DB425CABE3";
+      videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
+      const videoElement = videoRef.current;
+      videoElement.src = videoUrl;
+      videoElement.load();
+    }//to delete
     if(video_id){
-      //console.log('video_id:');
-      //console.log(video_id);
-      //get video
-
       //get video metadata:
       axios.get(METADATA_URL + "?id=" + video_id,
           {
@@ -103,7 +107,7 @@ const VideoPlayer = () => {
         }
       });
     }
-  })
+  }, [params.videoid])
 
   const handleEditClick = () => {
     setEditMode(true);
@@ -163,7 +167,7 @@ const VideoPlayer = () => {
               description: description,
               thumbnail: base64String,
               tags: tags,
-              visibility: visibility?0:1
+              visibility: visibility?"Public":"Private"
             }),
             {
                 headers: { 
@@ -202,7 +206,7 @@ const VideoPlayer = () => {
               description: description,
               thumbnail: base64data,
               tags: tags,
-              visibility: visibility?0:1
+              visibility: visibility?"Public":"Private"
             }),
             {
                 headers: { 
@@ -254,7 +258,7 @@ const VideoPlayer = () => {
       justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
       <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
 
-        <video id="videoPlayer" width="830" controls>
+        <video id="videoPlayer" width="830" controls ref={videoRef}>
           <source src={videoUrl} type="video/mp4" />
         </video>
         
@@ -366,7 +370,7 @@ const VideoPlayer = () => {
                             id="tags"
                             ref={tagsRef}
                             autoComplete="off"
-                            onChange={(e) => setTags(e.target.value)}
+                            onChange={(e) => setTags(e.target.value.split(', '))}
                             value={tags}
                             required
                             aria-describedby="uidnote"

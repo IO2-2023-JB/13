@@ -34,15 +34,13 @@ const AddVideo = () => {
     const errRef = useRef();
     const [videoData, setVideoData] = useState({
       id: "",
-      title: "Loading...",
-      description: "Loading...",
+      title: "",
+      description: "",
       thumbnail: "",
       authorId: "",
-      authorNickname: "Loading...",
+      authorNickname: "",
       viewCount: 0,
-      tags:  [
-        "tag1"
-      ],
+      tags:  [],
       visibility: "Private",
       processingProgress: "",
       uploadDate: "",
@@ -52,7 +50,7 @@ const AddVideo = () => {
     });
     
 
-    const [tags, setTags] = useState(["tag1"]);
+    const [tags, setTags] = useState([]);
     const [tagsFocus, setTagsFocus] = useState(false)
     const [title, setTitle] = useState("");
     const [titleFocus, setTitleFocus] = useState(false)
@@ -117,7 +115,7 @@ const AddVideo = () => {
                   description: description,
                   thumbnail: base64String,
                   tags: tags,
-                  visibility: visibility?0:1
+                  visibility: visibility?"Public":"Private"
                 }),
                 {
                     headers: { 
@@ -274,7 +272,7 @@ const AddVideo = () => {
                         id="tags"
                         ref={tagsRef}
                         autoComplete="off"
-                        onChange={(e) => setTags(e.target.value)}
+                        onChange={(e) => setTags(e.target.value.split(', '))}
                         value={tags}
                         required
                         aria-describedby="uidnote"

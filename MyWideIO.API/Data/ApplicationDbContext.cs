@@ -100,7 +100,12 @@ namespace MyVideIO.Data
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            
+            modelBuilder.Entity<VideoModel>()
+                .HasMany(v => v.Tags)
+                .WithOne(v => v.Parent)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         }
     }
 }

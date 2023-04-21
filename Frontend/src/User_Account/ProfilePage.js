@@ -14,9 +14,12 @@ import {cookies} from '../App'
 config.autoAddCss = false;
 
 const PROFILE_URL = '/user';
+const VIDEO_URL = '/video';
+const USER_VIDEOS_URL = '/user/videos'
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const NAME_REGEX = /^[A-Z][a-z]{2,17}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 
 const ProfilePage = () => {
 
@@ -28,6 +31,8 @@ const ProfilePage = () => {
   const [success, setSuccess] = useState(false);
 
   const [data, setData] = useState(null);
+
+  const [videosdata, setVideosdata] = useState(null); //dane z filmami w formacie takim w jakim wysyła je api
 
   const location = useLocation();
 
@@ -50,6 +55,21 @@ useEffect(() => {
   .catch(error => {
     console.log("error: ", error);
   });
+
+  axios.get(USER_VIDEOS_URL + "?id=" + auth?.id, {
+    headers: { 
+      'Content-Type': 'application/json',
+      "Authorization" : `Bearer ${auth?.accessToken}`
+    },
+    withCredentials: true 
+  })
+  .then(response => {
+    setVideosdata(response?.data);
+  })
+  .catch(error => {
+    console.log("error: ", error);
+  });
+
 }, [auth?.accessToken, auth?.id]);
 
 const [userData, setUserData] = useState({

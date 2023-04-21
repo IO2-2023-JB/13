@@ -2,8 +2,10 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MyWideIO.API.Exceptions;
+using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using SixLabors.ImageSharp.Formats;
+using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -32,6 +34,17 @@ namespace MyWideIO.API.Services
             if (response.IsError)
             {
                 throw new UserException("Image removal error");
+            }
+        }
+
+        public string GetImageBase64(string fileName)
+        {
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+
+            using(var br = new BinaryReader(blobClient.OpenRead()))
+            {
+                byte[] file = br.ReadBytes((int)br.BaseStream.Length);
+                return Convert.ToBase64String(file);
             }
         }
 

@@ -4,6 +4,7 @@ using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Extensions;
 using MyWideIO.API.Models;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Services.Interfaces;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Data.Repositories
@@ -36,7 +37,7 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext.Videos.Remove(video);
         }
 
-        public async Task<bool> PutVideoData(Guid id, VideoUploadDto videoData)
+        public async Task<bool> PutVideoData(Guid id, VideoUploadDto videoData, IImageService imageService)
         {
             VideoModel? model = await GetVideoAsync(id);
             if (model == null)
@@ -48,8 +49,10 @@ namespace MyWideIO.API.Data.Repositories
             model.IsVisible = videoData.Visibility == VisibilityDto.PublicEnum;
 
             // TODO Thumbnail
+            (string a, string b) = await imageService.UploadImageAsync(videoData.Thumbnail, "thumbnail_" + id.ToString());
 
             _dbContext.Update(model);
+            _dbContext.SaveChanges();
 
             return true;
         }

@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models;
@@ -17,8 +18,9 @@ namespace MyWideIO.API.Services
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _blobContainerClient;
         private readonly string containerName = "video";
+        private readonly IImageService _imageService;
 
-        public AzureBlobVideoService(BlobServiceClient blobServiceClient, IVideoRepository videoRepository)
+        public AzureBlobVideoService(BlobServiceClient blobServiceClient, IVideoRepository videoRepository, IImageService imageService)
         {
             _blobServiceClient = blobServiceClient;
             _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
@@ -28,6 +30,7 @@ namespace MyWideIO.API.Services
             }
             _blobContainerClient.SetAccessPolicy(PublicAccessType.BlobContainer);
             _videoRepository = videoRepository;
+            _imageService = imageService;
         }
 
         public async Task<Stream> GetVideo(Guid id)
@@ -53,7 +56,37 @@ namespace MyWideIO.API.Services
 
         public async Task<bool> UpdateVideo(Guid id, VideoUploadDto dto)
         {
-            return await _videoRepository.PutVideoData(id, dto);
+            return await _videoRepository.PutVideoData(id, dto, _imageService);
+        }
+
+
+
+        public async Task<VideoMetadataDto> GetVideoMetadata(Guid id)
+        {
+            VideoModel? model = await _videoRepository.GetVideoAsync(id);
+            if (model == null)
+                throw new ArgumentException("No video of given id");
+
+            List<string> tgs = new List<string>();
+            if(model.Tags != null)
+                foreach (var t in model.Tags) 
+                    tgs.Add(t.Content);
+
+            return new VideoMetadataDto()
+            {
+                Id = id,
+                Title = model.Title,
+                Description = model.Description,
+                Thumbnail = _imageService.GetImageBase64("thumbnail_" + id.ToString() + ".png"),
+                AuthorId = model.CreatorId,
+                AuthorNickname = "TEST", // test
+                ViewCount = 1, // test
+                Tags = tgs,
+                Visibility = model.IsVisible ? VisibilityDto.PublicEnum : VisibilityDto.PrivateEnum,
+                ProcessingProgress = model.ProcessingProgress,
+                EditDate = DateTime.Now, // test
+                Duration = model.Duration.ToString()
+            };
         }
 
         public async Task UploadVideoAsync(Guid id, Stream videoStream) // raczej Stream video

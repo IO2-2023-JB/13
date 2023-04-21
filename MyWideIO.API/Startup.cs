@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
@@ -141,6 +142,11 @@ namespace MyWideIO.API
                 config.DocumentFilter<BasePathFilter>("/VideIO/1.0.6");
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
+            });
+
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = int.MaxValue; //:)
             });
 
             CreateRoles(services.BuildServiceProvider()).Wait();

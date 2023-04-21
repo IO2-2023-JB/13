@@ -165,9 +165,17 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoMetadata")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoMetadataDto), description: "OK")]
-        public virtual IActionResult GetVideoMetadata([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetVideoMetadata([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                VideoMetadataDto model = await _videoService.GetVideoMetadata(id);
+                return Ok(model);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         /// <summary>
@@ -248,7 +256,7 @@ namespace MyWideIO.API.Controllers
             }
             catch(Exception ex) 
             {
-            
+                return BadRequest(ex.Message);
             }
 
 

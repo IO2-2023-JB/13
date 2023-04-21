@@ -15,5 +15,6 @@
         /// <param name="fileName">image file name</param>
         /// <returns></returns>
         public Task RemoveImageAsync(string fileName);
+        public string GetImageBase64(string fileName);
     }
 }

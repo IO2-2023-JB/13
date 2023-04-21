@@ -21,7 +21,7 @@ const VideoPlayer = () => {
   //let video_id = params.videoid; //JSON.stringify(params.id)
   const baseURL = 'https://io2test.azurewebsites.net';
   console.log(auth.accessToken);
-  let video_id = "30E78CA4-2238-4841-A48C-08DB41EB9486";//"1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
+  let video_id = "DEB7E530-5E54-4373-4F4C-08DB4206C401";//"1637AEEF-B0AC-4E41-7FCB-08DB4119B61C";//"1AC6B4F2-9E85-457D-EC26-08DB4106DCA2"; 
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   //const videoUrl = 'https://videioblob.blob.core.windows.net/video/sample-30s.mp4';
   const [errMsg, setErrMsg] = useState('');
@@ -110,7 +110,7 @@ const VideoPlayer = () => {
   };
 
   const handleDeleteClick = () => {
-    axios.delete(VIDEO_URL + "/" + video_id,
+    axios.delete(VIDEO_URL + "?id=" + video_id,
           {
             headers: { 
               'Content-Type': 'application/json',

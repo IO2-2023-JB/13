@@ -73,9 +73,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetUserVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
-        public virtual IActionResult GetUserVideos([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetUserVideos([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            return Ok(await _videoService.GetUserVideosAsync(id));
         }
 
         /// <summary>

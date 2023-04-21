@@ -14,5 +14,6 @@ namespace MyWideIO.API.Data.IRepositories
         public Task UpdateVideoReaction(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto);
         public Task<VideoReactionDto> GetVideoReaction(Guid videoId, Guid viewerId);
         public Task<bool> PutVideoData(Guid id, VideoUploadDto videoData, IImageService imageService);
+        public Task<List<VideoModel>> GetUserVideosAsync(Guid id);
     }
 }

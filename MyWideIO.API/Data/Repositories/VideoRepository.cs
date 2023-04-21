@@ -150,6 +150,11 @@ namespace MyWideIO.API.Data.Repositories
 
             return new VideoReactionDto() { PositiveCount = positiveReviews, NegativeCount = negativeReviews, CurrentUserReaction = currUserReaction };
         }
+
+        public async Task<List<VideoModel>> GetUserVideosAsync(Guid id)
+        {
+            return await _dbContext.Videos.Where(v => v.CreatorId == id).ToListAsync();
+        }
     }
 
 }

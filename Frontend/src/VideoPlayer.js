@@ -110,7 +110,7 @@ const VideoPlayer = () => {
   };
 
   const handleDeleteClick = () => {
-    axios.delete(VIDEO_URL + "?id=" + video_id,
+    axios.delete(VIDEO_URL + "/" + video_id,
           {
             headers: { 
               'Content-Type': 'application/json',

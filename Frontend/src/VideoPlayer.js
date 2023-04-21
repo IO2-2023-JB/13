@@ -319,12 +319,14 @@ const VideoPlayer = () => {
           )}
       </div>
       ):(
-        <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
-        <h1>Edit video metadata</h1>
-        <section>
+        <div style={{marginTop: "50px"}} class="container-fluid justify-content-center" align="center"> 
+        <h1 class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", marginBottom:"50px", padding:"30px", backgroundColor:"#282828"}}>Edit video metadata</h1>
+        <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", marginBottom:"100px", padding:"30px", backgroundColor:"#282828"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <form onSubmit={handleSubmit}>
-                        <label htmlFor="title">
+                        <label style={{color:"white"}} htmlFor="title">
                             Title:
                         </label>
                         <input
@@ -340,7 +342,7 @@ const VideoPlayer = () => {
                             onBlur={() => setTitleFocus(false)}
                         />
 
-                        <label htmlFor="description">
+                        <label style={{color:"white"}} htmlFor="description">
                             Description:
                         </label>
                         <input
@@ -356,7 +358,7 @@ const VideoPlayer = () => {
                             onBlur={() => setDescriptionFocus(false)}
                         />
 
-                        <label htmlFor="tags">
+                        <label style={{color:"white"}} htmlFor="tags">
                             Tags:
                         </label>
                         <input
@@ -372,10 +374,11 @@ const VideoPlayer = () => {
                             onBlur={() => setTagsFocus(false)}
                         />
 
-                        <label htmlFor="thumbnail_picture">
+                        <label style={{color:"white"}} htmlFor="thumbnail_picture">
                             Thumbnail (Optional):
                         </label>
                         <input
+                          class="btn btn-dark"  
                             type="file"
                             accept="image/*"
                             id="thumbnail_picture"
@@ -393,7 +396,7 @@ const VideoPlayer = () => {
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Must be image up to 5 MB!
                         </p>
-                        <label htmlFor="terms">
+                        <label style={{color:"white"}} htmlFor="terms">
                             <input
                                 type="checkbox"
                                 id="terms"
@@ -403,9 +406,9 @@ const VideoPlayer = () => {
                             <text> I want my video to be public</text>
                         </label>
 
-                        <button disabled={!tags || !title || !description ? true : false}>Submit</button>
+                        <button class="btn btn-dark" disabled={!tags || !title || !description ? true : false}>Submit</button>
                     </form>
-                    <button onClick={handleCancelClick}>Cancel</button>
+                    <button class="btn btn-dark" onClick={handleCancelClick}>Cancel</button>
         </section>
       </div>
       )}

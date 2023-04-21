@@ -445,7 +445,8 @@ return (
         <div class ="mt-2 row">
           <div class="col-sm">
             <h2>Data</h2>
-            <section style={{color: "white"}}>
+            <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <label>Name:</label>
               <div>{userData.firstName}</div>
               <label>Surname:</label>
@@ -459,33 +460,35 @@ return (
               </div>
             </section>
 
-
-            <div className="row">
-              <div className="col">
-                {userType==='Creator' && (
-                  <button class="btn btn-danger" style={{ whiteSpace: "nowrap" }} onClick={handleCreatorClick}>Stop being a creator</button>
-                )
-                }
+            <div class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", marginBottom:"100px", paddingTop:"0px", backgroundColor:"#333333"}}>
+              <div className="row">
+                <div className="col">
+                  {userType==='Creator' && (
+                    <button class="btn btn-danger" style={{ whiteSpace: "nowrap" }} onClick={handleCreatorClick}>Stop being a creator</button>
+                  )
+                  }
+                </div>
+              </div>
+              <div className="row">
+                <div className="col">
+                  <button class="btn btn-danger mb-4" onClick={handleDeleteClick}>Delete account</button>
+                </div>
               </div>
             </div>
-            <div className="row">
-              <div className="col">
-                <button class="btn btn-danger" onClick={handleDeleteClick}>Delete account</button>
-                <div className="mt-5"></div>
-              </div>
-            </div>
-
           </div>
           <div class="col-sm">
             <h2>Avatar Image</h2>
-            <section style={{color: "white"}}>
+            <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
               <img key={userData.avatarImage} src = {userData.avatarImage+"?time="+new Date()} alt="No avatar image"/>
             </section>
           </div>
           {userType==='Creator'?(
           <div class="col-sm">
           <h2>Your Videos</h2>
-            <section>
+            <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>
                 <li style={{listStyleType: "none"}}>
                   <div className="box" style={{width:"300px", height:"170px"}}>
@@ -590,8 +593,9 @@ return (
       </div>
     ) : (
       <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
-        <h1>Change Data</h1>
-        <section>
+        <h1 class="display-3 mb-5">Change Data</h1>
+        <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", marginBottom:"100px", paddingTop:"0px", backgroundColor:"#333333"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <form onSubmit={handleSubmit}>
                         <label htmlFor="name">
@@ -675,6 +679,7 @@ return (
                             <FontAwesomeIcon icon={faTimes} className={!wrong_profile_picture ? "hide" : "invalid"} /> {/* validprofile_picture || !profile_picture */}
                         </label>
                         <input
+                            class="btn btn-dark"
                             type="file"
                             accept="image/*"
                             id="profile_picture"
@@ -693,10 +698,10 @@ return (
                             Must be image up to 5 MB!
                         </p>
 
-                        <button disabled={!validNickname || !validName || !validSurname || !validEmail ? true : false}>Submit</button>
+                        <button class="btn btn-dark" disabled={!validNickname || !validName || !validSurname || !validEmail ? true : false}>Submit</button>
                     </form>
                     {/* <button disabled={!validNickname || !validName || !validSurname || !validEmail ? true : false} onClick={handleSubmitClick}>Submit</button> */}
-                    <button onClick={handleCancelClick}>Cancel</button>
+                    <button class="btn btn-dark" onClick={handleCancelClick}>Cancel</button>
         </section>
       </div>
     )}

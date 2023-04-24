@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MyWideIO.API.Models.Enums;
 using System.ComponentModel.DataAnnotations;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Models.DB_Models
 {
@@ -19,9 +19,8 @@ namespace MyWideIO.API.Models.DB_Models
         public ICollection<ViewerLike> Likes { get; set; }
         public ICollection<PlaylistModel> Playlists { get; set; }
         public DateTime EndOfBan { get; set; }
-        public string? ProfilePicture { get; set; }
-        public string? ProfilePictureFileName { get; set; }
+        public ImageModel? ProfilePicture { get; set; }
         public decimal? AccountBalance { get; set; }
-        public UserTypeDto UserTypeDto { get; set; }
+        public UserTypeEnum UserTypeDto { get; set; }
     }
 }

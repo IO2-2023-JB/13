@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Data;
+using MyWideIO.API.Data.Repositories;
 
-
-namespace MyVideIO.Data
+namespace MyWideIO.Data
 {
     public class ApplicationDbContext : IdentityDbContext<AppUserModel, UserRole, Guid>
     {
-        public DbSet<AppUserModel> Users { get; set; }
+        //public DbSet<AppUserModel> Users { get; set; } juz jest w IdentityDbContext
         public DbSet<CreatorModel> Creators { get; set; }
         public DbSet<VideoModel> Videos { get; set; }
         public DbSet<PlaylistModel> Playlists { get; set; }
@@ -100,10 +100,10 @@ namespace MyVideIO.Data
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<VideoModel>()
-                .HasMany(v => v.Tags)
-                .WithOne(v => v.Parent)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<VideoModel>()
+            //    .HasMany(v => v.Tags)
+            //   .WithOne(v => v.Parent)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
 
         }

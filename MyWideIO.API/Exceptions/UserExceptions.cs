@@ -3,7 +3,7 @@
     /// <summary>
     /// Wyjatek zwiazany z kontrolerem usera.
     /// </summary>
-    public class UserException : Exception
+    public class UserException : CustomException
     {
         public UserException(string? message) : base(message)
         {

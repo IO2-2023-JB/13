@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using WideIO.API.Models;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Models.DB_Models
 {
@@ -30,7 +30,7 @@ namespace MyWideIO.API.Models.DB_Models
 
         public Guid VideoId { get; set; }
         public VideoModel Video { get; set; }
-        public ReactionDto Reaction { get; set; }
+        public ReactionEnum Reaction { get; set; }
 
     }
 
@@ -41,5 +41,10 @@ namespace MyWideIO.API.Models.DB_Models
 
         public Guid PlaylistId { get; set; }
         public PlaylistModel Playlist { get; set; }
+    }
+    public class ImageModel
+    {
+        public string Url { get; set; }
+        public string FileName { get; set; }
     }
 }

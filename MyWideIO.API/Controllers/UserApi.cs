@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using WideIO.API.Attributes;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Controllers
 {
@@ -141,7 +141,7 @@ namespace MyWideIO.API.Controllers
         /// User registration
         /// </summary>
         /// <param name="registerDto"></param>
-        /// <response code="200">OK</response>
+        /// <response code="201">Created</response>
         /// <response code="400">Bad request</response>
         /// <response code="409">A user with this e-mail address already exists</response>
         [HttpPost("register")]
@@ -151,7 +151,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [AllowAnonymous]
         [SwaggerOperation("RegisterUser")]
-        [SwaggerResponse(statusCode: 200, description: "OK")]
+        [SwaggerResponse(statusCode: 201, description: "Created")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         [SwaggerResponse(statusCode: 409, description: "A user with this e-mail address already exists")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)

@@ -1,4 +1,4 @@
-﻿using WideIO.API.Models;
+﻿using MyWideIO.API.Models.Dto_Models;
 
 namespace MyWideIO.API.Services.Interfaces
 {

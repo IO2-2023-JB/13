@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -13,9 +14,9 @@ namespace MyWideIO.API.Services
         private readonly SignInManager<AppUserModel> _signInManager;
         private readonly ITokenService _authenticationService;
         private readonly ITransactionService _transactionService;
-        private readonly IImageService _imageService;
+        private readonly IImageStorageService _imageService;
 
-        public UserService(UserManager<AppUserModel> userManager, IImageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService)
+        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService)
         {
             _imageService = imageService;
             _userManager = userManager;
@@ -57,8 +58,8 @@ namespace MyWideIO.API.Services
                     {
                         registerDto.AvatarImage = registerDto.AvatarImage.Split(imagePrefix)[1];
                     }
-                    (user.ProfilePicture, user.ProfilePictureFileName) = await _imageService.UploadImageAsync(registerDto.AvatarImage, user.Id.ToString());
-                    if (user.ProfilePicture.Length == 0)
+                    user.ProfilePicture = await _imageService.UploadImageAsync(registerDto.AvatarImage, user.Id.ToString());
+                    if (user.ProfilePicture.Url.Length == 0)
                     {
                         throw new UserException("Image upload error");
                     }
@@ -99,19 +100,17 @@ namespace MyWideIO.API.Services
                     {
                         updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
                     }
-                    (user.ProfilePicture, user.ProfilePictureFileName) = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
-                    if (user.ProfilePicture.Length == 0)
+                    user.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
+                    if (user.ProfilePicture.Url.Length == 0)
                     {
                         throw new UserException("Image upload error");
                     }
                 }
-                else if(user.ProfilePictureFileName is not null)
+                else if(user.ProfilePicture is not null)
                 {
-                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
-                    user.ProfilePictureFileName = null;
+                    await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
                     user.ProfilePicture = null;
                 }
-
                 result = await _userManager.UpdateAsync(user); // tutaj zapisanie zmian w bazie
                 if (!result.Succeeded)
                 {
@@ -162,8 +161,8 @@ namespace MyWideIO.API.Services
                 Surname = user.Surname,
                 Email = user.Email,
                 Nickname = user.UserName,
-                UserType = (UserTypeDto)Enum.Parse(typeof(UserTypeDto), (await _userManager.GetRolesAsync(user)).First()),
-                AvatarImage = user.ProfilePicture
+                UserType = (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()),
+                AvatarImage = user?.ProfilePicture?.Url
             };
         }
 
@@ -195,8 +194,8 @@ namespace MyWideIO.API.Services
                 {
                     throw new UserException(result.Errors.First()?.Code);
                 }
-                if (user.ProfilePictureFileName is not null)
-                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
+                if (user.ProfilePicture is not null)
+                    await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
             }
             catch
             {

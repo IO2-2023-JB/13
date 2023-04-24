@@ -1,6 +1,6 @@
 ﻿namespace MyWideIO.API.Exceptions
 {
-    public class VideoException: Exception
+    public class VideoException: CustomException
     {
         public VideoException(string? message) : base(message) { }
     }

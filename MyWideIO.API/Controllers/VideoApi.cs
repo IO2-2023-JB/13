@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using WideIO.API.Attributes;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Controllers
 {
@@ -41,10 +42,8 @@ namespace MyWideIO.API.Controllers
         [SwaggerOperation("DeleteVideo")]
         public virtual async Task<IActionResult> DeleteVideo([FromQuery(Name = "id")][Required()] Guid id)
         {
-            if (await _videoService.RemoveVideoIfExist(id))
-                return Ok();
-            else
-                return BadRequest("Video o podanym ID nie istnieje");
+            await _videoService.RemoveVideoAsync(id);
+            return Ok();
         }
 
         /// <summary>
@@ -75,7 +74,8 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
         public virtual async Task<IActionResult> GetUserVideos([FromQuery(Name = "id")][Required()] Guid id)
         {
-            return Ok(await _videoService.GetUserVideosAsync(id));
+            var videoListDto = await _videoService.GetUserVideosAsync(id);
+            return Ok(videoListDto);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace MyWideIO.API.Controllers
         {
             
             // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
-            var stream = await _videoService.GetVideo(id);
+            var stream = await _videoService.GetVideoAsync(id);
             return File(stream, "video/mp4", true);
         }
 
@@ -117,11 +117,13 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(VideoUploadResponseDto), description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad request")]
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
+        [SwaggerResponse(statusCode: 403, description: "Forbidden")]
+        [Authorize(Roles = "Creator")]
         public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
         {
             VideoUploadResponseDto result;
             Guid CreatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            result = await _videoService.UploadVideoMetadata(videoUploadDto, CreatorId);
+            result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, CreatorId);
 
             return Ok(result);
 
@@ -139,15 +141,17 @@ namespace MyWideIO.API.Controllers
         [Consumes("multipart/form-data")]
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
-        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile) // cos w tym stylu
+        [Authorize(Roles = "Creator")]
+        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile)
         {
-            
+            // tu nie bedzie wyjatkow zadnych, ExceptionMiddleware je lapie
+
             Stream vidStream = videoFile.OpenReadStream();
             try
             {
                  await _videoService.UploadVideoAsync(id, vidStream);
             }
-            catch (ApplicationException ex) // already uploading
+            catch (CustomException ex) // already uploading
             {
                 return BadRequest(ex.Message); //BadRequest wtedy?
             }
@@ -173,7 +177,7 @@ namespace MyWideIO.API.Controllers
         {
             try
             {
-                VideoMetadataDto model = await _videoService.GetVideoMetadata(id);
+                VideoMetadataDto model = await _videoService.GetVideoMetadataAsync(id);
                 return Ok(model);
             }
             catch(Exception e)
@@ -199,7 +203,7 @@ namespace MyWideIO.API.Controllers
             Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             try
             {
-               var a = await _videoService.GetVideoReaction(id, viewerId);
+               var a = await _videoService.GetVideoReactionAsync(id, viewerId);
                 return Ok(a);
             }
             catch (Exception ex)
@@ -224,18 +228,11 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
+        [Authorize(Roles = "Creator")]
         public virtual async Task<IActionResult> UpdateVideoMetadata([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoUploadDto videoUploadDto)
         {
-            if (await _videoService.UpdateVideo(id, videoUploadDto))
-            {
-                return Ok();
-            }
-            else
-            {
-                return BadRequest("No such video");
-            }
-            // await _videoService.UpdateVideo(id, videoUploadDto);
-            // return Ok();
+            await _videoService.UpdateVideoAsync(id, videoUploadDto);
+            return Ok();
         }
 
         /// <summary>
@@ -256,7 +253,7 @@ namespace MyWideIO.API.Controllers
             Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             try
             {
-                await _videoService.UpdateVideoReaction(id, viewerId, videoReactionUpdateDto);
+                await _videoService.UpdateVideoReactionAsync(id, viewerId, videoReactionUpdateDto);
             }
             catch(Exception ex) 
             {

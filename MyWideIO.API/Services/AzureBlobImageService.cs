@@ -9,13 +9,13 @@ using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
-    public class AzureBlobImageService : IImageService
+    public class AzureBlobImageStorageService : IImageStorageService
     {
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _blobContainerClient;
         private readonly string containerName = "blob1";
 
-        public AzureBlobImageService(BlobServiceClient blobServiceClient)
+        public AzureBlobImageStorageService(BlobServiceClient blobServiceClient)
         {
             _blobServiceClient = blobServiceClient;
             _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
@@ -48,7 +48,7 @@ namespace MyWideIO.API.Services
             }
         }
 
-        public async Task<(string url, string fileName)> UploadImageAsync(string base64image, string id)
+        public async Task<ImageModel> UploadImageAsync(string base64image, string id)
         {
             byte[] buffer;
             try
@@ -92,7 +92,13 @@ namespace MyWideIO.API.Services
             {
                 ContentType = format.DefaultMimeType,
             })).GetRawResponse();
-            return response.IsError ? throw new UserException("Image upload error") : ((string url, string fileName))(blobClient.Uri.AbsoluteUri, fileName);
+            if (response.IsError)
+                throw new UserException("Image upload error");
+            return new ImageModel
+            {
+                Url = blobClient.Uri.AbsoluteUri,
+                FileName = fileName
+            };
         }
     }
 }

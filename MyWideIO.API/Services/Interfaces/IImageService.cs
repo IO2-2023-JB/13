@@ -1,6 +1,8 @@
-﻿namespace MyWideIO.API.Services.Interfaces
+﻿using MyWideIO.API.Models.DB_Models;
+
+namespace MyWideIO.API.Services.Interfaces
 {
-    public interface IImageService
+    public interface IImageStorageService
     {
         /// <summary>
         /// Uploads a image and returns url to that image
@@ -8,7 +10,7 @@
         /// <param name="base64image">base64-encoded image</param>
         /// <param name="fileName">name for the image file</param>
         /// <returns>uploaded image's url and filename</returns>
-        public Task<(string url, string fileName)> UploadImageAsync(string base64image, string fileName);
+        public Task<ImageModel> UploadImageAsync(string base64image, string fileName);
         /// <summary>
         /// Removes the image file
         /// </summary>

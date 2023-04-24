@@ -5,17 +5,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MyVideIO.Data;
+using MyWideIO.Data;
 using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
+using MyWideIO.API.Middleware;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services;
 using MyWideIO.API.Services.Interfaces;
 using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
-using WideIO.API.Models;
 
 namespace MyWideIO.API
 {
@@ -55,16 +56,19 @@ namespace MyWideIO.API
             });
 
             services.AddControllers();
-            services.AddSingleton<IImageService, AzureBlobImageService>(); // singleton powinien byc ok
-            services.AddSingleton<ITokenService, TokenService>(); // singleton powinien byc ok
 
-            //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ApiDbConnection")));
             
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>(); // singleton powinien byc ok
+            services.AddSingleton<ITokenService, TokenService>();
+            services.AddSingleton<IVideoStorageService, AzureBlobVideoStorageService>();
+
             services.AddScoped<IVideoRepository, VideoRepository>();
-            services.AddScoped<IVideoService, AzureBlobVideoService>();
-            // Add services to the container.
+            services.AddScoped<ILikeRepository, LikeRepository>();
+            
+            services.AddScoped<IVideoService, VideoService>();
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<ITransactionService, TransactionService>();
 
             // CORS
             services.AddCors(options =>
@@ -156,7 +160,7 @@ namespace MyWideIO.API
             // role init
             var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
             
-            string[] roleNames = Enum.GetValues(typeof(UserTypeDto)).Cast<UserTypeDto>().Select(t => t.ToString()).ToArray();
+            string[] roleNames = Enum.GetValues(typeof(UserTypeEnum)).Cast<UserTypeEnum>().Select(t => t.ToString()).ToArray();
 
             foreach (var roleName in roleNames)
             {

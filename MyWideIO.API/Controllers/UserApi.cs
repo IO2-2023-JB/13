@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
@@ -58,6 +60,9 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")] // jeszcze 404 i 403 by sie przydaly
         public async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
+            if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje usunac nie swoje konto
+                if (User.FindFirstValue(ClaimTypes.Role) != UserTypeEnum.Administrator.ToString()) // i nie jest adminem
+                    Forbid();
             await _userService.DeleteUserAsync(id);
             return Ok();
         }
@@ -80,10 +85,17 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         public async Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
-            id ??= Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
+            if (id is null)
+                id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            else
+            {
+                // if (User.FindFirstValue(ClaimTypes.Role) != UserTypeEnum.Administrator.ToString()) // i nie jest adminem
+                if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje usunac nie swoje konto
+                    Forbid();
+            }
+
             UserDto userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
-            return Ok(userDto);// po co sie zwraca to 
+            return Ok(userDto);
         }
 
         /// <summary>

@@ -10,6 +10,13 @@
 
         }
     }
+    public class ForbiddenException : UserException
+    {
+        public ForbiddenException() : base("Forbidden")
+        {
+
+        }
+    }
     public class DuplicateEmailException : UserException
     {
         public DuplicateEmailException() : base("A user with this e-mail address already exists")

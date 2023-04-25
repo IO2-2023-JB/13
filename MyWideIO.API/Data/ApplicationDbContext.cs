@@ -24,7 +24,7 @@ namespace MyWideIO.Data
 
             modelBuilder.Entity<ViewerWatchLater>()
                 .HasKey(vw => new { vw.ViewerId, vw.VideoId });
-            
+
             modelBuilder.Entity<ViewerWatchLater>()
                 .HasOne(vw => vw.Viewer)
                 .WithMany(v => v.WatchLater)
@@ -98,12 +98,25 @@ namespace MyWideIO.Data
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<VideoModel>()
+                .OwnsOne(c => c.Thumbnail);
+
+            modelBuilder.Entity<AppUserModel>()
+                .OwnsOne(c => c.ProfilePicture);
+
+            modelBuilder.Entity<CreatorModel>()
+                .HasMany(c => c.OwnedVideos)
+                .WithOne(c => c.Creator)
+                .HasForeignKey(c => c.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //modelBuilder.Entity<VideoModel>()
-            //    .HasMany(v => v.Tags)
-            //   .WithOne(v => v.Parent)
-            //    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<VideoModel>()
+                .HasMany(v => v.Tags)
+                .WithMany(v => v.Videos);
+
 
 
         }

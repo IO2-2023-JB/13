@@ -28,9 +28,12 @@ namespace MyWideIO.API.Services
             _userManager = userManager;
         }
 
-        public async Task<Stream> GetVideoAsync(Guid id)
+        public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (!video.IsVisible && video.CreatorId != viewerId)
+                throw new ForbiddenException();
+
             if (!new[] { ProcessingProgressEnum.Uploaded, ProcessingProgressEnum.Ready, ProcessingProgressEnum.Processing }.Contains(video.ProcessingProgress))
                 throw new VideoException("Video not available");
             //video.ProcessingProgress = ProcessingProgressEnum.Processing;
@@ -39,21 +42,23 @@ namespace MyWideIO.API.Services
             // wiec jesli jedna ustawi proccessing i potem druga
             // i pierwsza skonczy przed druga i zmieni na ready/uploaded
             // to bedzie mozna usunac, ale druga wciaz pobiera
-            await _videoRepository.UpdateVideoAsync(video);
+            // await _videoRepository.UpdateVideoAsync(video);
             return await _videoStorageService.GetVideoFileAsync(video.Id);
         }
 
-        public async Task RemoveVideoAsync(Guid id)
+        public async Task RemoveVideoAsync(Guid videoId, Guid creatorId)
         {
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (video.CreatorId != creatorId)
+                throw new ForbiddenException();
 
-            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new VideoNotFoundException();
             if (video.ProcessingProgress == ProcessingProgressEnum.Uploading)
                 throw new VideoException("can't delete while uploading");
-            else if(video.ProcessingProgress == ProcessingProgressEnum.Processing)
+            else if (video.ProcessingProgress == ProcessingProgressEnum.Processing)
                 throw new VideoException("can't delete while proccessing");
-            await _videoRepository.RemoveVideoAsync(video); // najpierw usuwamy zeby nie mozna bylo czytac w trakcie usuwania
+            await _videoRepository.RemoveVideoAsync(video); // najpierw usuwamy z bazy zeby nie mozna bylo czytac w trakcie usuwania
 
-            if (new []{ ProcessingProgressEnum.Uploaded }.Contains(video.ProcessingProgress)) // co z ready, proccesing
+            if (new[] { ProcessingProgressEnum.Uploaded }.Contains(video.ProcessingProgress)) // co z ready, proccesing
                 await _videoStorageService.RemoveVideoFileAsync(video.Id);
 
             if (video.Thumbnail is not null)
@@ -61,9 +66,11 @@ namespace MyWideIO.API.Services
 
         }
 
-        public async Task UpdateVideoAsync(Guid id, VideoUploadDto dto)
+        public async Task UpdateVideoAsync(Guid videoId, Guid creatorId, VideoUploadDto dto)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (video.CreatorId != creatorId)
+                throw new ForbiddenException();
 
             video.Description = dto.Description;
             video.Title = dto.Title;
@@ -88,19 +95,22 @@ namespace MyWideIO.API.Services
 
 
 
-        public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid id)
+        public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId)
         {
-            VideoModel? model = await _videoRepository.GetVideoAsync(id) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (!video.IsVisible && video.CreatorId != viewerId)
+                throw new ForbiddenException();
 
-            return VideoMapper.VideoModelToVideoMetadataDto(model);
+            return VideoMapper.VideoModelToVideoMetadataDto(video);
         }
 
-        public async Task UploadVideoAsync(Guid id, Stream videoStream) // raczej Stream video
+        public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile) // raczej Stream video
         {
             // race condition ?
 
-
-            VideoModel video = await _videoRepository.GetVideoAsync(id) ?? throw new UserNotFoundException(); // nie user nowe trzeba zrobic wyjatki dla video
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (video.CreatorId != creatorId)
+                throw new ForbiddenException();
 
             switch (video.ProcessingProgress)
             {
@@ -126,7 +136,7 @@ namespace MyWideIO.API.Services
             {
                 // TODO zmiana pliku na mp4
 
-                await _videoStorageService.UploadVideoFileAsync(id, videoStream);
+                await _videoStorageService.UploadVideoFileAsync(videoId, videoFile);
 
                 video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
 
@@ -177,8 +187,10 @@ namespace MyWideIO.API.Services
 
         public async Task UpdateVideoReactionAsync(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto)
         {
-            AppUserModel user = await _userManager.FindByIdAsync(viewerId.ToString());
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (!video.IsVisible)
+                throw new ForbiddenException();
+            AppUserModel user = await _userManager.FindByIdAsync(viewerId.ToString());
             ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId); // jakos inaczej
             like ??= new ViewerLike
             {
@@ -220,6 +232,8 @@ namespace MyWideIO.API.Services
         public async Task<VideoReactionDto> GetVideoReactionAsync(Guid videoId, Guid viewerId)
         {
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (!video.IsVisible)
+                throw new ForbiddenException();
             ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId);
             return new VideoReactionDto
             {
@@ -230,11 +244,14 @@ namespace MyWideIO.API.Services
 
         }
 
-        public async Task<VideoListDto> GetUserVideosAsync(Guid id)
+        public async Task<VideoListDto> GetUserVideosAsync(Guid creatorId, Guid viewerId)
         {
+            var list = (await _videoRepository.GetUserVideosAsync(creatorId)).Select(m => VideoMapper.VideoModelToVideoMetadataDto(m));
+            if (creatorId != viewerId)
+                list = list.Where(v => v.Visibility == VisibilityEnum.Public);
             return new VideoListDto
             {
-                Videos = (await _videoRepository.GetUserVideosAsync(id)).Select(v => VideoMapper.VideoModelToVideoMetadataDto(v)).ToList()
+                Videos = list.ToList()
             };
         }
     }

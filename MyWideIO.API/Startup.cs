@@ -153,7 +153,7 @@ namespace MyWideIO.API
                 options.Limits.MaxRequestBodySize = int.MaxValue; //:)
             });
 
-            //CreateRoles(services.BuildServiceProvider()).Wait();
+            CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {

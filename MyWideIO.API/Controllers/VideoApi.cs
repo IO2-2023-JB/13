@@ -19,6 +19,7 @@ namespace MyWideIO.API.Controllers
     /// </summary>
     [ApiController]
     [Route("video")]
+    [Authorize]
     public class VideoApiController : ControllerBase
     {
         private readonly IVideoService _videoService;
@@ -31,7 +32,7 @@ namespace MyWideIO.API.Controllers
         /// <summary>
         /// Video removal
         /// </summary>
-        /// <param name="id">Video ID</param>
+        /// <param name="videoId">Video ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
@@ -40,9 +41,11 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteVideo")]
-        public virtual async Task<IActionResult> DeleteVideo([FromQuery(Name = "id")][Required()] Guid id)
+        [Authorize(Roles = "Creator")]
+        public virtual async Task<IActionResult> DeleteVideo([FromQuery(Name = "id")][Required()] Guid videoId)
         {
-            await _videoService.RemoveVideoAsync(id);
+            Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _videoService.RemoveVideoAsync(videoId, creatorId);
             return Ok();
         }
 
@@ -64,7 +67,7 @@ namespace MyWideIO.API.Controllers
         /// <summary>
         /// Get user&#39;s video
         /// </summary>
-        /// <param name="id">User ID</param>
+        /// <param name="ceatorId">User ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
@@ -72,16 +75,17 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetUserVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
-        public virtual async Task<IActionResult> GetUserVideos([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetUserVideos([FromQuery(Name = "id")][Required()] Guid ceatorId)
         {
-            var videoListDto = await _videoService.GetUserVideosAsync(id);
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var videoListDto = await _videoService.GetUserVideosAsync(ceatorId, viewerId);
             return Ok(videoListDto);
         }
 
         /// <summary>
         /// Video file retreival
         /// </summary>
-        /// <param name="id">Video ID</param>
+        /// <param name="videoId">Video ID</param>
         /// <param name="accessToken">Access token</param>
         /// <param name="range">VideoFileRange</param>
         /// <response code="200">OK</response>
@@ -92,13 +96,14 @@ namespace MyWideIO.API.Controllers
         [HttpGet("{id}")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
-        [SwaggerResponse(statusCode: 200, type: typeof(Stream), description: "OK")]
-        [SwaggerResponse(statusCode: 206, type: typeof(Stream), description: "Partial Content")]
-        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
+        [SwaggerResponse(statusCode: 200, type: typeof(FileStreamResult), description: "OK")]
+        [SwaggerResponse(statusCode: 206, type: typeof(FileStreamResult), description: "Partial Content")]
+        [Produces("video/mp4")]
+        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
         {
-            
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
-            var stream = await _videoService.GetVideoAsync(id);
+            var stream = await _videoService.GetVideoAsync(videoId, viewerId);
             return File(stream, "video/mp4", true);
         }
 
@@ -106,7 +111,6 @@ namespace MyWideIO.API.Controllers
         /// Video metadata upload
         /// </summary>
         /// <param name="videoUploadDto"></param>
-        /// <param name="id"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
@@ -132,7 +136,7 @@ namespace MyWideIO.API.Controllers
         /// <summary>
         /// Video file upload
         /// </summary>
-        /// <param name="id">Video ID</param>
+        /// <param name="videoId">Video ID</param>
         /// <param name="videoFile"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
@@ -142,29 +146,19 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
         [Authorize(Roles = "Creator")]
-        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid id, [FromForm] IFormFile videoFile)
+        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile)
         {
             // tu nie bedzie wyjatkow zadnych, ExceptionMiddleware je lapie
-
+            Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             Stream vidStream = videoFile.OpenReadStream();
-            try
-            {
-                 await _videoService.UploadVideoAsync(id, vidStream);
-            }
-            catch (CustomException ex) // already uploading
-            {
-                return BadRequest(ex.Message); //BadRequest wtedy?
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            await _videoService.UploadVideoAsync(videoId, creatorId, vidStream);
             return Ok();
         }
         /// <summary>
         /// Video metadata retreival
         /// </summary>
-        /// <param name="id">Video ID</param>
+        /// <param name="videoId">Video ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
@@ -173,23 +167,19 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoMetadata")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoMetadataDto), description: "OK")]
-        public virtual async Task<IActionResult> GetVideoMetadata([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetVideoMetadata([FromQuery(Name = "id")][Required()] Guid videoId)
         {
-            try
-            {
-                VideoMetadataDto model = await _videoService.GetVideoMetadataAsync(id);
-                return Ok(model);
-            }
-            catch(Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            VideoMetadataDto model = await _videoService.GetVideoMetadataAsync(videoId, viewerId);
+            return Ok(model);
         }
+
 
         /// <summary>
         /// Video reaction retreival
         /// </summary>
-        /// <param name="id">Video ID</param>
+        /// <param name="videoId">Video ID</param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="404">Not found</response>
@@ -197,28 +187,18 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoReactions")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoReactionDto), description: "OK")]
-        public virtual async Task<IActionResult> GetVideoReactions([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<IActionResult> GetVideoReactions([FromQuery(Name = "id")][Required()] Guid videoId)
         {
-
             Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            try
-            {
-               var a = await _videoService.GetVideoReactionAsync(id, viewerId);
-                return Ok(a);
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            return BadRequest();
+            VideoReactionDto videoReactionDto = await _videoService.GetVideoReactionAsync(videoId, viewerId);
+            return Ok(videoReactionDto);
         }
 
         /// <summary>
         /// Video metadata update
         /// </summary>
         /// <param name="videoUploadDto"></param>
-        /// <param name="id"></param>
+        /// <param name="videoId"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
@@ -229,16 +209,17 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
         [Authorize(Roles = "Creator")]
-        public virtual async Task<IActionResult> UpdateVideoMetadata([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoUploadDto videoUploadDto)
+        public virtual async Task<IActionResult> UpdateVideoMetadata([FromQuery(Name = "id")][Required()] Guid videoId, [FromBody] VideoUploadDto videoUploadDto)
         {
-            await _videoService.UpdateVideoAsync(id, videoUploadDto);
+            Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _videoService.UpdateVideoAsync(videoId, creatorId, videoUploadDto);
             return Ok();
         }
 
         /// <summary>
         /// Video reaction update
         /// </summary>
-        /// <param name="id">Video ID</param>
+        /// <param name="videoId">Video ID</param>
         /// <param name="videoReactionUpdateDto"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
@@ -248,22 +229,14 @@ namespace MyWideIO.API.Controllers
         [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoReaction")]
-        public virtual async Task<IActionResult> UpdateVideoReaction([FromQuery(Name = "id")][Required()] Guid id, [FromBody] VideoReactionUpdateDto videoReactionUpdateDto)
+        public virtual async Task<IActionResult> UpdateVideoReaction([FromQuery(Name = "id")][Required()] Guid videoId, [FromBody] VideoReactionUpdateDto videoReactionUpdateDto)
         {
             Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            try
-            {
-                await _videoService.UpdateVideoReactionAsync(id, viewerId, videoReactionUpdateDto);
-            }
-            catch(Exception ex) 
-            {
-                return BadRequest(ex.Message);
-            }
-
+            await _videoService.UpdateVideoReactionAsync(videoId, viewerId, videoReactionUpdateDto);
 
             return Ok();
         }
 
-        
+
     }
 }

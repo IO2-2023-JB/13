@@ -15,14 +15,16 @@ namespace MyWideIO.API.Services
         private readonly ITokenService _authenticationService;
         private readonly ITransactionService _transactionService;
         private readonly IImageStorageService _imageService;
+        private readonly IVideoService _videoService;
 
-        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService)
+        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService, IVideoService videoService)
         {
             _imageService = imageService;
             _userManager = userManager;
             _signInManager = signInManager;
             _authenticationService = authenticationService;
             _transactionService = transactionService;
+            _videoService = videoService;
         }
         public async Task RegisterUserAsync(RegisterDto registerDto)
         {
@@ -30,13 +32,15 @@ namespace MyWideIO.API.Services
             await _transactionService.BeginTransactionAsync();
             try
             {
-                AppUserModel user = new()
-                {
-                    Email = registerDto.Email,
-                    Name = registerDto.Name,
-                    UserName = registerDto.Nickname,
-                    Surname = registerDto.Surname
-                };
+                AppUserModel user;
+                if (registerDto.UserType == UserTypeEnum.Simple)
+                    user = new();
+                else
+                    user = new CreatorModel();
+                user.Email = registerDto.Email;
+                user.Name = registerDto.Name;
+                user.UserName = registerDto.Nickname;
+                user.Surname = registerDto.Surname;
                 result = await _userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded)
                 {
@@ -106,7 +110,7 @@ namespace MyWideIO.API.Services
                         throw new UserException("Image upload error");
                     }
                 }
-                else if(user.ProfilePicture is not null)
+                else if (user.ProfilePicture is not null)
                 {
                     await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
                     user.ProfilePicture = null;
@@ -133,6 +137,32 @@ namespace MyWideIO.API.Services
                     {
                         throw new UserException(result.Errors.First()?.Code);
                     }
+                    if (newRole == UserTypeEnum.Creator.ToString())
+                    {
+                        user = new CreatorModel(user);
+                        result = await _userManager.UpdateAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            throw new UserException(result.Errors.First()?.Code);
+                        }
+                    }
+                    else if (newRole == UserTypeEnum.Simple.ToString())
+                    {
+                        var creator = (CreatorModel)user;
+                        foreach (var video in creator.OwnedVideos) // nie wiem czy usuwac video czy co
+                                                                   // moze oddzielna metoda w videoService do usuniecia wszystkich
+                            await _videoService.RemoveVideoAsync(video.Id, creator.Id);
+
+                        creator.OwnedVideos.Clear();
+                        creator.Subscribers.Clear();
+                        user = new AppUserModel(creator);
+                        result = await _userManager.UpdateAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            throw new UserException(result.Errors.First()?.Code);
+                        }
+                    }
+                    
                 }
             }
             catch

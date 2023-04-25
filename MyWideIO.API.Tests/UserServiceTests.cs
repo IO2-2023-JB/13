@@ -19,6 +19,7 @@ namespace MyWideIO.API.Tests
         private readonly Mock<ITokenService> _mockTokenService;
         private readonly Mock<IImageStorageService> _mockImageService;
         private readonly Mock<ITransactionService> _mockTransactionService;
+        private readonly Mock<IVideoService> _mockVideoService;
         private readonly UserService _userService;
 
         public UserServiceTests()
@@ -32,7 +33,8 @@ namespace MyWideIO.API.Tests
             _mockTokenService = new Mock<ITokenService>();
             _mockImageService = new Mock<IImageStorageService>();
             _mockTransactionService = new Mock<ITransactionService>();
-            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object,_mockTransactionService.Object);
+            _mockVideoService = new Mock<IVideoService>();
+            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object,_mockTransactionService.Object,_mockVideoService.Object);
         }
 
         [Fact]

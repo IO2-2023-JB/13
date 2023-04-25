@@ -45,7 +45,10 @@ namespace MyWideIO.API.Middleware
             else if (exception is IncorrectPasswordException)
                 statusCode = HttpStatusCode.Unauthorized;
 
-            else if (exception is UserException)
+            else if (exception is ForbiddenException)
+                statusCode = HttpStatusCode.Forbidden;
+
+            else if (exception is CustomException)
                 statusCode = HttpStatusCode.BadRequest;
 
             var response = new

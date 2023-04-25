@@ -1,7 +1,6 @@
 ﻿using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
-using Riok.Mapperly.Abstractions;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Mappers

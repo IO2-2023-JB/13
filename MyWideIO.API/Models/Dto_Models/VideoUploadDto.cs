@@ -25,7 +25,7 @@ namespace MyWideIO.API.Models.Dto_Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class VideoUploadDto : IEquatable<VideoUploadDto>
+    public class VideoUploadDto : IEquatable<VideoUploadDto>
     {
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace MyWideIO.API.Models.Dto_Models
         /// Gets or Sets Thumbnail
         /// </summary>
         [DataMember(Name = "thumbnail", EmitDefaultValue = false)]
-        public string Thumbnail { get; set; }
+        public string? Thumbnail { get; set; }
 
         /// <summary>
         /// Gets or Sets Tags

@@ -7,6 +7,7 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
+using System.Collections.Concurrent;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
@@ -43,6 +44,15 @@ namespace MyWideIO.API.Services
             // i pierwsza skonczy przed druga i zmieni na ready/uploaded
             // to bedzie mozna usunac, ale druga wciaz pobiera
             // await _videoRepository.UpdateVideoAsync(video);
+
+            //if (!scopedUsersVideos.Contains((videoId, viewerId)))
+            //{
+            video.ViewCount++; // jak sie bedzie przewijac video to sie bedzie zwiekszac
+                               // przy kazdym requescie
+            await _videoRepository.UpdateVideoAsync(video);
+           
+            //   scopedUsersVideos.Add((videoId, viewerId));
+            // }
             return await _videoStorageService.GetVideoFileAsync(video.Id);
         }
 
@@ -65,6 +75,7 @@ namespace MyWideIO.API.Services
                 await _imageStorageService.RemoveImageAsync(video.Thumbnail.FileName);
 
         }
+        // private readonly HashSet<(Guid, Guid)> scopedUsersVideos = new();
 
         public async Task UpdateVideoAsync(Guid videoId, Guid creatorId, VideoUploadDto dto)
         {
@@ -75,8 +86,8 @@ namespace MyWideIO.API.Services
             video.Description = dto.Description;
             video.Title = dto.Title;
             video.Tags = dto.Tags.Select(t => new TagModel { Content = t }).ToList();
-            video.ProcessingProgress = ProcessingProgressEnum.MetadataRecordCreated;
             video.EditDate = DateTime.Now;
+            video.IsVisible = dto.Visibility == VisibilityEnum.Public;
             if (dto.Thumbnail is not null)
             {
                 string imagePrefix = @"base64,";
@@ -157,13 +168,15 @@ namespace MyWideIO.API.Services
 
         public async Task<VideoUploadResponseDto> UploadVideoMetadataAsync(VideoUploadDto dto, Guid creatorId)
         {
-            CreatorModel creator = (CreatorModel)await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
+            AppUserModel creator = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
+            if (creator.Money is null)
+                throw new UserException("Creator doesn't have requered properites");
             var video = new VideoModel
             {
                 Description = dto.Description,
                 Title = dto.Title,
                 Tags = dto.Tags.Select(t => new TagModel { Content = t }).ToList(),
-                Thumbnail = null,
+                //Thumbnail = null,
                 ProcessingProgress = ProcessingProgressEnum.MetadataRecordCreated,
                 CreatorId = creatorId,
                 Creator = creator,
@@ -178,6 +191,8 @@ namespace MyWideIO.API.Services
                 video.Thumbnail = await _imageStorageService.UploadImageAsync(dto.Thumbnail, video.Id.ToString());
                 await _videoRepository.UpdateVideoAsync(video);
             }
+            creator.OwnedVideos.Add(video);
+            await _userManager.UpdateAsync(creator);
             return new VideoUploadResponseDto
             {
                 Id = video.Id,

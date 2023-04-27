@@ -115,10 +115,15 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 400, description: "Bad request")]
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         [SwaggerResponse(statusCode: 404, description: "Not found")]
-
+        [AllowAnonymous]
         public async Task<IActionResult> GetUserData([FromQuery(Name = "id")] Guid? id)
         {
-            id ??= Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (id is null)
+            {
+                if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid nId))
+                    BadRequest("Not logged in users must provide an id");
+                id = nId;
+            }
             UserDto userDto = await _userService.GetUserAsync(id.Value);
             return Ok(userDto);
         }

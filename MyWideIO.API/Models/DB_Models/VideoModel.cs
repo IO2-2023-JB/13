@@ -27,18 +27,18 @@ namespace MyWideIO.API.Models.DB_Models
 
         public int NegativeReactions { get; set; } = 0;
 
-        public ICollection<CommentModel> Comments { get; set; } = new Collection<CommentModel>();
-        public ICollection<TagModel> Tags { get; set; } = new Collection<TagModel>();
+        public virtual ICollection<CommentModel> Comments { get; set; } = new Collection<CommentModel>();
+        public virtual ICollection<TagModel> Tags { get; set; } = new Collection<TagModel>();
         public DateTime UploadDate { get; set; } = DateTime.Now;
         public DateTime EditDate { get; set; } = DateTime.Now;
 
         public Guid CreatorId { get; set; }
-        public CreatorModel Creator { get; set; }
-        public ICollection<VideoPlaylist> Playlists { get; set; } = new Collection<VideoPlaylist>();
-        public ICollection<ViewerLike> LikedBy { get; set; } = new Collection<ViewerLike>();
+        public virtual AppUserModel Creator { get; set; }
+        public virtual ICollection<VideoPlaylist> Playlists { get; set; } = new Collection<VideoPlaylist>();
+        public virtual ICollection<ViewerLike> LikedBy { get; set; } = new Collection<ViewerLike>();
 
         // public string fileName { get; set; }
-        public ImageModel? Thumbnail { get; set; }
+        public virtual ImageModel? Thumbnail { get; set; }
         public bool IsVisible { get; set; }
         public ProcessingProgressEnum ProcessingProgress { get; set; }
 

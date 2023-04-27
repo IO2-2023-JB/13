@@ -12,6 +12,6 @@ namespace MyWideIO.API.Models.DB_Models
         [StringLength(500)]
         public string Content { get; set; }
 
-        public ICollection<VideoModel> Videos { get; set; }
+        public virtual ICollection<VideoModel> Videos { get; set; }
     }
 }

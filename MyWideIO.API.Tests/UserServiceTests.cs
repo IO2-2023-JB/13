@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services;
 using MyWideIO.API.Services.Interfaces;
 using WideIO.API.Models;
@@ -15,8 +17,9 @@ namespace MyWideIO.API.Tests
         private readonly Mock<UserManager<AppUserModel>> _mockUserManager;
         private readonly Mock<SignInManager<AppUserModel>> _mockSignInManager;
         private readonly Mock<ITokenService> _mockTokenService;
-        private readonly Mock<IImageService> _mockImageService;
+        private readonly Mock<IImageStorageService> _mockImageService;
         private readonly Mock<ITransactionService> _mockTransactionService;
+        private readonly Mock<IVideoService> _mockVideoService;
         private readonly UserService _userService;
 
         public UserServiceTests()
@@ -28,9 +31,10 @@ namespace MyWideIO.API.Tests
                 _mockUserManager.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<AppUserModel>>(), null, null, null, null);
 
             _mockTokenService = new Mock<ITokenService>();
-            _mockImageService = new Mock<IImageService>();
+            _mockImageService = new Mock<IImageStorageService>();
             _mockTransactionService = new Mock<ITransactionService>();
-            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object,_mockTransactionService.Object);
+            _mockVideoService = new Mock<IVideoService>();
+            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object,_mockTransactionService.Object,_mockVideoService.Object);
         }
 
         [Fact]
@@ -44,7 +48,7 @@ namespace MyWideIO.API.Tests
                 Surname = "User",
                 Nickname = "testuser",
                 Password = "password",
-                UserType = UserTypeDto.Simple,
+                UserType = UserTypeEnum.Simple,
                 AvatarImage = "base64-image"
             };
 
@@ -58,7 +62,7 @@ namespace MyWideIO.API.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _mockImageService.Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(("url","filename"));
+                .ReturnsAsync(new ImageModel { Url = "url", FileName = "filename" });
 
             // Act
             Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);
@@ -77,7 +81,7 @@ namespace MyWideIO.API.Tests
                 Surname = "User",
                 Nickname = "testuser",
                 Password = "password",
-                UserType = UserTypeDto.Simple,
+                UserType = UserTypeEnum.Simple,
                 AvatarImage = "base64-image"
             };
 

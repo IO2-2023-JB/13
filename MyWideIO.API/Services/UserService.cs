@@ -5,6 +5,8 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MyWideIO.API.Services
 {
@@ -33,14 +35,19 @@ namespace MyWideIO.API.Services
             try
             {
                 AppUserModel user;
-                if (registerDto.UserType == UserTypeEnum.Simple)
-                    user = new();
-                else
-                    user = new CreatorModel();
-                user.Email = registerDto.Email;
-                user.Name = registerDto.Name;
-                user.UserName = registerDto.Nickname;
-                user.Surname = registerDto.Surname;
+                user = new()
+                {
+                    Email = registerDto.Email,
+                    Name = registerDto.Name,
+                    UserName = registerDto.Nickname,
+                    Surname = registerDto.Surname
+                };
+                if(registerDto.UserType == UserTypeEnum.Creator)
+                {
+                    user.Subscribers = new Collection<ViewerSubscription>();
+                    user.OwnedVideos = new Collection<VideoModel>();
+                    user.Money = 0f;
+                }
                 result = await _userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded)
                 {
@@ -139,30 +146,31 @@ namespace MyWideIO.API.Services
                     }
                     if (newRole == UserTypeEnum.Creator.ToString())
                     {
-                        user = new CreatorModel(user);
+                        user.Money = 0f;
                         result = await _userManager.UpdateAsync(user);
                         if (!result.Succeeded)
                         {
                             throw new UserException(result.Errors.First()?.Code);
                         }
                     }
-                    else if (newRole == UserTypeEnum.Simple.ToString())
+                    else if (newRole == UserTypeEnum.Simple.ToString() && role == UserTypeEnum.Creator.ToString())
                     {
-                        var creator = (CreatorModel)user;
-                        foreach (var video in creator.OwnedVideos) // nie wiem czy usuwac video czy co
-                                                                   // moze oddzielna metoda w videoService do usuniecia wszystkich
-                            await _videoService.RemoveVideoAsync(video.Id, creator.Id);
+                        if (user.Money is null)
+                            throw new UserException("Creator doesn't have requered properites");
+                        foreach (var video in user.OwnedVideos) // nie wiem czy usuwac video czy co
+                                                                // moze oddzielna metoda w videoService do usuniecia wszystkich
+                            await _videoService.RemoveVideoAsync(video.Id, user.Id);
 
-                        creator.OwnedVideos.Clear();
-                        creator.Subscribers.Clear();
-                        user = new AppUserModel(creator);
+                        user.OwnedVideos.Clear();
+                        user.Subscribers.Clear();
+                        user.Money = null;
                         result = await _userManager.UpdateAsync(user);
                         if (!result.Succeeded)
                         {
                             throw new UserException(result.Errors.First()?.Code);
                         }
                     }
-                    
+
                 }
             }
             catch
@@ -184,7 +192,7 @@ namespace MyWideIO.API.Services
 
         private async Task<UserDto> ConvertUserModelToDto(AppUserModel user)
         {
-            return new UserDto
+            var userDto =  new UserDto
             {
                 Id = user.Id,
                 Name = user.Name,
@@ -192,8 +200,16 @@ namespace MyWideIO.API.Services
                 Email = user.Email,
                 Nickname = user.UserName,
                 UserType = (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()),
-                AvatarImage = user?.ProfilePicture?.Url
+                AvatarImage = user?.ProfilePicture?.Url,
+                AccountBalance = user?.AccountBalance
             };
+            if(userDto.UserType == UserTypeEnum.Creator)
+            {
+                if (user.Money is null)
+                    throw new UserException("Creator doesn't have requered properites");
+                userDto.SubscriptionsCount = user.Subscribers.Count;
+            }
+            return userDto;
         }
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)

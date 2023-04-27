@@ -171,6 +171,7 @@ namespace MyWideIO.API
         }
         public void Configure(IApplicationBuilder app)
         {
+            app.UseCors("AllowLocalhost3000");
 
             {
                 app.UseSwaggerUI(c =>
@@ -204,7 +205,6 @@ namespace MyWideIO.API
             });
 
             // CORS
-            app.UseCors("AllowLocalhost3000");
 
             app.UseDeveloperExceptionPage(); // do wywalenia
         }

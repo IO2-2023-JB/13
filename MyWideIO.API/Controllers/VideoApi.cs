@@ -75,9 +75,11 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetUserVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
+        [AllowAnonymous]
         public virtual async Task<IActionResult> GetUserVideos([FromQuery(Name = "id")][Required()] Guid ceatorId)
         {
-            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
+                viewerId = Guid.Empty;
             var videoListDto = await _videoService.GetUserVideosAsync(ceatorId, viewerId);
             return Ok(videoListDto);
         }
@@ -92,16 +94,17 @@ namespace MyWideIO.API.Controllers
         /// <response code="206">Partial Content</response>
         /// <response code="401">Unauthorised</response>
         /// <response code="416">Range Not Satisfiable</response>
-        [AllowAnonymous]
         [HttpGet("{id}")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(FileStreamResult), description: "OK")]
         [SwaggerResponse(statusCode: 206, type: typeof(FileStreamResult), description: "Partial Content")]
         [Produces("video/mp4")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
         {
-            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
+                viewerId = Guid.Empty;
             // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
             var stream = await _videoService.GetVideoAsync(videoId, viewerId);
             return File(stream, "video/mp4", true);
@@ -167,9 +170,11 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoMetadata")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoMetadataDto), description: "OK")]
+        [AllowAnonymous]
         public virtual async Task<IActionResult> GetVideoMetadata([FromQuery(Name = "id")][Required()] Guid videoId)
         {
-            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
+                viewerId = Guid.Empty;
 
             VideoMetadataDto model = await _videoService.GetVideoMetadataAsync(videoId, viewerId);
             return Ok(model);
@@ -187,9 +192,11 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetVideoReactions")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoReactionDto), description: "OK")]
+        [AllowAnonymous]
         public virtual async Task<IActionResult> GetVideoReactions([FromQuery(Name = "id")][Required()] Guid videoId)
         {
-            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
+                viewerId = Guid.Empty;
             VideoReactionDto videoReactionDto = await _videoService.GetVideoReactionAsync(videoId, viewerId);
             return Ok(videoReactionDto);
         }

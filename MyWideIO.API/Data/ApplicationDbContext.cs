@@ -10,7 +10,7 @@ namespace MyWideIO.Data
     public class ApplicationDbContext : IdentityDbContext<AppUserModel, UserRole, Guid>
     {
         //public DbSet<AppUserModel> Users { get; set; } juz jest w IdentityDbContext
-        public DbSet<CreatorModel> Creators { get; set; }
+        // public DbSet<CreatorModel> Creators { get; set; }
         public DbSet<VideoModel> Videos { get; set; }
         public DbSet<PlaylistModel> Playlists { get; set; }
         public DbSet<CommentModel> Comments { get; set; }
@@ -100,15 +100,21 @@ namespace MyWideIO.Data
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict); 
 
-            modelBuilder.Entity<VideoModel>()
-                .OwnsOne(c => c.Thumbnail);
+            //modelBuilder.Entity<VideoModel>()
+            //    .OwnsOne(c => c.Thumbnail);
+
+            //modelBuilder.Entity<AppUserModel>()
+            //    .OwnsOne(c => c.ProfilePicture);
 
             modelBuilder.Entity<AppUserModel>()
-                .OwnsOne(c => c.ProfilePicture);
-
-            modelBuilder.Entity<CreatorModel>()
                 .HasMany(c => c.OwnedVideos)
                 .WithOne(c => c.Creator)
+                .HasForeignKey(c => c.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VideoModel>()
+                .HasOne(c => c.Creator)
+                .WithMany(c => c.OwnedVideos)
                 .HasForeignKey(c => c.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 

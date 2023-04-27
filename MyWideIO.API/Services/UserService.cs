@@ -2,8 +2,11 @@
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
-using WideIO.API.Models;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MyWideIO.API.Services
 {
@@ -13,15 +16,17 @@ namespace MyWideIO.API.Services
         private readonly SignInManager<AppUserModel> _signInManager;
         private readonly ITokenService _authenticationService;
         private readonly ITransactionService _transactionService;
-        private readonly IImageService _imageService;
+        private readonly IImageStorageService _imageService;
+        private readonly IVideoService _videoService;
 
-        public UserService(UserManager<AppUserModel> userManager, IImageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService)
+        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService, IVideoService videoService)
         {
             _imageService = imageService;
             _userManager = userManager;
             _signInManager = signInManager;
             _authenticationService = authenticationService;
             _transactionService = transactionService;
+            _videoService = videoService;
         }
         public async Task RegisterUserAsync(RegisterDto registerDto)
         {
@@ -29,13 +34,20 @@ namespace MyWideIO.API.Services
             await _transactionService.BeginTransactionAsync();
             try
             {
-                AppUserModel user = new()
+                AppUserModel user;
+                user = new()
                 {
                     Email = registerDto.Email,
                     Name = registerDto.Name,
                     UserName = registerDto.Nickname,
                     Surname = registerDto.Surname
                 };
+                if(registerDto.UserType == UserTypeEnum.Creator)
+                {
+                    user.Subscribers = new Collection<ViewerSubscription>();
+                    user.OwnedVideos = new Collection<VideoModel>();
+                    user.Money = 0f;
+                }
                 result = await _userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded)
                 {
@@ -57,8 +69,8 @@ namespace MyWideIO.API.Services
                     {
                         registerDto.AvatarImage = registerDto.AvatarImage.Split(imagePrefix)[1];
                     }
-                    (user.ProfilePicture, user.ProfilePictureFileName) = await _imageService.UploadImageAsync(registerDto.AvatarImage, user.Id.ToString());
-                    if (user.ProfilePicture.Length == 0)
+                    user.ProfilePicture = await _imageService.UploadImageAsync(registerDto.AvatarImage, user.Id.ToString());
+                    if (user.ProfilePicture.Url.Length == 0)
                     {
                         throw new UserException("Image upload error");
                     }
@@ -99,19 +111,17 @@ namespace MyWideIO.API.Services
                     {
                         updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
                     }
-                    (user.ProfilePicture, user.ProfilePictureFileName) = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
-                    if (user.ProfilePicture.Length == 0)
+                    user.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
+                    if (user.ProfilePicture.Url.Length == 0)
                     {
                         throw new UserException("Image upload error");
                     }
                 }
-                else if(user.ProfilePictureFileName is not null)
+                else if (user.ProfilePicture is not null)
                 {
-                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
-                    user.ProfilePictureFileName = null;
+                    await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
                     user.ProfilePicture = null;
                 }
-
                 result = await _userManager.UpdateAsync(user); // tutaj zapisanie zmian w bazie
                 if (!result.Succeeded)
                 {
@@ -134,6 +144,33 @@ namespace MyWideIO.API.Services
                     {
                         throw new UserException(result.Errors.First()?.Code);
                     }
+                    if (newRole == UserTypeEnum.Creator.ToString())
+                    {
+                        user.Money = 0f;
+                        result = await _userManager.UpdateAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            throw new UserException(result.Errors.First()?.Code);
+                        }
+                    }
+                    else if (newRole == UserTypeEnum.Simple.ToString() && role == UserTypeEnum.Creator.ToString())
+                    {
+                        if (user.Money is null)
+                            throw new UserException("Creator doesn't have requered properites");
+                        foreach (var video in user.OwnedVideos) // nie wiem czy usuwac video czy co
+                                                                // moze oddzielna metoda w videoService do usuniecia wszystkich
+                            await _videoService.RemoveVideoAsync(video.Id, user.Id);
+
+                        user.OwnedVideos.Clear();
+                        user.Subscribers.Clear();
+                        user.Money = null;
+                        result = await _userManager.UpdateAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            throw new UserException(result.Errors.First()?.Code);
+                        }
+                    }
+
                 }
             }
             catch
@@ -155,16 +192,24 @@ namespace MyWideIO.API.Services
 
         private async Task<UserDto> ConvertUserModelToDto(AppUserModel user)
         {
-            return new UserDto
+            var userDto =  new UserDto
             {
                 Id = user.Id,
                 Name = user.Name,
                 Surname = user.Surname,
                 Email = user.Email,
                 Nickname = user.UserName,
-                UserType = (UserTypeDto)Enum.Parse(typeof(UserTypeDto), (await _userManager.GetRolesAsync(user)).First()),
-                AvatarImage = user.ProfilePicture
+                UserType = (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()),
+                AvatarImage = user?.ProfilePicture?.Url,
+                AccountBalance = user?.AccountBalance
             };
+            if(userDto.UserType == UserTypeEnum.Creator)
+            {
+                if (user.Money is null)
+                    throw new UserException("Creator doesn't have requered properites");
+                userDto.SubscriptionsCount = user.Subscribers.Count;
+            }
+            return userDto;
         }
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
@@ -195,8 +240,8 @@ namespace MyWideIO.API.Services
                 {
                     throw new UserException(result.Errors.First()?.Code);
                 }
-                if (user.ProfilePictureFileName is not null)
-                    await _imageService.RemoveImageAsync(user.ProfilePictureFileName);
+                if (user.ProfilePicture is not null)
+                    await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
             }
             catch
             {

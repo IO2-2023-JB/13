@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Exceptions;
+using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using WideIO.API.Attributes;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Controllers
 {
@@ -58,6 +60,9 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")] // jeszcze 404 i 403 by sie przydaly
         public async Task<IActionResult> DeleteUserData([FromQuery(Name = "id")][Required()] Guid id)
         {
+            if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje usunac nie swoje konto
+                if (User.FindFirstValue(ClaimTypes.Role) != UserTypeEnum.Administrator.ToString()) // i nie jest adminem
+                    Forbid();
             await _userService.DeleteUserAsync(id);
             return Ok();
         }
@@ -80,10 +85,17 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         public async Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
-            id ??= Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
+            if (id is null)
+                id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            else
+            {
+                // if (User.FindFirstValue(ClaimTypes.Role) != UserTypeEnum.Administrator.ToString()) // i nie jest adminem
+                if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje usunac nie swoje konto
+                    Forbid();
+            }
+
             UserDto userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
-            return Ok(userDto);// po co sie zwraca to 
+            return Ok(userDto);
         }
 
         /// <summary>
@@ -103,10 +115,15 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 400, description: "Bad request")]
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
         [SwaggerResponse(statusCode: 404, description: "Not found")]
-
+        [AllowAnonymous]
         public async Task<IActionResult> GetUserData([FromQuery(Name = "id")] Guid? id)
         {
-            id ??= Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (id is null)
+            {
+                if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid nId))
+                    BadRequest("Not logged in users must provide an id");
+                id = nId;
+            }
             UserDto userDto = await _userService.GetUserAsync(id.Value);
             return Ok(userDto);
         }
@@ -141,7 +158,7 @@ namespace MyWideIO.API.Controllers
         /// User registration
         /// </summary>
         /// <param name="registerDto"></param>
-        /// <response code="200">OK</response>
+        /// <response code="201">Created</response>
         /// <response code="400">Bad request</response>
         /// <response code="409">A user with this e-mail address already exists</response>
         [HttpPost("register")]
@@ -151,7 +168,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [AllowAnonymous]
         [SwaggerOperation("RegisterUser")]
-        [SwaggerResponse(statusCode: 200, description: "OK")]
+        [SwaggerResponse(statusCode: 201, description: "Created")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         [SwaggerResponse(statusCode: 409, description: "A user with this e-mail address already exists")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterDto registerDto)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
@@ -20,24 +21,26 @@ namespace MyWideIO.API.Models.DB_Models
         [StringLength(500)]
         public string Description { get; set; }
 
-        public int Duration { get; set; } //in ms?
+        public TimeSpan Duration { get; set; }
+        public int ViewCount { get; set; } = 0;
+        public int PositiveReactions { get; set; } = 0;
 
-        public int PositiveReactions { get; set; }
+        public int NegativeReactions { get; set; } = 0;
 
-        public int NegativeReactions { get; set; }
-
-        public ICollection<CommentModel> Comments { get; set; }
-        public ICollection<TagModel> Tags { get; set; }
+        public virtual ICollection<CommentModel> Comments { get; set; } = new Collection<CommentModel>();
+        public virtual ICollection<TagModel> Tags { get; set; } = new Collection<TagModel>();
+        public DateTime UploadDate { get; set; } = DateTime.Now;
+        public DateTime EditDate { get; set; } = DateTime.Now;
 
         public Guid CreatorId { get; set; }
-        public CreatorModel Creator { get; set; }
-        public ICollection<VideoPlaylist> Playlists { get; set; }
-        public ICollection<ViewerLike> LikedBy { get; set; }
+        public virtual AppUserModel Creator { get; set; }
+        public virtual ICollection<VideoPlaylist> Playlists { get; set; } = new Collection<VideoPlaylist>();
+        public virtual ICollection<ViewerLike> LikedBy { get; set; } = new Collection<ViewerLike>();
 
-        public string fileName { get; set; }
-        public string Thumbnail { get; set; }
+        // public string fileName { get; set; }
+        public virtual ImageModel? Thumbnail { get; set; }
         public bool IsVisible { get; set; }
-        public ProcessingProgressDto ProcessingProgress { get; set; }
+        public ProcessingProgressEnum ProcessingProgress { get; set; }
 
     }
 }

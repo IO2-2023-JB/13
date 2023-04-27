@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Models.Dto_Models;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using WideIO.API.Attributes;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Controllers
 {

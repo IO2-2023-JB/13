@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Data;
+using MyWideIO.API.Data.Repositories;
 
-
-namespace MyVideIO.Data
+namespace MyWideIO.Data
 {
     public class ApplicationDbContext : IdentityDbContext<AppUserModel, UserRole, Guid>
     {
-        public DbSet<AppUserModel> Users { get; set; }
-        public DbSet<CreatorModel> Creators { get; set; }
+        //public DbSet<AppUserModel> Users { get; set; } juz jest w IdentityDbContext
+        // public DbSet<CreatorModel> Creators { get; set; }
         public DbSet<VideoModel> Videos { get; set; }
         public DbSet<PlaylistModel> Playlists { get; set; }
         public DbSet<CommentModel> Comments { get; set; }
@@ -24,7 +24,7 @@ namespace MyVideIO.Data
 
             modelBuilder.Entity<ViewerWatchLater>()
                 .HasKey(vw => new { vw.ViewerId, vw.VideoId });
-            
+
             modelBuilder.Entity<ViewerWatchLater>()
                 .HasOne(vw => vw.Viewer)
                 .WithMany(v => v.WatchLater)
@@ -98,12 +98,31 @@ namespace MyVideIO.Data
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            //modelBuilder.Entity<VideoModel>()
+            //    .OwnsOne(c => c.Thumbnail);
+
+            //modelBuilder.Entity<AppUserModel>()
+            //    .OwnsOne(c => c.ProfilePicture);
+
+            modelBuilder.Entity<AppUserModel>()
+                .HasMany(c => c.OwnedVideos)
+                .WithOne(c => c.Creator)
+                .HasForeignKey(c => c.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<VideoModel>()
+                .HasOne(c => c.Creator)
+                .WithMany(c => c.OwnedVideos)
+                .HasForeignKey(c => c.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<VideoModel>()
                 .HasMany(v => v.Tags)
-                .WithOne(v => v.Parent)
-                .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(v => v.Videos);
+
 
 
         }

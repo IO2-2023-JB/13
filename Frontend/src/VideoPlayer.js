@@ -447,7 +447,7 @@ const VideoPlayer = () => {
               Views: {videoData.viewCount}
             </div>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
-              Upload date: {videoData.uploadDate}
+              Upload date: {new Date(videoData.uploadDate).toLocaleDateString('en-EN', { day: 'numeric', month: 'long', year: 'numeric' })}
             </div>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
               Tags: {videoData.tags.join(", ")}

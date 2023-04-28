@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
-using MyVideIO.Data;
+using MyWideIO.Data;
 using MyWideIO.API.Services.Interfaces;
 
 namespace MyWideIO.API.Services

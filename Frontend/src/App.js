@@ -5,7 +5,7 @@ import {Administrator} from './Administrator'
 import {Department} from './Department';
 import {Employee} from './Employee';
 import { FetchData } from './FetchData';
-import { Route, Routes, NavLink } from 'react-router-dom';
+import { Route, Routes, NavLink, Navigate } from 'react-router-dom';
 import Register from './User_Account/Register'
 import Login from './User_Account/Login'
 import ProfilePage from './User_Account/ProfilePage';
@@ -69,8 +69,8 @@ function App() {
   const logout = async () => {
     // if used in more components, this should be in context
     setAuth({});
-    cookies.remove("accessToken");
     navigate('/login');
+    cookies.remove("accessToken");
   }
 
   const isLoggedIn = () =>{

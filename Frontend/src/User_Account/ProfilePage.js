@@ -11,7 +11,7 @@ import logo from '../images/happy.jpg'
 import { useNavigate, useLocation } from 'react-router-dom';
 import {cookies} from '../App'
 
-config.autoAddCss = false;
+//config.autoAddCss = false;
 
 const PROFILE_URL = '/user';
 const VIDEO_URL = '/video';

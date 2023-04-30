@@ -71,6 +71,9 @@ const VideoPlayer = () => {
     currentUserReaction: '',
   });
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [validVideoFile, setValidVideoFile] = useState(false);
+
   useEffect(() => {
     //console.log("Updated reactionsData:", reactionsData);
     setIsLoading(false);
@@ -247,7 +250,7 @@ const VideoPlayer = () => {
         }
         else
         {
-          base64data = "";
+          base64data = null;
         }
         setTimeout(async () => {
           response = await axios.put(METADATA_URL + "?id=" + video_id,
@@ -362,28 +365,63 @@ const VideoPlayer = () => {
     }
   }
 
+  const onChangeHandler = (event) => {
+    setSelectedFile(event.target.files[0]);
+    setValidVideoFile(true);
+  };
+
+  const handleVideoUpload = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('videoFile', selectedFile);
+      const response = await axios.post(VIDEO_URL + "/" + videoData.id,
+        formData,
+        {
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true //cred
+        }
+      );
+      navigate('/profile');
+    } catch (err) {
+        if (!err?.response) {
+            setErrMsg('No Server Response');
+        } else if (err.response?.status === 401) {
+            setErrMsg('Unauthorized');
+        } else {
+            setErrMsg('Data Change Failed');
+        }
+        errRef.current.focus();
+    }
+  };
+
   return (
     <div>
     {!isLoading && (
     <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
       justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
-      <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
+      {videoData.processingProgress === 'Uploaded' && (
+        <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
 
         {/* <video id="videoPlayer" width="830" controls autoplay loop muted playsinline ref={videoRef}>
           <source src={videoUrl} type="video/mp4" />
         </video> */}
-        <ReactPlayer
-          id="videoPlayer"
-          ref={videoRef}
-          url={videoUrl}
-          playing={true}
-          width={830}
-          controls={true}
-          loop={true}
-        />
-        
-      </div>
+          <ReactPlayer
+            id="videoPlayer"
+            ref={videoRef}
+            url={videoUrl}
+            playing={true}
+            width={830}
+            controls={true}
+            loop={true}
+          />
+        </div>
+      )}
       {!editMode?(
+        videoData.processingProgress === 'Uploaded' ? (
       <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
           <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>  {/*className="movie_title"*/}
@@ -463,6 +501,85 @@ const VideoPlayer = () => {
             </div>
           )}
       </div>
+        ):(
+          <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+          <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
+            <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>  {/*className="movie_title"*/}
+                This video is currently in processing proggress state: {videoData.processingProgress}
+            </div>
+            {
+              (videoData.processingProgress === 'MetadataRecordCreated' || videoData.processingProgress === 'FailedToUpload')? (
+                <div>
+                  <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>  {/*className="movie_title"*/}
+                    Please upload your video.
+                  </div>
+                  <form onSubmit={handleVideoUpload}>
+                     <label htmlFor="video">
+                          Video File:
+                      </label>
+                      <input
+                          class="btn btn-dark"
+                          type="file"
+                          accept="video/*"
+                          id="video"
+                          onChange={onChangeHandler}
+                      />
+                      <button class="btn btn-dark" disabled={!validVideoFile ? true : false}>Submit</button>
+                  </form>
+                </div>
+              ):(
+                <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>  {/*className="movie_title"*/}
+                  Video is being uploaded. Please wait until your video is uploaded.
+                </div>
+              )
+            }
+            <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>  {/*className="movie_title"*/}
+              {videoData.title}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0px", paddingTop:"12px", height:"60px"}}>
+              Author: {videoData.authorNickname}
+            </div>
+          </div>
+          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+            <button class="btn btn-dark" style={{marginRight:"20px"}}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+              </svg>
+            </button>
+            <button class="btn btn-dark" style={{marginRight:"20px"}}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+              </svg>
+            </button>
+            <button class="btn btn-dark" style={{marginRight:"20px", position: "absolute", right: "10px"}}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+              </svg>
+            </button>
+          </div>
+          <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
+              Views: {videoData.viewCount}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
+              Upload date: {new Date(videoData.uploadDate).toLocaleDateString('en-EN', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
+              Tags: {videoData.tags.join(", ")}
+            </div>
+            <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
+              {videoData.description}
+            </div>
+          </div>
+          {(videoData.authorId == auth.id) &&(
+            <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+              <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px"}}>Edit video metadata</button>
+              <button onClick={handleDeleteClick} class="btn btn-dark">Delete video</button>
+            </div>
+          )}
+      </div>
+        )
       ):(
         <div style={{marginTop: "50px"}} class="container-fluid justify-content-center" align="center"> 
         <h1 class="container-fluid justify-content-center" style={{marginTop:"20px", 

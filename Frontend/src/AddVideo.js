@@ -157,7 +157,7 @@ const AddVideo = () => {
             }
             else
             {
-              base64data = "";
+              base64data = null;
             }
             setTimeout(async () => {
               response = await axios.post(METADATA_URL,
@@ -192,9 +192,6 @@ const AddVideo = () => {
               handleCancelClick();
             }, 100);
           }
-
-            
-
         } catch (err) {
             if (!err?.response) {
                 setErrMsg('No Server Response');
@@ -206,25 +203,6 @@ const AddVideo = () => {
             errRef.current.focus();
         }
       };
-
-    // const handleSubmit = (event) => {
-    //     event.preventDefault();
-    //     const formData = new FormData();
-    //     const { selectedFile } = this.state;
-    //     formData.append('title', 'test');
-    //     formData.append('description', 'test');
-    //     formData.append('thumbnail', {  position: 0,
-    //                                     readTimeout: 0,
-    //                                     writeTimeout: 0 });
-    //     formData.append('tags', ["xD"]);
-    //     formData.append('inputFile', selectedFile);
-    //     fetch(VIDEO_URL, {
-    //         method: 'POST',
-    //         body: formData,
-    //     });
-    // }
-
-
 
 
     return (
@@ -265,14 +243,14 @@ const AddVideo = () => {
                         onBlur={() => setDescriptionFocus(false)}
                     />
                     <label htmlFor="tags">
-                        Tags:
+                        Tags (separated by commas):
                     </label>
                     <input
                         type="text"
                         id="tags"
                         ref={tagsRef}
                         autoComplete="off"
-                        onChange={(e) => setTags(e.target.value.split(', '))}
+                        onChange={(e) => setTags(e.target.value.split(','))}
                         value={tags}
                         required
                         aria-describedby="uidnote"

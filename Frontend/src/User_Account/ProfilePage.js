@@ -500,6 +500,7 @@ return (
                 </li>
                 {
                 videosdata.map(video => (
+                  video.processingProgress ==='Uploaded' && (
                   <div>
                   <li style={{listStyleType: "none"}}>
                   <div className="box" style={{width:"300px", height:"170px", backgroundImage: `url(${video.thumbnail})`, backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center"}}>
@@ -525,7 +526,40 @@ return (
                     </div>
                     </li>
                   </div>
-                ))}
+                  )
+                )).reverse()}
+                <h2 style={{color: 'red', textAlign: 'center'}}>Not ready videos</h2>
+                {
+                videosdata.map(video => (
+                  video.processingProgress !== 'Uploaded' && (
+                  <div>
+                  <li style={{listStyleType: "none"}}>
+                  <div className="box" style={{width:"300px", height:"170px", backgroundImage: `url(${video.thumbnail})`, backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center"}}>
+                    <div className="box2" style={{width:"280px", height:"150px"}}>
+                        <table>
+                            <tr>
+                            <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                              <h2>{video.title}</h2>
+                            </div>
+                            </tr>
+                            <tr>
+                            <div className="movie_thumbnail" style={{width:"280px", height:"100px", backgroundImage: `url(${video.thumbnail})`, backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center" } } onClick={() => handleVideoClick(video.id)}>
+                                {/* <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16" >
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                </svg> */}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-play-circle-fill" viewBox="0 0 16 16" style={{ fill: "white", borderRadius: "100%" }}>
+                                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                </svg>
+                            </div>
+                            </tr>
+                        </table>
+                        </div> 
+                    </div>
+                    </li>
+                  </div>
+                  )
+                )).reverse()}
+
               </ul>
             </section>
           </div>

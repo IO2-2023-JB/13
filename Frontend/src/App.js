@@ -1,11 +1,7 @@
-import logo from './logo.svg';
 import './App.css';
 import {Home} from './Home';
 import {Administrator} from './Administrator'
-import {Department} from './Department';
-import {Employee} from './Employee';
-import { FetchData } from './FetchData';
-import { Route, Routes, NavLink, Navigate } from 'react-router-dom';
+import { Route, Routes, NavLink } from 'react-router-dom';
 import Register from './User_Account/Register'
 import Login from './User_Account/Login'
 import ProfilePage from './User_Account/ProfilePage';
@@ -15,18 +11,16 @@ import useAuth from './hooks/useAuth';
 import Cookies from 'universal-cookie'
 import { useContext } from "react";
 import AuthContext from "./context/AuthProvider";
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import jwt_decode  from 'jwt-decode';
 import VideoPlayer from './VideoPlayer';
 import React, { useState } from 'react';
-import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import './Sidebar.css';
-import whitelogo from './images/logo2.png'
-import { IconContext } from 'react-icons';
 import AddVideo from './AddVideo';
+import AddPlaylist from './AddPlaylist';
 
 export const cookies = new Cookies();
 
@@ -50,7 +44,7 @@ function App() {
       const id = payload["sub"];
       setAuth({user: email, pwd: "", roles, accessToken, id});
       const lastVisitedPage = localStorage.getItem("lastVisitedPage");
-      if(from!= "/home"){
+      if(from !== "/home"){
         navigate(from, {replace: true});
       }
       else if(lastVisitedPage){
@@ -60,21 +54,19 @@ function App() {
         navigate(from, {replace: true});
       }
     }
-  }, []);
+  }, [setAuth]);
 
   const [sidebar, setSidebar] = useState(false);
 
   const showSidebar = () => setSidebar(!sidebar);
 
   const logout = async () => {
-    // if used in more components, this should be in context
     setAuth({});
-    navigate('/login');
+    navigate(LOGIN_URL);
     cookies.remove("accessToken");
   }
 
   const isLoggedIn = () =>{
-    //console.log(auth?.accessToken ? "Logged In" : "Logged Out");
     return(
       auth?.accessToken
     )
@@ -97,11 +89,11 @@ function App() {
             </NavLink>
           </li>
           }
-          <li className='nav-item m-1'>
+          {/* <li className='nav-item m-1'>
             <NavLink className="btn btn-outline-light" to='/videoplayer'>
                 Play video
               </NavLink>
-          </li>
+          </li> */}
 
           {isLoggedIn()?
             <li className='nav-item m-0 mr-auto'>
@@ -162,15 +154,13 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path='/home' element={<Home/>}/>
           <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/addvideo' element={<AddVideo />} />
+          <Route path="/administrator" element={<Administrator />}/>
+          <Route path="/addplaylist" element={<AddPlaylist />} />
         </Route>
         <Route path='/videoplayer/:videoid?' element={<VideoPlayer/>} />
-        <Route path='/department' element={<Department />} />
-        <Route path='/employee' element={<Employee />} />
         <Route path='/login' element={<Login />} />
-        <Route path="/administrator" element={<Administrator />}/>
         <Route path='/register' element={<Register />} />
-        <Route path='/employee' element={<Employee />} />
-        <Route path='/video' element={<AddVideo />} />
       </Routes>
     </div>
   );

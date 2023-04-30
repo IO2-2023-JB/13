@@ -2,6 +2,7 @@ import React from "react";
 import axios from './api/axios';
 import {useRef, useState, useEffect } from "react"
 import AuthContext from "./context/AuthProvider"
+import useAuth from './hooks/useAuth';
 import { useContext } from "react";
 import {useLocation, useNavigate} from 'react-router-dom';
 import { useParams } from "react-router-dom";
@@ -16,9 +17,10 @@ const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 
 const VideoPlayer = () => {
+  const { setAuth } = useAuth();
+  const { auth } = useContext(AuthContext);
   const params = useParams();
   const location = useLocation();
-  const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
   let video_id = params.videoid; //JSON.stringify(params.id)
   const baseURL = 'https://io2test.azurewebsites.net';
@@ -73,6 +75,12 @@ const VideoPlayer = () => {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [validVideoFile, setValidVideoFile] = useState(false);
+
+  useEffect(() => {
+    if (!auth?.accessToken) {
+      navigate('/login', { state: { from: location } });
+    }
+  }, [auth]);
 
   useEffect(() => {
     //console.log("Updated reactionsData:", reactionsData);

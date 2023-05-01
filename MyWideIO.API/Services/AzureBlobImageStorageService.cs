@@ -1,34 +1,30 @@
-﻿using Azure;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using SixLabors.ImageSharp.Formats;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
     public class AzureBlobImageStorageService : IImageStorageService
     {
-        private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _blobContainerClient;
-        private readonly string containerName = "blob1";
+        private const string ContainerName = "blob1";
 
         public AzureBlobImageStorageService(BlobServiceClient blobServiceClient)
         {
-            _blobServiceClient = blobServiceClient;
-            _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            _blobContainerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
             if (!_blobContainerClient.Exists())
             {
-                _blobContainerClient = _blobServiceClient.CreateBlobContainer(containerName);
+                _blobContainerClient = blobServiceClient.CreateBlobContainer(ContainerName);
             }
             _blobContainerClient.SetAccessPolicy(PublicAccessType.BlobContainer);
         }
 
         public async Task RemoveImageAsync(string fileName)
         {
-            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
+            var blobClient = _blobContainerClient.GetBlobClient(fileName);
 
             var response = await blobClient.DeleteAsync();
             if (response.IsError)
@@ -41,19 +37,17 @@ namespace MyWideIO.API.Services
         {
             BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
 
-            using(var br = new BinaryReader(blobClient.OpenRead()))
-            {
-                byte[] file = br.ReadBytes((int)br.BaseStream.Length);
-                return Convert.ToBase64String(file);
-            }
+            using var br = new BinaryReader(blobClient.OpenRead());
+            var file = br.ReadBytes((int)br.BaseStream.Length);
+            return Convert.ToBase64String(file);
         }
 
-        public async Task<ImageModel> UploadImageAsync(string base64image, string id)
+        public async Task<ImageModel> UploadImageAsync(string base64Image, string id)
         {
             byte[] buffer;
             try
             {
-                buffer = Convert.FromBase64String(base64image);
+                buffer = Convert.FromBase64String(base64Image);
             }
             catch (FormatException e)
             {
@@ -65,7 +59,7 @@ namespace MyWideIO.API.Services
             {
                 try
                 {
-                    format = Image.DetectFormat(ms);
+                    format = await Image.DetectFormatAsync(ms);
                 }
                 catch (InvalidImageContentException e)
                 {
@@ -79,10 +73,9 @@ namespace MyWideIO.API.Services
             }
 
             string fileName = id + "." + format.Name.ToLower();
-            BinaryData binaryData = new(buffer);
-            BlobClient blobClient = _blobContainerClient.GetBlobClient(fileName);
-            Response response;
-            response = (await blobClient.UploadAsync(binaryData, true)).GetRawResponse();
+            var binaryData = new BinaryData(buffer);
+            var blobClient = _blobContainerClient.GetBlobClient(fileName);
+            var response = (await blobClient.UploadAsync(binaryData, true)).GetRawResponse();
             if (response.IsError)
             {
                 throw new UserException("Image upload error");

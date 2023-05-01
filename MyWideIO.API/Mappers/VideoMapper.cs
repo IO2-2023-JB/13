@@ -20,7 +20,7 @@ namespace MyWideIO.API.Mappers
             Title = videoModel.Title,
             Description = videoModel.Description,
             Thumbnail = videoModel?.Thumbnail?.Url ?? "", // "" czy null
-            AuthorId = videoModel.CreatorId,
+            AuthorId = videoModel!.CreatorId,
             AuthorNickname = videoModel.Creator.UserName,
             ViewCount = videoModel.ViewCount,
             Tags = videoModel.Tags.Select(t => t.Content).ToList(),

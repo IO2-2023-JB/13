@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MyWideIO.API.Models.DB_Models
+﻿namespace MyWideIO.API.Models.DB_Models
 {
     public class PlaylistModel
     {

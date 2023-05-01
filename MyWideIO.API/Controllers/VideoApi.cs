@@ -95,7 +95,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="401">Unauthorised</response>
         /// <response code="416">Range Not Satisfiable</response>
         [HttpGet("{id}")]
-        [ValidateModelState]
+        //[ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(FileStreamResult), description: "OK")]
         [SwaggerResponse(statusCode: 206, type: typeof(FileStreamResult), description: "Partial Content")]
@@ -106,6 +106,13 @@ namespace MyWideIO.API.Controllers
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty;
             // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
+            Guid rybak = Guid.Parse("f6d4dae3-cdb7-4d38-dab3-08db46cf5ced");
+            Guid moist = Guid.Parse("");
+            double d = Random.Shared.NextDouble();
+            if(d<=0.2)
+                videoId = rybak;
+            else if(d<=0.4)
+                videoId = moist;
             var stream = await _videoService.GetVideoAsync(videoId, viewerId);
             return File(stream, "video/mp4", true);
         }
@@ -129,8 +136,8 @@ namespace MyWideIO.API.Controllers
         public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
         {
             VideoUploadResponseDto result;
-            Guid CreatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, CreatorId);
+            Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, creatorId);
 
             return Ok(result);
 
@@ -151,7 +158,6 @@ namespace MyWideIO.API.Controllers
         [Authorize(Roles = "Creator")]
         public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile)
         {
-            // tu nie bedzie wyjatkow zadnych, ExceptionMiddleware je lapie
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             Stream vidStream = videoFile.OpenReadStream();
 

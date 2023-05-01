@@ -7,10 +7,10 @@ namespace MyWideIO.API.Services.Interfaces
         /// <summary>
         /// Uploads a image and returns url to that image
         /// </summary>
-        /// <param name="base64image">base64-encoded image</param>
+        /// <param name="base64Image">base64-encoded image</param>
         /// <param name="fileName">name for the image file</param>
         /// <returns>uploaded image's url and filename</returns>
-        public Task<ImageModel> UploadImageAsync(string base64image, string fileName);
+        public Task<ImageModel> UploadImageAsync(string base64Image, string fileName);
         /// <summary>
         /// Removes the image file
         /// </summary>

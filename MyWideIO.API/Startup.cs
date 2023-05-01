@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MyWideIO.Data;
 using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
@@ -17,11 +16,14 @@ using MyWideIO.API.Services.Interfaces;
 using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Primitives;
+using MyWideIO.API.Filters;
 
 namespace MyWideIO.API
 {
     public class Startup
     {
+        // todo - allow request with size > 5mb
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -76,11 +78,11 @@ namespace MyWideIO.API
                 options.AddPolicy("AllowLocalhost3000",
                     builder =>
                     {
-                        //builder.WithOrigins("http://localhost:3000")
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins("http://localhost:3000")
+                        //builder.AllowAnyOrigin()
                                .AllowAnyHeader()
-                               .AllowAnyMethod();
-                        //.AllowCredentials();
+                               .AllowAnyMethod()
+                               .AllowCredentials();
                     });
             });
 
@@ -99,7 +101,44 @@ namespace MyWideIO.API
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
+                    
                     ClockSkew = TimeSpan.FromMinutes(5)
+                };
+                // allow token in query string
+                options.Events = new JwtBearerEvents {
+                    OnMessageReceived = (context) => {
+
+                        if (!context.Request.Query.TryGetValue("access_token", out var values)) {
+                            return Task.CompletedTask;
+                        }
+
+                        if (values.Count > 1)
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Fail(
+                                "Only one 'access_token' query string parameter can be defined. " +
+                                $"However, {values.Count:N0} were included in the request."
+                            );
+
+                            return Task.CompletedTask;
+                        }
+
+                        var token = values.Single();
+
+                        if (string.IsNullOrWhiteSpace(token)) {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Fail(
+                                "The 'access_token' query string parameter was defined, " +
+                                "but a value to represent the token was not included."
+                            );
+
+                            return Task.CompletedTask;
+                        }
+                        
+                        context.Token = token.StartsWith("Bearer ") ? token[7..] : token;
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
             services.AddAuthorization();
@@ -150,7 +189,8 @@ namespace MyWideIO.API
 
             services.Configure<KestrelServerOptions>(options =>
             {
-                options.Limits.MaxRequestBodySize = int.MaxValue; //:)
+                options.Limits.MaxRequestBodySize = null; //:)
+                options.Limits.MaxRequestBufferSize = null;
             });
 
             CreateRoles(services.BuildServiceProvider()).Wait();

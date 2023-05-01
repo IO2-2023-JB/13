@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyWideIO.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Extensions;
 using MyWideIO.API.Models;

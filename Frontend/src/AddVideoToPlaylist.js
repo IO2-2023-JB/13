@@ -23,6 +23,12 @@ const AddVideoToPlaylist = () => {
 
     const video_id = params.videoid;
 
+    const [newPlaylist, setNewPlaylist] = useState(false);
+    const [name, setName] = useState("");
+    const [visibility, setVisibility] = useState(false);
+    const nameRef = useRef();
+    const [submiting, setSubmiting] = useState(false);
+
     const [playlistsData, setPlaylistsData] = useState([]);
 
     const [playlistsList, setPlaylistsList] = useState([]);
@@ -37,7 +43,6 @@ const AddVideoToPlaylist = () => {
           setPlaylistsList(newList);
         }
     }
-
 
     useEffect(() => {
         axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
@@ -98,10 +103,77 @@ const AddVideoToPlaylist = () => {
         navigate(from);
     }
 
+    const handleNewPlaylistClick = () => {
+        setNewPlaylist(true);
+    }
+
+    const handleCancelNewPlaylistClick = () => {
+        setNewPlaylist(false);
+    }
+
+    const handleSubmitNewPlaylist = async () => {
+        try {
+            setSubmiting(true);
+            const response = await axios.post(PLAYLIST_DETAILS_URL,
+              JSON.stringify({
+                name: name,
+                visibility: visibility?"Public":"Private"
+              }),
+              {
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${auth?.accessToken}`
+                },
+                withCredentials: true //cred
+              }
+            );
+            axios.post(PLAYLIST_URL + "/" + response?.data.id + "/" + video_id,
+            {
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true //cred
+            }
+            ).catch(err => {
+              if (!err?.response) {
+                setErrMsg('No Server Response');
+              } else if (err.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if (err.response?.status === 401) {
+                setErrMsg('Unauthorized');
+              }else if (err.response?.status === 403) {
+                setErrMsg('Forbidden');
+              }else if (err.response?.status === 404) {
+                setErrMsg('Not found');
+              }else {
+                setErrMsg('Adding video with id ' + video_id + ' to playlist Failed');
+              }
+              errRef.current.focus();
+            });
+            setSubmiting(false);
+            handleCancelClick();
+          } catch (err) {
+            if (!err?.response) {
+                setErrMsg('No Server Response');
+            } else if (err.response?.status === 400) {
+                setErrMsg('Bad request');
+            } else if (err.response?.status === 401) {
+              setErrMsg('Unauthorized');
+            }else {
+                setErrMsg('Playlist creation Failed');
+            }
+            errRef.current.focus();
+          }
+          setSubmiting(false);
+    };
+
     return(
+        !newPlaylist?(
         <div style={{marginTop: "200px"}} class="container">
             <div class ="mt-2 row">
             <h2>Choose playlists you want to add your video to:</h2>
+            <button class="btn btn-dark" onClick={handleNewPlaylistClick}>Create and add to new playlist</button>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>
@@ -153,6 +225,45 @@ const AddVideoToPlaylist = () => {
                 <button onClick={handleCancelClick} class="btn btn-danger">Cancel</button>
             </div>
         </div>
+        ):(
+            <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
+            <h1 class="display-3" style={{marginBottom:"60px"}}>Upload your video</h1>
+            <section class="container-fluid justify-content-center mb-5" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
+                <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
+                <form onSubmit={handleSubmitNewPlaylist}>
+                    <label htmlFor="name">
+                        Name:
+                    </label>
+                    <input
+                        type="text"
+                        id="name"
+                        ref={nameRef}
+                        autoComplete="off"
+                        onChange={(e) => setName(e.target.value)}
+                        value={name}
+                        required
+                        aria-describedby="uidnote"
+                    />
+                    <label htmlFor="terms">
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            onChange={() => setVisibility(!visibility)}
+                            checked={visibility}
+                        />
+                        <text> I want my playlist to be public</text>
+                    </label>
+                    <label htmlFor="name">
+                        Select videos you want on your playlist:
+                    </label>
+                    
+                    <button class="btn btn-dark" disabled={(!name || submiting) ? true : false}>Submit</button>
+                </form>
+                <button class="btn btn-dark" onClick={handleCancelNewPlaylistClick}>Cancel</button>
+             </section>
+        </div>
+        )
     )
 }
 export default AddVideoToPlaylist;

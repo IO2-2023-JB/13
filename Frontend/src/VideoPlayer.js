@@ -14,6 +14,8 @@ import ReactPlayer from 'react-player';
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
+const COMMENT_URL = '/comment';
+const RESPONS_URL = '/comment/response'
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -70,6 +72,10 @@ const VideoPlayer = () => {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [validVideoFile, setValidVideoFile] = useState(false);
+
+  const [commentsData, setCommentsData] = useState([]);
+  const [responsesData, setResponsesData] = useState({});
+  
 
   useEffect(() => {
     if (!auth?.accessToken) {
@@ -142,7 +148,6 @@ const VideoPlayer = () => {
             withCredentials: true
           }
       ).then(response => {
-        console.log(response.data);
         setReactionsData({
           positiveCount: response.data.positiveCount,
           negativeCount: response.data.negativeCount,
@@ -160,7 +165,64 @@ const VideoPlayer = () => {
             setErrMsg('Getting metadata failed');
         }
       });
-      }
+      //get comments
+      axios.get(COMMENT_URL + "?id=" + video_id,
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true
+          }
+      ).then(response => {
+        setCommentsData(response?.data.comments);
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+          setErrMsg('Unauthorized');
+        } else if(err.response?.status === 403){
+          setErrMsg('Forbidden');
+        } else if(err.response?.status === 404){
+          setErrMsg('Not found');
+        } else {
+            setErrMsg('Getting coments failed');
+        }
+      });
+      commentsData.forEach(comment => {
+        //TODO responses
+        if(comment.hasResponses){
+          axios.get(RESPONS_URL + "?id=" + comment.id,
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true
+          }
+          ).then(response => {
+            setResponsesData((prevState) => ({
+              ...prevState,
+              [comment.id]: response?.data?.comments,
+            }));
+          }).catch(err => {
+            if(!err?.response) {
+                setErrMsg('No Server Response')
+            } else if(err.response?.status === 400) {
+                setErrMsg('Bad request');
+            } else if(err.response?.status === 401){
+              setErrMsg('Unauthorized');
+            } else if(err.response?.status === 404){
+              setErrMsg('Not found');
+            } else {
+              setErrMsg('Getting coments failed');
+            }
+          });
+        }
+      });
+    }
     }
   }, [params.videoid, auth?.accessToken, auth?.id])
 
@@ -399,6 +461,34 @@ const VideoPlayer = () => {
     navigate(`/addvideotoplaylist/${id}`);
   }
 
+  const handleCommentDeleteClick = (id) => {
+    axios.delete(COMMENT_URL + "?id=" + id,
+    {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true
+    }
+    ).then(response => {
+      window.location.reload();
+    }).catch(err => {
+      if(!err?.response) {
+          setErrMsg('No Server Response')
+      } else if(err.response?.status === 400) {
+          setErrMsg('Bad request');
+      } else if(err.response?.status === 401){
+          setErrMsg('Unauthorized');
+      } else if(err.response?.status === 403){
+          setErrMsg('Forbidden');
+      } else if(err.response?.status === 404){
+        setErrMsg('Not found');
+      } else {
+        setErrMsg('Deleting comment failed');
+      }
+    });
+  }
+
   return (
     <div>
     {!isLoading && (
@@ -509,6 +599,32 @@ const VideoPlayer = () => {
           <div style={{marginBottom: "50px"}}>
             <button style={{marginLeft:"15px"}} onClick={() => handleAddToPlaylistClick(videoData.id)} class="btn btn-dark">Add this video to playlist</button>
           </div>
+          {commentsData.map(comment => (
+            <div>
+            (comment.authorId == auth.id) && (
+              <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete comment</button>
+            )
+              {/*comment.avatarImage, comment.nickname*/}
+              <h5>
+                {comment.content}
+              </h5>
+              {comment.hasResponses &&(
+                responsesData[comment.id].map(response => (
+                    <div>
+                    (response.authorId == auth.id) && (
+                      <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete response</button>
+                    )
+                    {/*response.avatarImage, response.nickname*/}
+                    <h5>
+                      {response.content}
+                    </h5>
+                    </div>
+                ))
+              )}
+              {/* add responseClick */}
+            </div>
+            // add comentClick
+          ))}
       </div>
         ):(
           <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>

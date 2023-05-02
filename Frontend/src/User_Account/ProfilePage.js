@@ -1,21 +1,21 @@
-import {useRef, useState, useEffect } from "react"
-import AuthContext from "../context/AuthProvider"
+import {useRef, useState, useEffect } from "react";
+import AuthContext from "../context/AuthProvider";
 import useAuth from '../hooks/useAuth';
 import { useContext } from "react";
 import axios from '../api/axios';
-import {faCheck, faTimes, faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import {faCheck, faTimes, faInfoCircle  } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {cookies} from '../App'
+import {cookies} from '../App';
 
 config.autoAddCss = false;
 
 const PROFILE_URL = '/user';
-const USER_VIDEOS_URL = '/user/videos'
-const USER_PLAYLISTS_URL = '/playlist/user' 
-const CREATE_PLAYLIST_URL = '/addplaylist'
+const USER_VIDEOS_URL = '/user/videos';
+const USER_PLAYLISTS_URL = '/playlist/user';
+const CREATE_PLAYLIST_URL = '/addplaylist';
 const ADD_VIDEO_URL = '/addvideo';
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const NAME_REGEX = /^[A-Z][a-z]{2,17}$/;
@@ -41,113 +41,113 @@ const ProfilePage = () => {
     localStorage.setItem("lastVisitedPage", location.pathname);
   })
 
-useEffect(() => {
-  axios.get(PROFILE_URL + "?id=" + auth?.id, {
-    headers: { 
-      'Content-Type': 'application/json',
-      "Authorization" : `Bearer ${auth?.accessToken}`
-    },
-    withCredentials: true 
-  })
-  .then(response => {
-    setData(response?.data);
-  })
-  .catch(error => {
-    console.log("error: ", error);
-  });
-
-  axios.get(USER_VIDEOS_URL + "?id=" + auth?.id, {
-    headers: { 
-      'Content-Type': 'application/json',
-      "Authorization" : `Bearer ${auth?.accessToken}`
-    },
-    withCredentials: true 
-  })
-  .then(response => {
-    setVideosData(response?.data?.videos);
-  })
-  .catch(error => {
-    console.log("error: ", error);
-  });
-
-  // axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
-  //   headers: { 
-  //     'Content-Type': 'application/json',
-  //     "Authorization" : `Bearer ${auth?.accessToken}`
-  //   },
-  //   withCredentials: true 
-  // })
-  // .then(response => {
-  //   setPlaylistsData(response?.data);
-  // })
-  // .catch(error => {
-  //   console.log("error: ", error);
-  // });
-  //TODO
-}, [auth?.accessToken, auth?.id]);
-
-const [userData, setUserData] = useState({
-  firstName: "Loading...",
-  lastName: "Loading...",
-  nickname: "Loading...",
-  email: "Loading...",
-  accountBalance: 0,
-  avatarImage: '',
-  userType: '',
-});
-
-useEffect(() => {
-  if (data) {
-    setUserData({
-      firstName: data?.name,
-      lastName: data?.surname,
-      nickname: data?.nickname,
-      email: data?.email,
-      accountBalance: data?.accountBalance,
-      avatarImage: data?.avatarImage,
-      userType: data?.userType,
+  useEffect(() => {
+    axios.get(PROFILE_URL + "?id=" + auth?.id, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response => {
+      setData(response?.data);
+    })
+    .catch(error => {
+      console.log("error: ", error);
     });
-  }
-}, [data]);
+  
+    axios.get(USER_VIDEOS_URL + "?id=" + auth?.id, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response => {
+      setVideosData(response?.data?.videos);
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
+  
+    // axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
+    //   headers: { 
+    //     'Content-Type': 'application/json',
+    //     "Authorization" : `Bearer ${auth?.accessToken}`
+    //   },
+    //   withCredentials: true 
+    // })
+    // .then(response => {
+    //   setPlaylistsData(response?.data);
+    // })
+    // .catch(error => {
+    //   console.log("error: ", error);
+    // });
+    //TODO
+  }, [auth?.accessToken, auth?.id]);
 
-const userRef = useRef();
-const nameRef = useRef();
-const surnameRef = useRef();
-const [user, setUser] = useState('');
-const [validNickname, setValidNickname] = useState(false);
-const [userFocus, setUserFocus] = useState(false)
-const [name, setName] = useState("");
-const [validName, setValidName] = useState(false);
-const [nameFocus, setNameFocus] = useState(false)
-const [surname, setSurname] = useState('');
-const [validSurname, setValidSurname] = useState(false);
-const [surnameFocus, setSurnameFocus] = useState(false)
-const [email, setEmail] = useState('');
-const [validEmail, setValidEmail] = useState(false);
-const [profile_picture, setProfile_picture] = useState(null);
-const [profile_picture_name, setProfile_picture_name] = useState('');
-const [validprofile_picture, setValidprofile_picture] = useState(false);
-const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
+  const [userData, setUserData] = useState({
+    firstName: "Loading...",
+    lastName: "Loading...",
+    nickname: "Loading...",
+    email: "Loading...",
+    accountBalance: 0,
+    avatarImage: '',
+    userType: '',
+  });
 
-const [userType, setUserType] = useState('');
+  useEffect(() => {
+    if (data) {
+      setUserData({
+        firstName: data?.name,
+        lastName: data?.surname,
+        nickname: data?.nickname,
+        email: data?.email,
+        accountBalance: data?.accountBalance,
+        avatarImage: data?.avatarImage,
+        userType: data?.userType,
+      });
+    }
+  }, [data]);
+
+  const userRef = useRef();
+  const nameRef = useRef();
+  const surnameRef = useRef();
+  const [user, setUser] = useState('');
+  const [validNickname, setValidNickname] = useState(false);
+  const [userFocus, setUserFocus] = useState(false)
+  const [name, setName] = useState("");
+  const [validName, setValidName] = useState(false);
+  const [nameFocus, setNameFocus] = useState(false)
+  const [surname, setSurname] = useState('');
+  const [validSurname, setValidSurname] = useState(false);
+  const [surnameFocus, setSurnameFocus] = useState(false)
+  const [email, setEmail] = useState('');
+  const [validEmail, setValidEmail] = useState(false);
+  const [profile_picture, setProfile_picture] = useState(null);
+  const [profile_picture_name, setProfile_picture_name] = useState('');
+  const [validprofile_picture, setValidprofile_picture] = useState(false);
+  const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
+
+  const [userType, setUserType] = useState('');
 
 
 
-useEffect(() => {
-  setName(userData.firstName);
-}, [userData.firstName]);
-useEffect(() => {
-  setSurname(userData.lastName);
-}, [userData.lastName]);
-useEffect(() => {
-  setUser(userData.nickname);
-}, [userData.nickname]);
-useEffect(() => {
-  setEmail(userData.email);
-}, [userData.email]);
-useEffect(() => {
-  setUserType(userData.userType);
-}, [userData.userType]);
+  useEffect(() => {
+    setName(userData.firstName);
+  }, [userData.firstName]);
+  useEffect(() => {
+    setSurname(userData.lastName);
+  }, [userData.lastName]);
+  useEffect(() => {
+    setUser(userData.nickname);
+  }, [userData.nickname]);
+  useEffect(() => {
+    setEmail(userData.email);
+  }, [userData.email]);
+  useEffect(() => {
+    setUserType(userData.userType);
+  }, [userData.userType]);
 
   useEffect(() => {
     setValidNickname(USER_REGEX.test(user));
@@ -432,7 +432,6 @@ const handleVideoClick = (id) => {
 
 const handelCreateNewPlaylistClick = async (e) => {
   navigate(CREATE_PLAYLIST_URL);
-  //TODO
 }
 
 const handelPlaylistClick = (id) => {
@@ -518,7 +517,7 @@ return (
                               </div>
                             </tr>
                             <tr style={{backgroundColor: "transparent"}}>
-                            <div className="movie_thumbnail" style={{width:"280px", height:"100px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoClick(video.id)}>
+                            <div className="movie_thumbnail" style={{width:"280px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoClick(video.id)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-play-circle-fill" viewBox="0 0 16 16" style={{ fill: "white", borderRadius: "100%", marginBottom: "40px" }}>
                                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
                                 </svg>
@@ -531,35 +530,37 @@ return (
                   </div>
                   )
                 )).reverse()}
-                <h2 style={{color: 'red', textAlign: 'center'}}>Not ready videos</h2>
-                {
-                videosData.map(video => (
-                  video.processingProgress !== 'Uploaded' && (
+                {(videosData.some(video => video.processingProgress !== 'Uploaded')) && (
                   <div>
-                  <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"170px", backgroundImage: `url(${video.thumbnail})`, backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center"}}>
-                    <div className="box2" style={{width:"280px", height:"150px", backgroundColor: "transparent"}}>
-                        <table style={{backgroundColor: "transparent"}}>
-                            <tr style={{backgroundColor: "transparent", position:"center"}}>
-                            <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
-                              <h2 class="text-with-stroke" style={{backgroundColor: "transparent", position:"center"}}>{video.title}</h2>
-                            </div>
-                            </tr>
-                            <tr style={{backgroundColor: "transparent"}}>
-                            <div className="movie_thumbnail" style={{width:"280px", height:"100px", backgroundColor: "transparent", backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center" } } onClick={() => handleVideoClick(video.id)}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-play-circle-fill" viewBox="0 0 16 16" style={{ fill: "white", borderRadius: "100%", marginBottom: "40px" }}>
-                                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                </svg>
-                            </div>
-                            </tr>
-                        </table>
-                        </div> 
-                    </div>
-                    </li>
+                    <h2 style={{color: 'red', textAlign: 'center'}}>Not ready videos</h2>
+                      {videosData.map(video => (
+                        video.processingProgress !== 'Uploaded' && (
+                        <div>
+                        <li style={{listStyleType: "none"}}>
+                        <div className="box" style={{width:"300px", height:"170px" }}>
+                          <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                              <table style={{backgroundColor: "transparent"}}>
+                                  <tr style={{backgroundColor: "transparent", position:"center"}}>
+                                  <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                                    <h2 class="text-with-stroke" style={{backgroundColor: "transparent", position:"center"}}>{video.title}</h2>
+                                  </div>
+                                  </tr>
+                                  <tr style={{backgroundColor: "transparent"}}>
+                                  <div className="movie_thumbnail" style={{width:"280px", height:"60px", backgroundColor: "transparent", backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center" } } onClick={() => handleVideoClick(video.id)}>
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" class="bi bi-play-circle-fill" viewBox="0 0 16 16" style={{ fill: "white", borderRadius: "100%", marginBottom: "40px" }}>
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                      </svg>
+                                  </div>
+                                  </tr>
+                              </table>
+                              </div> 
+                          </div>
+                          </li>
+                        </div>
+                        )
+                      )).reverse()}
                   </div>
-                  )
-                )).reverse()}
-
+                )}
               </ul>
             </section>
 
@@ -716,8 +717,5 @@ return (
     )}
     </div>
 );
-
-
 };
-
 export default ProfilePage;

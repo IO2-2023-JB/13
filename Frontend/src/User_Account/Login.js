@@ -23,7 +23,7 @@ const Login = () => {
 
     useEffect(() => {
         localStorage.setItem("lastVisitedPage", location.pathname);
-      })
+    })
 
     useEffect(() => {
         emailRef.current.focus();

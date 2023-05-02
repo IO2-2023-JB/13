@@ -364,7 +364,7 @@ const ProfilePage = () => {
           userType: data?.userType,
         });
         handleCancelClick();
-        window.location.reload()
+        window.location.reload();
       }, 100);
       }
       else
@@ -503,8 +503,7 @@ return (
                       </div> 
                   </div>
                 </li>
-                {
-                videosData.map(video => (
+                {videosData.map(video => (
                   video.processingProgress ==='Uploaded' && (
                   <div>
                   <li style={{listStyleType: "none"}}>

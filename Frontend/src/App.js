@@ -21,6 +21,7 @@ import { SidebarData } from './SidebarData';
 import './Sidebar.css';
 import AddVideo from './AddVideo';
 import AddPlaylist from './AddPlaylist';
+import Playlist from './Playlist';
 
 export const cookies = new Cookies();
 
@@ -159,6 +160,7 @@ function App() {
           <Route path="/addplaylist" element={<AddPlaylist />} />
         </Route>
         <Route path='/videoplayer/:videoid?' element={<VideoPlayer/>} />
+        <Route path='/playlist/:playlistid?' element={<Playlist/>} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
       </Routes>

@@ -26,6 +26,11 @@ const VideoPlayer = () => {
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
   const errRef = useRef();
+
+  useEffect(() => {
+    localStorage.setItem("lastVisitedPage", location.pathname);
+  })
+
   const [videoData, setVideoData] = useState({
     id: "",
     title: "Loading...",
@@ -180,7 +185,7 @@ const VideoPlayer = () => {
         } else if(err.response?.status === 400) {
             setErrMsg('Bad request');
         } else if(err.response?.status === 401){
-            setErrMsg('Unauthorised');
+            setErrMsg('Unauthorized');
         } else if(err.response?.status === 403){
             setErrMsg('Forbidden');
         } else if(err.response?.status === 404){
@@ -390,6 +395,10 @@ const VideoPlayer = () => {
     }
   };
 
+  const handleAddToPlaylistClick = (id) => {
+    navigate(`/addvideotoplaylist/${id}`);
+  }
+
   return (
     <div>
     {!isLoading && (
@@ -497,6 +506,9 @@ const VideoPlayer = () => {
               </div>
             </div>
           )}
+          <div style={{marginBottom: "50px"}}>
+            <button style={{marginLeft:"15px"}} onClick={() => handleAddToPlaylistClick(videoData.id)} class="btn btn-dark">Add this video to playlist</button>
+          </div>
       </div>
         ):(
           <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>

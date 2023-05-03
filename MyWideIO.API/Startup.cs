@@ -13,12 +13,9 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services;
 using MyWideIO.API.Services.Interfaces;
-using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
-using Microsoft.Extensions.Primitives;
 using MyWideIO.API.Filters;
-using Microsoft.Extensions.Hosting;
 using MyWideIO.API.BackgroundProcessing;
 
 namespace MyWideIO.API
@@ -80,11 +77,11 @@ namespace MyWideIO.API
                 options.AddPolicy("AllowLocalhost3000",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:3000")
-                        //builder.AllowAnyOrigin()
+                        //builder.WithOrigins("http://localhost:3000")
+                        builder.AllowAnyOrigin()
                                .AllowAnyHeader()
-                               .AllowAnyMethod()
-                               .AllowCredentials();
+                               .AllowAnyMethod();
+                        //       .AllowCredentials();
                     });
             });
 

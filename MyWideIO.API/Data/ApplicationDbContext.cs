@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Models.DB_Models;
-using MyWideIO.API.Data;
-using MyWideIO.API.Data.Repositories;
 
-namespace MyWideIO.Data
+namespace MyWideIO.API.Data
 {
     public class ApplicationDbContext : IdentityDbContext<AppUserModel, UserRole, Guid>
     {

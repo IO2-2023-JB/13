@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyWideIO.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
@@ -17,9 +16,9 @@ namespace MyWideIO.API.Data.Repositories
 
         public async Task AddAsync(ViewerLike like)
         {
-            var a = _dbContext.Likes.Add(like);
+            _dbContext.Likes.Add(like);
             if (await _dbContext.SaveChangesAsync() == 0)
-                throw new CustomException("Adding to database error");
+                throw new CustomException("Adding to database error"); // nie wiem czy to jest potrzebne
         }
 
         public async Task DeleteAsync(ViewerLike like)

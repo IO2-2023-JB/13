@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using MyWideIO.API.Models.Enums;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 

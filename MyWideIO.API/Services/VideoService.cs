@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Identity.Client;
+using MyWideIO.API.BackgroundProcessing;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Mappers;
@@ -7,7 +9,7 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
-using System.Collections.Concurrent;
+using NReco.VideoConverter;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
@@ -19,73 +21,72 @@ namespace MyWideIO.API.Services
         private readonly IVideoStorageService _videoStorageService;
         private readonly ILikeRepository _likeRepository;
         private readonly UserManager<AppUserModel> _userManager;
-
-        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager)
+        private readonly ITransactionService _transactionService;
+        private readonly IBackgroundTaskQueue<VideoProcessWorkItem> _backgroundTaskQueue;
+        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService, IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue)
         {
             _videoRepository = videoRepository;
             _imageStorageService = imageService;
             _videoStorageService = videoStorageService;
             _likeRepository = likeRepository;
             _userManager = userManager;
+            _transactionService = transactionService;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
-        public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId)
+        public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
-                throw new ForbiddenException();
+                throw new VideoIsPrivateException();
 
-            if (!new[] { ProcessingProgressEnum.Uploaded, ProcessingProgressEnum.Ready, ProcessingProgressEnum.Processing }.Contains(video.ProcessingProgress))
-                throw new VideoException("Video not available");
-            //video.ProcessingProgress = ProcessingProgressEnum.Processing;
-            // moze proccessing znaczy w trakcie ogladania?
-            // na pewno moze kilka osoba na raz ogladac
-            // wiec jesli jedna ustawi proccessing i potem druga
-            // i pierwsza skonczy przed druga i zmieni na ready/uploaded
-            // to bedzie mozna usunac, ale druga wciaz pobiera
-            // await _videoRepository.UpdateVideoAsync(video);
+            if (video.ProcessingProgress != ProcessingProgressEnum.Ready)
+                throw new VideoException("Video not avaible");
 
-            //if (!scopedUsersVideos.Contains((videoId, viewerId)))
-            //{
-            video.ViewCount++; // jak sie bedzie przewijac video to sie bedzie zwiekszac
-                               // przy kazdym requescie
+
+            video.ViewCount++;
             await _videoRepository.UpdateVideoAsync(video);
-           
-            //   scopedUsersVideos.Add((videoId, viewerId));
-            // }
-            return await _videoStorageService.GetVideoFileAsync(video.Id);
+
+            return await _videoStorageService.GetVideoFileAsync(video.Id, cancellationToken);
         }
 
         public async Task RemoveVideoAsync(Guid videoId, Guid creatorId)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
             if (video.CreatorId != creatorId)
                 throw new ForbiddenException();
 
-            if (video.ProcessingProgress == ProcessingProgressEnum.Uploading)
-                throw new VideoException("can't delete while uploading");
-            else if (video.ProcessingProgress == ProcessingProgressEnum.Processing)
-                throw new VideoException("can't delete while proccessing");
-            await _videoRepository.RemoveVideoAsync(video); // najpierw usuwamy z bazy zeby nie mozna bylo czytac w trakcie usuwania
+            switch (video.ProcessingProgress)
+            {
+                case ProcessingProgressEnum.Uploading:
+                    throw new VideoException("can't delete while uploading");
+                case ProcessingProgressEnum.Uploaded:
+                    throw new VideoException("can't delete while in queue for processing");
+                case ProcessingProgressEnum.Processing:
+                    throw new VideoException("can't delete while processing");
+            }
+            await _videoRepository.RemoveVideoAsync(video);
 
-            if (new[] { ProcessingProgressEnum.Uploaded }.Contains(video.ProcessingProgress)) // co z ready, proccesing
+            if (video.ProcessingProgress == ProcessingProgressEnum.Ready)
                 await _videoStorageService.RemoveVideoFileAsync(video.Id);
 
             if (video.Thumbnail is not null)
                 await _imageStorageService.RemoveImageAsync(video.Thumbnail.FileName);
 
         }
-        // private readonly HashSet<(Guid, Guid)> scopedUsersVideos = new();
 
         public async Task UpdateVideoAsync(Guid videoId, Guid creatorId, VideoUploadDto dto)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
             if (video.CreatorId != creatorId)
                 throw new ForbiddenException();
 
             video.Description = dto.Description;
             video.Title = dto.Title;
-            video.Tags = dto.Tags.Select(t => new TagModel { Content = t }).ToList();
+            video.Tags = dto.Tags.Select(t => new TagModel
+            {
+                Content = t
+            }).ToList();
             video.EditDate = DateTime.Now;
             video.IsVisible = dto.Visibility == VisibilityEnum.Public;
             if (dto.Thumbnail is not null)
@@ -108,51 +109,48 @@ namespace MyWideIO.API.Services
 
         public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
-                throw new ForbiddenException();
+                throw new VideoIsPrivateException();
 
             return VideoMapper.VideoModelToVideoMetadataDto(video);
         }
 
-        public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile) // raczej Stream video
+        public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile, string extension, CancellationToken cancellationToken)
         {
-            // race condition ?
-
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
-            if (video.CreatorId != creatorId)
-                throw new ForbiddenException();
-
-            switch (video.ProcessingProgress)
-            {
-                // case ProcessingProgressEnum.Uploaded:
-                case ProcessingProgressEnum.FailedToUpload:
-                case ProcessingProgressEnum.MetadataRecordCreated:
-                    video.ProcessingProgress = ProcessingProgressEnum.Uploading;
-                    break;
-
-                case ProcessingProgressEnum.Uploading:
-                    throw new VideoException("Already Uploading");
-
-                case ProcessingProgressEnum.Uploaded: // nie mozna zmienic pliku na nowy?
-                    return;
-
-                //case ProcessingProgressEnum.FailedToUpload: //restart uploada
-                //    video.ProcessingProgress = ProcessingProgressEnum.Uploading;
-                //    break;
-                default: throw new Exception("unknown error"); //todo  (co robi ready i processing dokładnie?)
-            }
-            await _videoRepository.UpdateVideoAsync(video);
             try
-            {
-                // TODO zmiana pliku na mp4
+            {                
+                if (video.CreatorId != creatorId)
+                    throw new ForbiddenException();
 
-                await _videoStorageService.UploadVideoFileAsync(videoId, videoFile);
+                switch (video.ProcessingProgress)
+                {
+                    //case ProcessingProgressEnum.Ready:
+                    case ProcessingProgressEnum.FailedToUpload:
+                    case ProcessingProgressEnum.MetadataRecordCreated:
+                        video.ProcessingProgress = ProcessingProgressEnum.Uploading;
+                        break;
 
+                    case ProcessingProgressEnum.Uploading:
+                        throw new VideoException("Already Uploading");
+
+                    case ProcessingProgressEnum.Uploaded:
+                        throw new VideoException("Video is waiting to be processed");
+
+                    case ProcessingProgressEnum.Processing:
+                        throw new VideoException("Video is being processed");
+
+                    default: throw new Exception("unknown error"); //
+                }
+                await _videoRepository.UpdateVideoAsync(video);
+                var workItem = new VideoProcessWorkItem(videoId, new MemoryStream(), extension);
+                await videoFile.CopyToAsync(workItem.VideoFile,cancellationToken);
+                workItem.VideoFile.Position = 0;
+                await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(workItem);
+                // dodajemy do kolejki (Channel), z ktorej czyta background processing service i pokolei przetwarza
+                // background service ma ta sama instacje kolejki co ta tutaj (singleton)
                 video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
-
-                // response = (await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders())).GetRawResponse();
-
             }
             catch
             {
@@ -168,31 +166,45 @@ namespace MyWideIO.API.Services
 
         public async Task<VideoUploadResponseDto> UploadVideoMetadataAsync(VideoUploadDto dto, Guid creatorId)
         {
-            AppUserModel creator = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
+            var creator = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
             if (creator.Money is null)
-                throw new UserException("Creator doesn't have requered properites");
-            var video = new VideoModel
+                throw new UserException("Creator doesn't have required properties");
+            VideoModel video;
+            await _transactionService.BeginTransactionAsync();
+            try
             {
-                Description = dto.Description,
-                Title = dto.Title,
-                Tags = dto.Tags.Select(t => new TagModel { Content = t }).ToList(),
-                //Thumbnail = null,
-                ProcessingProgress = ProcessingProgressEnum.MetadataRecordCreated,
-                CreatorId = creatorId,
-                Creator = creator,
-                IsVisible = dto.Visibility == VisibilityEnum.Public
-            };
-            await _videoRepository.AddVideoAsync(video); // id potrzebne do zdjecia
-            if (dto.Thumbnail is not null)
-            {
-                string imagePrefix = @"base64,";
-                if (dto.Thumbnail.Contains(imagePrefix))
-                    dto.Thumbnail = dto.Thumbnail.Split(imagePrefix)[1];
-                video.Thumbnail = await _imageStorageService.UploadImageAsync(dto.Thumbnail, video.Id.ToString());
-                await _videoRepository.UpdateVideoAsync(video);
+
+                video = new VideoModel
+                {
+                    Description = dto.Description,
+                    Title = dto.Title,
+                    Tags = dto.Tags.Select(t => new TagModel
+                    {
+                        Content = t
+                    }).ToList(),
+                    ProcessingProgress = ProcessingProgressEnum.MetadataRecordCreated,
+                    CreatorId = creatorId,
+                    Creator = creator,
+                    IsVisible = dto.Visibility == VisibilityEnum.Public
+                };
+                await _videoRepository.AddVideoAsync(video); // id potrzebne do zdjecia
+                if (dto.Thumbnail is not null)
+                {
+                    string imagePrefix = @"base64,";
+                    if (dto.Thumbnail.Contains(imagePrefix))
+                        dto.Thumbnail = dto.Thumbnail.Split(imagePrefix)[1];
+                    video.Thumbnail = await _imageStorageService.UploadImageAsync(dto.Thumbnail, video.Id.ToString());
+                    await _videoRepository.UpdateVideoAsync(video);
+                }
+                creator.OwnedVideos.Add(video);
+                await _userManager.UpdateAsync(creator);
             }
-            creator.OwnedVideos.Add(video);
-            await _userManager.UpdateAsync(creator);
+            catch
+            {
+                await _transactionService.RollbackAsync();
+                throw;
+            }
+            await _transactionService.CommitAsync();
             return new VideoUploadResponseDto
             {
                 Id = video.Id,
@@ -203,19 +215,22 @@ namespace MyWideIO.API.Services
         public async Task UpdateVideoReactionAsync(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto)
         {
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
-            if (!video.IsVisible)
-                throw new ForbiddenException();
+            if (!video.IsVisible && video.CreatorId != viewerId)
+                throw new VideoIsPrivateException();
             AppUserModel user = await _userManager.FindByIdAsync(viewerId.ToString());
             ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId); // jakos inaczej
-            like ??= new ViewerLike
+            if (like is null)
             {
-                Viewer = user,
-                Video = video,
-                VideoId = videoId,
-                ViewerId = viewerId,
-                Reaction = ReactionEnum.None
-
-            };
+                like = new ViewerLike
+                {
+                    Viewer = user,
+                    Video = video,
+                    VideoId = videoId,
+                    ViewerId = viewerId,
+                    Reaction = ReactionEnum.None
+                };
+                await _likeRepository.AddAsync(like);
+            }
             switch (like.Reaction)
             {
                 case ReactionEnum.Positive:
@@ -226,6 +241,8 @@ namespace MyWideIO.API.Services
                     break;
                 case ReactionEnum.None:
                     break;
+                default:
+                    throw new VideoException("Unknown reaction");
             }
             like.Reaction = videoReactionUpdateDto.Value;
             switch (like.Reaction)
@@ -238,6 +255,8 @@ namespace MyWideIO.API.Services
                     break;
                 case ReactionEnum.None:
                     break;
+                default:
+                    throw new VideoException("Unknown reaction");
             }
             video.LikedBy.Add(like); // None usuwamy czy zostaje
             await _videoRepository.UpdateVideoAsync(video);
@@ -247,8 +266,8 @@ namespace MyWideIO.API.Services
         public async Task<VideoReactionDto> GetVideoReactionAsync(Guid videoId, Guid viewerId)
         {
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
-            if (!video.IsVisible)
-                throw new ForbiddenException();
+            if (!video.IsVisible && video.CreatorId != viewerId)
+                throw new VideoIsPrivateException();
             ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId);
             return new VideoReactionDto
             {

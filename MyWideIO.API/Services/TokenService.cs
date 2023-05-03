@@ -15,7 +15,7 @@ namespace MyWideIO.API.Services
         {
             _configuration = configuration;
         }
-        public string GenerateToken(AppUserModel user, IList<string> roles)
+        public string GenerateToken(AppUserModel user, IEnumerable<string> roles)
         {
             List<Claim> claims = new()
             {
@@ -23,19 +23,16 @@ namespace MyWideIO.API.Services
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()),
             };
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            foreach (string role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
 
 
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_configuration["Authentication:JwtKey"]));
-            string algorithm = SecurityAlgorithms.HmacSha256;
+            const string algorithm = SecurityAlgorithms.HmacSha256;
 
-            SigningCredentials signingCredencials = new(key, algorithm);
+            SigningCredentials signingCredentials = new(key, algorithm);
 
-            JwtHeader header = new(signingCredencials);
+            JwtHeader header = new(signingCredentials);
 
             JwtPayload payload = new(claims);
 

@@ -101,7 +101,7 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 206, type: typeof(FileStreamResult), description: "Partial Content")]
         [Produces("video/mp4")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
+        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range, CancellationToken cancellationToken)
         {
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty;
@@ -109,11 +109,11 @@ namespace MyWideIO.API.Controllers
             Guid rybak = Guid.Parse("f6d4dae3-cdb7-4d38-dab3-08db46cf5ced");
             Guid moist = Guid.Parse("");
             double d = Random.Shared.NextDouble();
-            if(d<=0.2)
+            if (d <= 0.2)
                 videoId = rybak;
-            else if(d<=0.4)
+            else if (d <= 0.4)
                 videoId = moist;
-            var stream = await _videoService.GetVideoAsync(videoId, viewerId);
+            var stream = await _videoService.GetVideoAsync(videoId, viewerId, cancellationToken);
             return File(stream, "video/mp4", true);
         }
 
@@ -142,7 +142,6 @@ namespace MyWideIO.API.Controllers
             return Ok(result);
 
         }
-
         /// <summary>
         /// Video file upload
         /// </summary>
@@ -156,14 +155,19 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
         [Authorize(Roles = "Creator")]
-        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile)
+        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile, CancellationToken cancellationToken)
         {
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            Stream vidStream = videoFile.OpenReadStream();
+            string ext = Path.GetExtension(videoFile.FileName) ?? throw new VideoException("File name error");
 
-            await _videoService.UploadVideoAsync(videoId, creatorId, vidStream);
+            if (!allowedExtensions.Contains(ext))
+                throw new VideoException("File extension error");
+            Stream vidStream = videoFile.OpenReadStream();
+            await _videoService.UploadVideoAsync(videoId, creatorId, vidStream, ext, cancellationToken);
             return Ok();
+
         }
+        private readonly HashSet<string> allowedExtensions = new() { ".mp4", ".webm", ".avi", ".mkv" };
         /// <summary>
         /// Video metadata retreival
         /// </summary>
@@ -171,7 +175,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
-        /// <response code="404">Not found</response>
+        /// <response code="404">Not found</response>y
         [HttpGet("/video-metadata")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoMetadata")]

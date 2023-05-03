@@ -10,7 +10,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.15.1" />
-		<PackageReference Include="MediaInfo.Wrapper.Core" Version="21.9.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.15" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.15" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.16">

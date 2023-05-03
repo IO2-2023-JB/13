@@ -20,11 +20,11 @@ namespace MyWideIO.API.Services
             _blobContainerClient.SetAccessPolicy(PublicAccessType.BlobContainer);
         }
 
-        public async Task<Stream> GetVideoFileAsync(Guid id)
+        public async Task<Stream> GetVideoFileAsync(Guid id, CancellationToken cancellationToken)
         {
             var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
 
-            return await blobClient.OpenReadAsync();
+            return await blobClient.OpenReadAsync(cancellationToken: cancellationToken);
         }
         public async Task RemoveVideoFileAsync(Guid id)
         {

@@ -87,11 +87,8 @@ namespace MyWideIO.API.Controllers
         {
             if (id is null)
                 id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            else
-            {
-                if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje edytowac nie swoje konto
-                    Forbid();
-            }
+            else if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje edytowac nie swoje konto
+                Forbid();
 
             UserDto userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
             return Ok(userDto);

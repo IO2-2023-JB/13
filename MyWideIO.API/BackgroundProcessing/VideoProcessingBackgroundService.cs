@@ -76,10 +76,11 @@ namespace MyWideIO.API.BackgroundProcessing
 
 
             }
-            catch
+            catch(Exception e)
             {
                 Console.WriteLine("Error while processing");
                 video.ProcessingProgress = ProcessingProgressEnum.FailedToUpload; // failed to process
+                video.Description = e.Message;
                 throw;
             }
             finally

@@ -18,6 +18,8 @@ using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Primitives;
 using MyWideIO.API.Filters;
+using Microsoft.Extensions.Hosting;
+using MyWideIO.API.BackgroundProcessing;
 
 namespace MyWideIO.API
 {
@@ -59,14 +61,14 @@ namespace MyWideIO.API
 
             services.AddControllers();
 
-            
+
             services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>(); // singleton powinien byc ok
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IVideoStorageService, AzureBlobVideoStorageService>();
 
             services.AddScoped<IVideoRepository, VideoRepository>();
             services.AddScoped<ILikeRepository, LikeRepository>();
-            
+
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
 
@@ -101,14 +103,17 @@ namespace MyWideIO.API
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
-                    
+
                     ClockSkew = TimeSpan.FromMinutes(5)
                 };
                 // allow token in query string
-                options.Events = new JwtBearerEvents {
-                    OnMessageReceived = (context) => {
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = (context) =>
+                    {
 
-                        if (!context.Request.Query.TryGetValue("access_token", out var values)) {
+                        if (!context.Request.Query.TryGetValue("access_token", out var values))
+                        {
                             return Task.CompletedTask;
                         }
 
@@ -125,7 +130,8 @@ namespace MyWideIO.API
 
                         var token = values.Single();
 
-                        if (string.IsNullOrWhiteSpace(token)) {
+                        if (string.IsNullOrWhiteSpace(token))
+                        {
                             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                             context.Fail(
                                 "The 'access_token' query string parameter was defined, " +
@@ -134,7 +140,7 @@ namespace MyWideIO.API
 
                             return Task.CompletedTask;
                         }
-                        
+
                         context.Token = token.StartsWith("Bearer ") ? token[7..] : token;
 
                         return Task.CompletedTask;
@@ -192,6 +198,12 @@ namespace MyWideIO.API
                 options.Limits.MaxRequestBodySize = null; //:)
                 options.Limits.MaxRequestBufferSize = null;
             });
+            services.AddHostedService<VideoProcessingBackgroundService>();
+            services.AddSingleton<IBackgroundTaskQueue<VideoProcessWorkItem>>(ctx =>
+            {
+                int queueCapacity = 100;
+                return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
+            });
 
             CreateRoles(services.BuildServiceProvider()).Wait();
         }
@@ -199,7 +211,7 @@ namespace MyWideIO.API
         {
             // role init
             var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
-            
+
             string[] roleNames = Enum.GetValues(typeof(UserTypeEnum)).Cast<UserTypeEnum>().Select(t => t.ToString()).ToArray();
 
             foreach (var roleName in roleNames)

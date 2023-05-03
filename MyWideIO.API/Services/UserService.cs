@@ -34,15 +34,14 @@ namespace MyWideIO.API.Services
             await _transactionService.BeginTransactionAsync();
             try
             {
-                AppUserModel user;
-                user = new()
+                AppUserModel user = new()
                 {
                     Email = registerDto.Email,
                     Name = registerDto.Name,
                     UserName = registerDto.Nickname,
                     Surname = registerDto.Surname
                 };
-                if(registerDto.UserType == UserTypeEnum.Creator)
+                if (registerDto.UserType == UserTypeEnum.Creator)
                 {
                     user.Subscribers = new Collection<ViewerSubscription>();
                     user.OwnedVideos = new Collection<VideoModel>();
@@ -52,7 +51,7 @@ namespace MyWideIO.API.Services
                 if (!result.Succeeded)
                 {
                     throw (_userManager.ErrorDescriber.DuplicateEmail(registerDto.Email).Code == result.Errors.First().Code) ?
-                         new DuplicateEmailException() : new UserException(result.Errors.First()?.Code);
+                        new DuplicateEmailException() : new UserException(result.Errors.First()?.Code);
                 }
 
 
@@ -98,13 +97,12 @@ namespace MyWideIO.API.Services
             {
                 IdentityResult result;
                 string imagePrefix = @"base64,";
-                // zmiania danych
+
                 user = await _userManager.FindByIdAsync(id.ToString());
                 user.Name = updateUserDto.Name;
                 user.Surname = updateUserDto.Surname;
                 user.UserName = updateUserDto.Nickname;
 
-                // zmiana zdjecia
                 if (updateUserDto.AvatarImage is not null)
                 {
                     if (updateUserDto.AvatarImage.Contains(imagePrefix))
@@ -129,8 +127,8 @@ namespace MyWideIO.API.Services
                 }
 
                 // zmiana roli
-                string role = (await _userManager.GetRolesAsync(user)).First() ?? throw new UserException("User has no role");
-                string newRole = updateUserDto.UserType.ToString();
+                var role = (await _userManager.GetRolesAsync(user)).First() ?? throw new UserException("User has no role");
+                var newRole = updateUserDto.UserType.ToString();
                 if (newRole != role)
                 {
                     result = await _userManager.RemoveFromRoleAsync(user, role);
@@ -158,7 +156,7 @@ namespace MyWideIO.API.Services
                         if (user.Money is null)
                             throw new UserException("Creator doesn't have requered properites");
                         foreach (var video in user.OwnedVideos) // nie wiem czy usuwac video czy co
-                                                                // moze oddzielna metoda w videoService do usuniecia wszystkich
+                            // moze oddzielna metoda w videoService do usuniecia wszystkich
                             await _videoService.RemoveVideoAsync(video.Id, user.Id);
 
                         user.OwnedVideos.Clear();
@@ -186,13 +184,13 @@ namespace MyWideIO.API.Services
         {
             AppUserModel user = await _userManager.FindByIdAsync(id.ToString());
             return user == null
-                ? throw new UserNotFoundException() // dziwne ze sie kompiluje
+                ? throw new UserNotFoundException()
                 : await ConvertUserModelToDto(user);
         }
 
         private async Task<UserDto> ConvertUserModelToDto(AppUserModel user)
         {
-            var userDto =  new UserDto
+            var userDto = new UserDto
             {
                 Id = user.Id,
                 Name = user.Name,
@@ -200,15 +198,14 @@ namespace MyWideIO.API.Services
                 Email = user.Email,
                 Nickname = user.UserName,
                 UserType = (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()),
-                AvatarImage = user?.ProfilePicture?.Url,
+                AvatarImage = Random.Shared.NextDouble() <= 0.2 ? "https://videioblob.blob.core.windows.net/blob1/burger.png" : user?.ProfilePicture?.Url,
                 AccountBalance = user?.AccountBalance
             };
-            if(userDto.UserType == UserTypeEnum.Creator)
-            {
-                if (user.Money is null)
-                    throw new UserException("Creator doesn't have requered properites");
-                userDto.SubscriptionsCount = user.Subscribers.Count;
-            }
+            if (userDto.UserType != UserTypeEnum.Creator)
+                return userDto;
+            if (user.Money is null)
+                throw new UserException("Creator doesn't have required properties");
+            userDto.SubscriptionsCount = user.Subscribers.Count;
             return userDto;
         }
 
@@ -233,7 +230,7 @@ namespace MyWideIO.API.Services
             await _transactionService.BeginTransactionAsync();
             try
             {
-                AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");// UserNotFoundException();
+                AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist"); // UserNotFoundException();
 
                 IdentityResult result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)

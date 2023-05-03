@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MyWideIO.Data;
 using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Data.Repositories;
@@ -14,14 +13,16 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services;
 using MyWideIO.API.Services.Interfaces;
-using Org.OpenAPITools.Filters;
 using System.Reflection;
 using System.Text;
+using MyWideIO.API.Filters;
+using MyWideIO.API.BackgroundProcessing;
 
 namespace MyWideIO.API
 {
     public class Startup
     {
+        // todo - allow request with size > 5mb
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -57,14 +58,14 @@ namespace MyWideIO.API
 
             services.AddControllers();
 
-            
+
             services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>(); // singleton powinien byc ok
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IVideoStorageService, AzureBlobVideoStorageService>();
 
             services.AddScoped<IVideoRepository, VideoRepository>();
             services.AddScoped<ILikeRepository, LikeRepository>();
-            
+
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
 
@@ -80,7 +81,7 @@ namespace MyWideIO.API
                         builder.AllowAnyOrigin()
                                .AllowAnyHeader()
                                .AllowAnyMethod();
-                        //.AllowCredentials();
+                        //       .AllowCredentials();
                     });
             });
 
@@ -99,7 +100,48 @@ namespace MyWideIO.API
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
+
                     ClockSkew = TimeSpan.FromMinutes(5)
+                };
+                // allow token in query string
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = (context) =>
+                    {
+
+                        if (!context.Request.Query.TryGetValue("access_token", out var values))
+                        {
+                            return Task.CompletedTask;
+                        }
+
+                        if (values.Count > 1)
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Fail(
+                                "Only one 'access_token' query string parameter can be defined. " +
+                                $"However, {values.Count:N0} were included in the request."
+                            );
+
+                            return Task.CompletedTask;
+                        }
+
+                        var token = values.Single();
+
+                        if (string.IsNullOrWhiteSpace(token))
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Fail(
+                                "The 'access_token' query string parameter was defined, " +
+                                "but a value to represent the token was not included."
+                            );
+
+                            return Task.CompletedTask;
+                        }
+
+                        context.Token = token.StartsWith("Bearer ") ? token[7..] : token;
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
             services.AddAuthorization();
@@ -150,7 +192,14 @@ namespace MyWideIO.API
 
             services.Configure<KestrelServerOptions>(options =>
             {
-                options.Limits.MaxRequestBodySize = int.MaxValue; //:)
+                options.Limits.MaxRequestBodySize = null; //:)
+                options.Limits.MaxRequestBufferSize = null;
+            });
+            services.AddHostedService<VideoProcessingBackgroundService>();
+            services.AddSingleton<IBackgroundTaskQueue<VideoProcessWorkItem>>(ctx =>
+            {
+                int queueCapacity = 100;
+                return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
             });
 
             CreateRoles(services.BuildServiceProvider()).Wait();
@@ -159,7 +208,7 @@ namespace MyWideIO.API
         {
             // role init
             var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
-            
+
             string[] roleNames = Enum.GetValues(typeof(UserTypeEnum)).Cast<UserTypeEnum>().Select(t => t.ToString()).ToArray();
 
             foreach (var roleName in roleNames)

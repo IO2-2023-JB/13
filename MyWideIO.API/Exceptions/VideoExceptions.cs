@@ -7,7 +7,11 @@
 
     public class VideoNotFoundException : VideoException
     {
-        public VideoNotFoundException() : base("Nie znaleziono podanego video") { }
+        public VideoNotFoundException() : base("Video not found") { }
+    }
+    public class VideoIsPrivateException : VideoException
+    {
+        public VideoIsPrivateException() : base("Video is private") { }
     }
 
 }

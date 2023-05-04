@@ -36,9 +36,17 @@ namespace MyWideIO.API.Middleware
                 CustomException => StatusCodes.Status418ImATeapot,
                 _ => StatusCodes.Status500InternalServerError
             };
+            var Messages = new List<string> { exception.Message };
+            Exception e = exception;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                if (!string.IsNullOrEmpty(e.Message))
+                    Messages.Add(e.Message);
+            }
             var response = new
             {
-                exception.Message
+                Messeges = Messages
             };
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = statusCode;

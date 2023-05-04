@@ -34,10 +34,10 @@ const AddVideo = () => {
     const onChangeHandler = (event) => {
         setSelectedFile(event.target.files[0]);
     };
+    
     const handleCancelClick = () => {
         navigate('/profile');
     };
-    
 
     const handle_picture = (event) => {
 

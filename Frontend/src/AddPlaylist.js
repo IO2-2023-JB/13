@@ -134,7 +134,7 @@ const AddPlaylist = () => {
 
     return (
         <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
-            <h1 class="display-3" style={{marginBottom:"60px"}}>Upload your video</h1>
+            <h1 class="display-3" style={{marginBottom:"60px"}}>Create new playlist</h1>
             <section class="container-fluid justify-content-center mb-5" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
                 <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
@@ -166,7 +166,7 @@ const AddPlaylist = () => {
                     </label>
 
                     {videosData.map(video => (
-                      video.processingProgress ==='Uploaded' && (
+                      video.processingProgress ==='Ready' && (
                         !videosList.includes(video.id)?(
                             <div>
                             <li style={{listStyleType: "none"}}>

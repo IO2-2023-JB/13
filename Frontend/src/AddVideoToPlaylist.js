@@ -45,19 +45,39 @@ const AddVideoToPlaylist = () => {
     }
 
     useEffect(() => {
-        axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
-          headers: { 
-            'Content-Type': 'application/json',
-            "Authorization" : `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true 
-        })
-        .then(response => {
-          setPlaylistsData(response?.data);
-        })
-        .catch(error => {
-          console.log("error: ", error);
+      axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true 
+      })
+      .then(response => {
+        setPlaylistsData(response?.data);
+        playlistsData.forEach(playlist => {
+          axios.get(PLAYLIST_VIDEOS_URL + "?id=" + playlist.id, 
+            {
+              headers: { 
+                'Content-Type': 'application/json',
+                "Authorization" : `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true 
+            })
+          .then(response => {
+            if (response && response.videos) {
+              for (let i = 0; i < response.videos.length; i++) {
+                if (response.videos[i].id === video_id) {
+                  setPlaylistsData(prevPlaylists => prevPlaylists.filter(p => p.id !== playlist.id));
+                  break;
+                }
+              }
+            }
+          });
         });
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
 
     }, [auth?.accessToken, auth?.id]);
 
@@ -221,13 +241,13 @@ const AddVideoToPlaylist = () => {
             </section>
             </div>
             <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
-                <button class="btn btn-dark" onClick={handleConfirmClick}>Confirm</button>
-                <button onClick={handleCancelClick} class="btn btn-danger">Cancel</button>
+                <button class="btn btn-dark" onClick={handleConfirmClick} disabled={playlistsList.length === 0}>Confirm</button>
+                <button onClick={handleCancelClick} class="btn btn-dark">Cancel</button>
             </div>
         </div>
         ):(
             <div style={{marginTop: "200px"}} class="col-xs-1" align="center"> 
-            <h1 class="display-3" style={{marginBottom:"60px"}}>Upload your video</h1>
+            <h1 class="display-3" style={{marginBottom:"60px"}}>Create new playlist</h1>
             <section class="container-fluid justify-content-center mb-5" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
                 <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
@@ -253,9 +273,6 @@ const AddVideoToPlaylist = () => {
                             checked={visibility}
                         />
                         <text> I want my playlist to be public</text>
-                    </label>
-                    <label htmlFor="name">
-                        Select videos you want on your playlist:
                     </label>
                     
                     <button class="btn btn-dark" disabled={(!name || submiting) ? true : false}>Submit</button>

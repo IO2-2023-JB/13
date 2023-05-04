@@ -28,6 +28,7 @@ const VideoPlayer = () => {
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
   const errRef = useRef();
+  const [forbiddedErr, setForbiddenErr] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("lastVisitedPage", location.pathname);
@@ -62,7 +63,7 @@ const VideoPlayer = () => {
   const [thumbnail_picture_name, setThumbnail_picture_name] = useState('');
   const [validthumbnail_picture, setValidthumbnail_picture] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [reactionsData, setReactionsData] = useState({
     positiveCount: 0,
@@ -121,6 +122,7 @@ const VideoPlayer = () => {
             withCredentials: true
           }
       ).then(response => {
+        setForbiddenErr(false);
         setVideoData(response?.data);
       }).catch(err => {
         if(!err?.response) {
@@ -130,9 +132,10 @@ const VideoPlayer = () => {
         } else if(err.response?.status === 401){
             setErrMsg('Unauthorised');
         } else if(err.response?.status === 403){
+            setForbiddenErr(true);
             setErrMsg('Forbidden');
-        } else if(err.response?.status === 403){
-          setErrMsg('Not found');
+        } else if(err.response?.status === 404){
+            setErrMsg('Not found');
           //navigate('/home');
         } else {
             setErrMsg('Getting metadata failed');
@@ -489,12 +492,13 @@ const VideoPlayer = () => {
     });
   }
 
+  if(!isLoading){
   return (
     <div>
     {!isLoading && (
     <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
       justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
-      {videoData.processingProgress === 'Uploaded' && (
+      {videoData.processingProgress === 'Ready' && (
         <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
 
         {/* <video id="videoPlayer" width="830" controls autoplay loop muted playsinline ref={videoRef}>
@@ -512,7 +516,7 @@ const VideoPlayer = () => {
         </div>
       )}
       {!editMode?(
-        videoData.processingProgress === 'Uploaded' ? (
+        videoData.processingProgress === 'Ready' ? (
       <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
           <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>
@@ -706,7 +710,7 @@ const VideoPlayer = () => {
           {(videoData.authorId === auth.id) &&(
             <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
               <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px"}}>Edit video metadata</button>
-              <button onClick={handleDeleteClick} class="btn btn-dark">Delete video</button>
+              <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
             </div>
           )}
       </div>
@@ -797,6 +801,18 @@ const VideoPlayer = () => {
     )}
     </div>
   );
-};
+}else{
+  return(
+    <div>
+    {(forbiddedErr === true && videoData.visibility === 'Private' && videoData.authorId !==auth.id) && (
+      <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
+      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+        <h2 class="container-fluid justify-content-center" style={{color:"red", textAlign:"center"}}> This video is private. </h2>
+      </div>
+    )}
+    </div>
+  );
+}
+}
 
 export default VideoPlayer;

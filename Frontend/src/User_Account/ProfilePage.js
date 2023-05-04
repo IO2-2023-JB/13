@@ -70,20 +70,19 @@ const ProfilePage = () => {
       console.log("error: ", error);
     });
   
-    // axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
-    //   headers: { 
-    //     'Content-Type': 'application/json',
-    //     "Authorization" : `Bearer ${auth?.accessToken}`
-    //   },
-    //   withCredentials: true 
-    // })
-    // .then(response => {
-    //   setPlaylistsData(response?.data);
-    // })
-    // .catch(error => {
-    //   console.log("error: ", error);
-    // });
-    //TODO
+    axios.get(USER_PLAYLISTS_URL + "?id=" + auth?.id, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response => {
+      setPlaylistsData(response?.data);
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
   }, [auth?.accessToken, auth?.id]);
 
   const [userData, setUserData] = useState({
@@ -435,8 +434,7 @@ const handelCreateNewPlaylistClick = async (e) => {
 }
 
 const handelPlaylistClick = (id) => {
-  //navigate(`/playlist/${id}`);
-  //TODO
+  navigate(`/playlist/${id}`);
 }
 
 return (
@@ -504,7 +502,7 @@ return (
                   </div>
                 </li>
                 {videosData.map(video => (
-                  video.processingProgress ==='Uploaded' && (
+                  video.processingProgress ==='Ready' && (
                   <div>
                   <li style={{listStyleType: "none"}}>
                   <div className="box" style={{width:"300px", height:"170px"}}>
@@ -529,11 +527,11 @@ return (
                   </div>
                   )
                 )).reverse()}
-                {(videosData.some(video => video.processingProgress !== 'Uploaded')) && (
+                {(videosData.some(video => video.processingProgress !== 'Ready')) && (
                   <div>
                     <h2 style={{color: 'red', textAlign: 'center'}}>Not ready videos</h2>
                       {videosData.map(video => (
-                        video.processingProgress !== 'Uploaded' && (
+                        video.processingProgress !== 'Ready' && (
                         <div>
                         <li style={{listStyleType: "none"}}>
                         <div className="box" style={{width:"300px", height:"170px" }}>

@@ -231,7 +231,7 @@ const AddVideo = () => {
           />
 
 
-          <button class="btn btn-dark" disabled={!tags || !title || !description ? true : false}>Submit</button>
+          <button class="btn btn-dark" disabled={!tags || !title || !description || (selectedFile ===null) ? true : false}>Submit</button>
       </form>
       <button class="btn btn-dark" onClick={handleCancelClick}>Cancel</button>
     </section>

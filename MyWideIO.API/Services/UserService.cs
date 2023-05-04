@@ -43,8 +43,6 @@ namespace MyWideIO.API.Services
                 };
                 if (registerDto.UserType == UserTypeEnum.Creator)
                 {
-                    user.Subscribers = new Collection<ViewerSubscription>();
-                    user.OwnedVideos = new Collection<VideoModel>();
                     user.Money = 0f;
                 }
                 result = await _userManager.CreateAsync(user, registerDto.Password);

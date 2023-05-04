@@ -93,9 +93,11 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="206">Partial Content</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
         /// <response code="416">Range Not Satisfiable</response>
         [HttpGet("{id}")]
-        //[ValidateModelState]
+        [ValidateModelState]
         [SwaggerOperation("GetVideoFile")]
         [SwaggerResponse(statusCode: 200, type: typeof(FileStreamResult), description: "OK")]
         [SwaggerResponse(statusCode: 206, type: typeof(FileStreamResult), description: "Partial Content")]
@@ -128,9 +130,6 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoUploadResponseDto), description: "OK")]
-        [SwaggerResponse(statusCode: 400, description: "Bad request")]
-        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
-        [SwaggerResponse(statusCode: 403, description: "Forbidden")]
         [Authorize(Roles = "Creator")]
         public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
         {
@@ -149,6 +148,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost("{id}")]
         [Consumes("multipart/form-data")]
         [ValidateModelState]
@@ -174,6 +174,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="404">Not found</response>y
         [HttpGet("/video-metadata")]
         [ValidateModelState]
@@ -218,8 +219,8 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="404">Not found</response>
-        /// <response code="500">Internal server error</response>
         [HttpPut("/video-metadata")]
         [Consumes("application/json")]
         [ValidateModelState]
@@ -240,6 +241,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="404">Not found</response>
         [HttpPost("/video-reaction")]
         [Consumes("application/json")]
@@ -249,7 +251,6 @@ namespace MyWideIO.API.Controllers
         {
             Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await _videoService.UpdateVideoReactionAsync(videoId, viewerId, videoReactionUpdateDto);
-
             return Ok();
         }
 

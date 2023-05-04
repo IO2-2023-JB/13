@@ -280,7 +280,7 @@ namespace MyWideIO.API.Services
 
         public async Task<VideoListDto> GetUserVideosAsync(Guid creatorId, Guid viewerId)
         {
-            var list = (await _videoRepository.GetUserVideosAsync(creatorId)).Select(m => VideoMapper.VideoModelToVideoMetadataDto(m));
+            var list = (await _videoRepository.GetUserVideosAsync(creatorId)).Select( VideoMapper.VideoModelToVideoMetadataDto);
             if (creatorId != viewerId)
                 list = list.Where(v => v.Visibility == VisibilityEnum.Public);
             return new VideoListDto

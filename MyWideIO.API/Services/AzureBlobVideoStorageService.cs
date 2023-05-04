@@ -1,51 +1,52 @@
 ﻿using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs;
 using MyWideIO.API.Services.Interfaces;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Azure;
 using MyWideIO.API.Exceptions;
-using WideIO.API.Models;
+using NReco.VideoConverter;
 
 namespace MyWideIO.API.Services
 {
     public class AzureBlobVideoStorageService : IVideoStorageService
     {
-        private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _blobContainerClient;
-        private readonly string containerName = "video";
+        private const string ContainerName = "video";
         public AzureBlobVideoStorageService(BlobServiceClient blobServiceClient)
         {
-            _blobServiceClient = blobServiceClient;
-            _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            _blobContainerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
             if (!_blobContainerClient.Exists())
             {
-                _blobContainerClient = _blobServiceClient.CreateBlobContainer(containerName);
+                _blobContainerClient = blobServiceClient.CreateBlobContainer(ContainerName);
             }
             _blobContainerClient.SetAccessPolicy(PublicAccessType.BlobContainer);
         }
 
-        public async Task<Stream> GetVideoFileAsync(Guid id)
+        public async Task<Stream> GetVideoFileAsync(Guid id, CancellationToken cancellationToken)
         {
-            BlobClient blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
+            var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
 
-            return await blobClient.OpenReadAsync();
+            return await blobClient.OpenReadAsync(cancellationToken: cancellationToken);
         }
         public async Task RemoveVideoFileAsync(Guid id)
         {
-            BlobClient blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
+            var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
             await blobClient.DeleteAsync();
         }
 
         public async Task UploadVideoFileAsync(Guid id, Stream stream)
         {
-            BlobClient blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
-
-            Response response;
-            response = (await blobClient.UploadAsync(stream, true)).GetRawResponse();
+            var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
+            var response = (await blobClient.UploadAsync(stream, true)).GetRawResponse();
             if (response.IsError)
             {
                 throw new UserException("Video upload error");
             }
         }
+        public Task<int> GetVideoDurationAsync(Guid id)
+        {
+            var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
+            BlobProperties p = blobClient.GetProperties();
+            return Task.FromResult(0);
+        }
+        
     }
 }

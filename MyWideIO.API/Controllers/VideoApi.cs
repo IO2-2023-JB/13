@@ -93,6 +93,8 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="206">Partial Content</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
         /// <response code="416">Range Not Satisfiable</response>
         [HttpGet("{id}")]
         [ValidateModelState]
@@ -101,12 +103,18 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 206, type: typeof(FileStreamResult), description: "Partial Content")]
         [Produces("video/mp4")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range)
+        public async Task<IActionResult> GetVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromQuery(Name = "access_token")][Required()] string accessToken, [FromHeader] string range, CancellationToken cancellationToken)
         {
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty;
-            // cos trzeba z tym tokenem zrobic jak inne grupy nie daja w headerze
-            var stream = await _videoService.GetVideoAsync(videoId, viewerId);
+            //Guid rybak = Guid.Parse("");
+            //Guid moist = Guid.Parse("");
+            //double d = Random.Shared.NextDouble();
+            //if (d <= 0.2)
+            //    videoId = rybak;
+            //else if (d <= 0.4)
+            //    videoId = moist;
+            var stream = await _videoService.GetVideoAsync(videoId, viewerId, cancellationToken);
             return File(stream, "video/mp4", true);
         }
 
@@ -122,20 +130,16 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("UpdateVideoMetadata")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoUploadResponseDto), description: "OK")]
-        [SwaggerResponse(statusCode: 400, description: "Bad request")]
-        [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
-        [SwaggerResponse(statusCode: 403, description: "Forbidden")]
         [Authorize(Roles = "Creator")]
         public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
         {
             VideoUploadResponseDto result;
-            Guid CreatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, CreatorId);
+            Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, creatorId);
 
             return Ok(result);
 
         }
-
         /// <summary>
         /// Video file upload
         /// </summary>
@@ -144,20 +148,25 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="500">Internal server error</response>
         [HttpPost("{id}")]
         [Consumes("multipart/form-data")]
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
         [Authorize(Roles = "Creator")]
-        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile)
+        public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile, CancellationToken cancellationToken)
         {
-            // tu nie bedzie wyjatkow zadnych, ExceptionMiddleware je lapie
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            Stream vidStream = videoFile.OpenReadStream();
+            string ext = Path.GetExtension(videoFile.FileName) ?? throw new VideoException("File name error");
 
-            await _videoService.UploadVideoAsync(videoId, creatorId, vidStream);
+            if (!allowedExtensions.Contains(ext))
+                throw new VideoException("File extension error");
+            Stream vidStream = videoFile.OpenReadStream();
+            await _videoService.UploadVideoAsync(videoId, creatorId, vidStream, ext, cancellationToken);
             return Ok();
+
         }
+        private readonly HashSet<string> allowedExtensions = new() { ".mp4", ".webm", ".avi", ".mkv" };
         /// <summary>
         /// Video metadata retreival
         /// </summary>
@@ -165,7 +174,8 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
-        /// <response code="404">Not found</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not found</response>y
         [HttpGet("/video-metadata")]
         [ValidateModelState]
         [SwaggerOperation("GetVideoMetadata")]
@@ -209,8 +219,8 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="404">Not found</response>
-        /// <response code="500">Internal server error</response>
         [HttpPut("/video-metadata")]
         [Consumes("application/json")]
         [ValidateModelState]
@@ -231,6 +241,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorised</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="404">Not found</response>
         [HttpPost("/video-reaction")]
         [Consumes("application/json")]
@@ -240,7 +251,6 @@ namespace MyWideIO.API.Controllers
         {
             Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await _videoService.UpdateVideoReactionAsync(videoId, viewerId, videoReactionUpdateDto);
-
             return Ok();
         }
 

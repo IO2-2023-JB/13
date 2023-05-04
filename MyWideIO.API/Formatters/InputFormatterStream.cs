@@ -1,9 +1,6 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace WideIO.API.Formatters
+namespace MyWideIO.API.Formatters
 {
     // Input Type Formatter to allow model binding to Streams
     public class InputFormatterStream : InputFormatter
@@ -16,12 +13,8 @@ namespace WideIO.API.Formatters
 
         protected override bool CanReadType(Type type)
         {
-            if (type == typeof(Stream))
-            {
-                return true;
-            }
+            return type == typeof(Stream);
 
-            return false;
         }
 
         public override Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context)

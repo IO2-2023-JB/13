@@ -7,13 +7,6 @@ namespace MyWideIO.API.Mappers
 {
     public static class VideoMapper
     {
-        public static VideoModel VideoUploadDtoToVideoModel(VideoUploadDto videoUploadDto) => new()
-        {
-            Title = videoUploadDto.Title,
-            Description = videoUploadDto.Description,
-            IsVisible = videoUploadDto.Visibility == VisibilityEnum.Public,
-            ProcessingProgress = ProcessingProgressEnum.MetadataRecordCreated,
-        };
         public static VideoMetadataDto VideoModelToVideoMetadataDto(VideoModel videoModel) => new()
         {
             Id = videoModel.Id,

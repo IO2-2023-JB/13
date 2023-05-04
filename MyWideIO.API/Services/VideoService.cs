@@ -147,19 +147,17 @@ namespace MyWideIO.API.Services
                 var workItem = new VideoProcessWorkItem(videoId, new MemoryStream(), extension);
                 await videoFile.CopyToAsync(workItem.VideoFile,cancellationToken);
                 workItem.VideoFile.Position = 0;
+                video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
+                await _videoRepository.UpdateVideoAsync(video);
                 await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(workItem);
                 // dodajemy do kolejki (Channel), z ktorej czyta background processing service i pokolei przetwarza
                 // background service ma ta sama instacje kolejki co ta tutaj (singleton)
-                video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
             }
             catch
             {
                 video.ProcessingProgress = ProcessingProgressEnum.FailedToUpload;
-                throw;
-            }
-            finally
-            {
                 await _videoRepository.UpdateVideoAsync(video);
+                throw;
             }
 
         }

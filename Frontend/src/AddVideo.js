@@ -166,7 +166,7 @@ const AddVideo = () => {
                   description: description,
                   thumbnail: base64data,
                   tags: tags,
-                  visibility: visibility?0:1
+                  visibility: visibility?"Public":"Private"
                 }),
                 {
                     headers: { 

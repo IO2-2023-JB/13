@@ -47,7 +47,6 @@ const Register = () => {
     const [profile_picture, setProfile_picture] = useState(null);
     const [profile_picture_name, setProfile_picture_name] = useState('');
     const [validprofile_picture, setValidprofile_picture] = useState(false);
-    const [profile_pictureFocus, setProfile_pictureFocus] = useState(false);
     const [wrong_profile_picture, setWrong_profile_picture] = useState(false);
 
     const [isCreatorChecked, setIsCreatorChecked] = useState(false);
@@ -94,7 +93,6 @@ const Register = () => {
         const maxSize = 5 * 1024 * 1024; // 5 MB
 
         if (file && file.size <= maxSize) {
-            //console.log(file.type);
             setProfile_picture(file);
             setProfile_picture_name(file.name);
             setValidprofile_picture(true);
@@ -110,7 +108,6 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // if button enabled with JS hack
         const v1 = USER_REGEX.test(user);
         const v2 = PWD_REGEX.test(pwd);
         const v3 = NAME_REGEX.test(name)
@@ -121,7 +118,6 @@ const Register = () => {
             return;
         }
         try {
-            let response;
             if(validprofile_picture)
             {
                 const reader = new FileReader();
@@ -131,7 +127,7 @@ const Register = () => {
                     base64String = reader.result.split(",")[1];
                 };
                 setTimeout(async () => {
-                response = await axios.post(REGISTER_URL,
+                await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
                         surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Simple", AvatarImage: base64String }),
                     {
@@ -143,7 +139,7 @@ const Register = () => {
             }
             else
             {
-                response = await axios.post(REGISTER_URL,
+                await axios.post(REGISTER_URL,
                     JSON.stringify({ email: email, nickname: user, name: name, 
                         surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Simple", AvatarImage: null }), //userType: "Simple"
                     {
@@ -152,9 +148,6 @@ const Register = () => {
                     }
                 );
             }
-            //console.log(response?.data);
-            //console.log(response?.accessToken);
-            //console.log(JSON.stringify(response))
             setSuccess(true);
             setUser('');
             setPwd('');
@@ -352,8 +345,6 @@ const Register = () => {
                             //required
                             aria-invalid={!wrong_profile_picture ? "false" : "true"}//
                             aria-describedby="confirmnote"
-                            onFocus={() => setProfile_pictureFocus(true)}
-                            onBlur={() => setProfile_pictureFocus(false)}
                         />
                         <p id="confirmnote" className={!validprofile_picture ? "instructions" : "offscreen"}> {/*profile_pictureFocus && */ }
                             <FontAwesomeIcon icon={faInfoCircle} />

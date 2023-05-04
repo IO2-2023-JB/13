@@ -11,6 +11,7 @@ const PLAYLIST_VIDEOS_URL = '/playlist/video';
 const USER_PLAYLISTS_URL = '/playlist/user';
 const PLAYLIST_DETAILS_URL = '/playlist/details'
 const PLAYLIST_URL = '/playlist'
+const USER_VIDEOS_URL = '/user/videos';
 
 const Playlist = () => {
 
@@ -23,6 +24,7 @@ const Playlist = () => {
     const playlist_id = params.playlistid;
 
     const [videosData, setVideosData] = useState([]);
+    const [allUserVideosData, setAllUserVideosData] = useState([]);
     const [playlistsData, setPlaylistsData] = useState([]);
     const [name, setName] = useState("");
     const [visibility, setVisibility] = useState(false);
@@ -73,10 +75,10 @@ const Playlist = () => {
             videosListAddItem(video.id);
             editedVideosListAddItem(video.id);
           });
-          setName(response?.name);
-          setEditedName(response?.name);
-          setVisibility(response?.visibility);
-          setEditedVisibility(response?.visibility);
+          setName(response?.data.name);
+          setEditedName(response?.data.name);
+          setVisibility(response?.data.visibility);
+          setEditedVisibility(response?.data.visibility);
         })
         .catch(error => {
           console.log("error: ", error);
@@ -99,11 +101,28 @@ const Playlist = () => {
     }, [auth?.accessToken, auth?.id, playlist_id]);
 
     useEffect(() => {
+      axios.get(USER_VIDEOS_URL + "?id=" + auth?.id, 
+        {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+          setAllUserVideosData(response?.data?.videos);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
+    }, [auth?.id, auth?.accessToken])
+
+    useEffect(() => {
         if(playlistsData.some(playlist => playlist.id === playlist_id)){
-            setIsPlaylistOwner(true);
+          setIsPlaylistOwner(true);
         }
         else{
-            setIsPlaylistOwner(false);
+          setIsPlaylistOwner(false);
         }
     }, [playlistsData, playlist_id])
 
@@ -158,9 +177,10 @@ const Playlist = () => {
     }
 
     const handleSubmit = async (e) => {
+      e.preventDefault();
         try {
           setSubmiting(true);
-          const response = await axios.put(PLAYLIST_DETAILS_URL,
+          const response = await axios.put(PLAYLIST_DETAILS_URL + "?id=" + playlist_id,
             JSON.stringify({
               name: editedName,
               visibility: editedVisibility?"Public":"Private"
@@ -177,9 +197,9 @@ const Playlist = () => {
           setEditedName(response?.data?.name);
           setVisibility(response?.data?.visibility);
           setEditedVisibility(response?.data?.visibility);
-          editedVideosList.forEach(video => {
-            if(!videosList.some(vid => vid.id === video.id)){
-                axios.post(PLAYLIST_URL + "/" + playlist_id + "/" + video.id,
+          const requests = await editedVideosList.map( (video_id) => {
+            if(!videosList.some(vid_id => vid_id === video_id)){
+                axios.post(PLAYLIST_URL + "/" + playlist_id + "/" + video_id, {},
                 {
                   headers: { 
                     'Content-Type': 'application/json',
@@ -199,16 +219,17 @@ const Playlist = () => {
                   }else if (err.response?.status === 404) {
                     setErrMsg('Not found');
                   }else {
-                    setErrMsg('Adding video with id ' + video.id + ' to playlist Failed');
+                    setErrMsg('Adding video with id ' + video_id + ' to playlist Failed');
                   }
                   errRef.current.focus();
                 });
             }
           });
-
-          videosList.forEach(video => {
-            if(!editedVideosList.some(vid => vid.id === video.id)){
-                axios.delete(PLAYLIST_URL + "/" + playlist_id + "/" + video.id,
+          //const results = await Promise.all(requests);
+          //if (results.every(result => result.success)) {
+          const requests2 = await videosList.map( (video_id) => {
+            if(!editedVideosList.some(vid_id => vid_id === video_id)){
+                axios.delete(PLAYLIST_URL + "/" + playlist_id + "/" + video_id,
                 {
                   headers: { 
                     'Content-Type': 'application/json',
@@ -228,15 +249,46 @@ const Playlist = () => {
                   }else if (err.response?.status === 404) {
                     setErrMsg('Not found');
                   }else {
-                    setErrMsg('Deleting video with id ' + video.id + 'Failed');
+                    setErrMsg('Deleting video with id ' + video_id + 'Failed');
                   }
                   errRef.current.focus();
                 });
             }
           });
-          setVideosList(editedVideosList);
-          setSubmiting(false);
-          handleCancelClick();
+          Promise.all([...requests, ...requests2]).then(() => {
+          //const results2 =  await Promise.all(requests2);
+          //if (results2.every(result => result.success)) {
+      
+          axios.get(PLAYLIST_VIDEOS_URL + "?id=" + playlist_id, 
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true 
+          })
+          .then(response => {
+            setVideosData(response?.data?.videos);
+            setVideosList([]);
+            setEditedVideosList([]);
+            response?.data?.videos.forEach(video => {
+              videosListAddItem(video.id);
+              editedVideosListAddItem(video.id);
+            });
+            setName(response?.data.name);
+            setEditedName(response?.data.name);
+            setVisibility(response?.data.visibility);
+            setEditedVisibility(response?.data.visibility);
+            setSubmiting(false);
+            setEditMode(false);
+            window.location.reload();
+          })
+          .catch(error => {
+            console.log("error: ", error);
+          });
+        })
+        //}
+        //}
         } catch (err) {
           if (!err?.response) {
               setErrMsg('No Server Response');
@@ -249,7 +301,6 @@ const Playlist = () => {
           }
           errRef.current.focus();
         }
-        setSubmiting(false);
     };
 
 
@@ -257,10 +308,10 @@ const Playlist = () => {
         <div style={{marginTop: "200px"}} class="container">
             {!editMode ? (
               <div class="row">
-                <h1 class="display-1">{name}</h1>
+                <h1 class="display-1" style={{textAlign:"center" }}>{name}</h1>
                 <div class ="mt-2 row">
                   <div class="col-sm">
-                    <h2>Videos on this playlist:</h2>
+                    <h2 style={{textAlign:"center" }} >Videos on this playlist:</h2>
                     <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
                       <ul style={{padding:"0px"}}>
@@ -295,12 +346,12 @@ const Playlist = () => {
                 </div>
                 {isPlaylistOwner &&(
                   <div>
-                    <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
+                    <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"10px", marginBottom:"200px", textAlign:"center"}}>
                       This playlist is {visibility}.
                     </div>
-                    <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
-                      <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px"}}>Edit playlist</button>
-                      <button onClick={handleDeleteClick} class="btn btn-danger">Delete playlist</button>
+                    <div class="container-fluid justify-content-center" style={{marginBottom: "50px", marginTop:"-200px"}}>
+                      <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px", marginLeft:"400px"}}>Edit playlist</button>
+                      <button onClick={handleDeleteClick} class="btn btn-danger" style={{marginRight:"20px"}}>Delete playlist</button>
                     </div>
                   </div>
                 )}
@@ -338,8 +389,8 @@ const Playlist = () => {
                             Select videos you want on your playlist:
                         </label>
     
-                        {videosData.map(video => (
-                          video.processingProgress ==='Uploaded' && (
+                        {allUserVideosData.map(video => (
+                          video.processingProgress ==='Ready' && (
                             !editedVideosList.includes(video.id)?(
                                 <div>
                                 <li style={{listStyleType: "none"}}>

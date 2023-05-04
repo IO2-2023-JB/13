@@ -74,62 +74,65 @@ const AddPlaylist = () => {
     }
 
     const handleSubmit = async (e) => {
-        try {
-          setSubmiting(true);
-          const response = await axios.post(PLAYLIST_DETAILS_URL,
-            JSON.stringify({
-              name: name,
-              visibility: visibility?"Public":"Private"
-            }),
-            {
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken}`
-              },
-              withCredentials: true //cred
-            }
-          );
-          videosList.forEach(video => {
-            axios.post(PLAYLIST_URL + "/" + response?.data.id + "/" + video.id,
-            {
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken}`
-              },
-              withCredentials: true //cred
-            }
-            ).catch(err => {
-              if (!err?.response) {
-                setErrMsg('No Server Response');
-              } else if (err.response?.status === 400) {
-                  setErrMsg('Bad request');
-              } else if (err.response?.status === 401) {
-                setErrMsg('Unauthorized');
-              }else if (err.response?.status === 403) {
-                setErrMsg('Forbidden');
-              }else if (err.response?.status === 404) {
-                setErrMsg('Not found');
-              }else {
-                setErrMsg('Adding video with id ' + video.id + ' to playlist Failed');
-              }
-              errRef.current.focus();
-            });
-          });
-          setSubmiting(false);
-          handleCancelClick();
-        } catch (err) {
-          if (!err?.response) {
-              setErrMsg('No Server Response');
-          } else if (err.response?.status === 400) {
-              setErrMsg('Bad request');
-          } else if (err.response?.status === 401) {
-            setErrMsg('Unauthorized');
-          }else {
-              setErrMsg('Playlist creation Failed');
+      e.preventDefault();
+      try {
+        setSubmiting(true);
+        const response = await axios.post(PLAYLIST_DETAILS_URL,
+          JSON.stringify({
+            name: name,
+            visibility: visibility?"Public":"Private"
+          }),
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true //cred
           }
-          errRef.current.focus();
-        }
+        );
+        const requests = videosList.map( (video_id) => {
+          axios.post(PLAYLIST_URL + "/" + response?.data.id + "/" + video_id, {},
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true //cred
+          }
+          ).catch(err => {
+            if (!err?.response) {
+              setErrMsg('No Server Response');
+            } else if (err.response?.status === 400) {
+                setErrMsg('Bad request');
+            } else if (err.response?.status === 401) {
+              setErrMsg('Unauthorized');
+            }else if (err.response?.status === 403) {
+              setErrMsg('Forbidden');
+            }else if (err.response?.status === 404) {
+              setErrMsg('Not found');
+            }else {
+              setErrMsg('Adding video with id ' + video_id + ' to playlist Failed');
+            }
+            errRef.current.focus();
+          });
+        });
+        await Promise.all(requests);
         setSubmiting(false);
+        handleCancelClick();
+        
+      } catch (err) {
+        if (!err?.response) {
+            setErrMsg('No Server Response');
+        } else if (err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if (err.response?.status === 401) {
+          setErrMsg('Unauthorized');
+        }else {
+            setErrMsg('Playlist creation Failed');
+        }
+        errRef.current.focus();
+      }
+      setSubmiting(false);
     };
 
     return (

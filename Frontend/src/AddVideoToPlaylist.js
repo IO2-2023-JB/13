@@ -9,8 +9,8 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 const PLAYLIST_VIDEOS_URL = '/playlist/video';
 const USER_PLAYLISTS_URL = '/playlist/user';
-const PLAYLIST_DETAILS_URL = '/playlist/details'
-const PLAYLIST_URL = '/playlist'
+const PLAYLIST_DETAILS_URL = '/playlist/details';
+const PLAYLIST_URL = '/playlist';
 
 const AddVideoToPlaylist = () => {
 
@@ -54,7 +54,7 @@ const AddVideoToPlaylist = () => {
       })
       .then(response => {
         setPlaylistsData(response?.data);
-        playlistsData.forEach(playlist => {
+        response?.data.forEach(playlist => {
           axios.get(PLAYLIST_VIDEOS_URL + "?id=" + playlist.id, 
             {
               headers: { 
@@ -63,12 +63,11 @@ const AddVideoToPlaylist = () => {
               },
               withCredentials: true 
             })
-          .then(response => {
-            if (response && response.videos) {
-              for (let i = 0; i < response.videos.length; i++) {
-                if (response.videos[i].id === video_id) {
+          .then(response1 => {
+            if (response1 && response1?.data?.videos) {
+              for (let i = 0; i < response1.data.videos.length; i++) {
+                if (response1.data.videos[i].id === video_id) {
                   setPlaylistsData(prevPlaylists => prevPlaylists.filter(p => p.id !== playlist.id));
-                  break;
                 }
               }
             }
@@ -90,33 +89,34 @@ const AddVideoToPlaylist = () => {
     }
 
     const handleConfirmClick = () => {
-        playlistsList.forEach(playlist => {
-            axios.post(PLAYLIST_URL + "/" + playlist.id + "/" + video_id,
-                {
-                  headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${auth?.accessToken}`
-                  },
-                  withCredentials: true //cred
+      console.log(auth.accessToken);
+      playlistsList.forEach(playlist_id => {
+          axios.post(PLAYLIST_URL + "/" + playlist_id + "/" + video_id, {},
+              {
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${auth.accessToken}`
+                },
+                withCredentials: true //cred
+              }
+              ).catch(err => {
+                if (!err?.response) {
+                  setErrMsg('No Server Response');
+                } else if (err.response?.status === 400) {
+                    setErrMsg('Bad request');
+                } else if (err.response?.status === 401) {
+                  setErrMsg('Unauthorized');
+                }else if (err.response?.status === 403) {
+                  setErrMsg('Forbidden');
+                }else if (err.response?.status === 404) {
+                  setErrMsg('Not found');
+                }else {
+                  setErrMsg('Adding video with id ' + video_id + ' to playlist with id' + playlist_id + 'Failed');
                 }
-                ).catch(err => {
-                  if (!err?.response) {
-                    setErrMsg('No Server Response');
-                  } else if (err.response?.status === 400) {
-                      setErrMsg('Bad request');
-                  } else if (err.response?.status === 401) {
-                    setErrMsg('Unauthorized');
-                  }else if (err.response?.status === 403) {
-                    setErrMsg('Forbidden');
-                  }else if (err.response?.status === 404) {
-                    setErrMsg('Not found');
-                  }else {
-                    setErrMsg('Adding video with id ' + video_id + ' to playlist with id' + playlist.id + 'Failed');
-                  }
-                  errRef.current.focus();
-            });
-        });
-        navigate(from);
+                errRef.current.focus();
+          });
+      });
+      navigate(from);
     }
 
     const handleCancelClick = () => {

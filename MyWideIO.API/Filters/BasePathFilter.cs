@@ -1,9 +1,8 @@
-using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Org.OpenAPITools.Filters
+namespace MyWideIO.API.Filters
 {
     /// <summary>
     /// BasePath Document Filter sets BasePath property of OpenAPI and removes it from the individual URL paths
@@ -38,12 +37,11 @@ namespace Org.OpenAPITools.Filters
 
             foreach (var (key, value) in pathsToModify)
             {
-                if (key.StartsWith(BasePath))
-                {
-                    var newKey = Regex.Replace(key, $"^{BasePath}", string.Empty);
-                    openapiDoc.Paths.Remove(key);
-                    openapiDoc.Paths.Add(newKey, value);
-                }
+                if (!key.StartsWith(BasePath)) 
+                    continue;
+                var newKey = Regex.Replace(key, $"^{BasePath}", string.Empty);
+                openapiDoc.Paths.Remove(key);
+                openapiDoc.Paths.Add(newKey, value);
             }
         }
     }

@@ -16,7 +16,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
-    [Authorize] // musi byc poprawny jwt token w headerze, chyba ze metoda ma [AllowAnonymous]
+    [Authorize]
     public class UserApiController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -52,7 +52,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="401">Unauthorized</response>
         [HttpDelete("user")]
         //[Route("user")]
-        [ValidateModelState] // dzieki temu nie trzeba sprawdzac ModelState.IsValid(), ale chyba wiecej jeszcze robi
+        [ValidateModelState]
         [SwaggerOperation("DeleteUserData")]
         [Produces("application/json")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
@@ -87,12 +87,8 @@ namespace MyWideIO.API.Controllers
         {
             if (id is null)
                 id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            else
-            {
-                // if (User.FindFirstValue(ClaimTypes.Role) != UserTypeEnum.Administrator.ToString()) // i nie jest adminem
-                if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje usunac nie swoje konto
-                    Forbid();
-            }
+            else if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje edytowac nie swoje konto
+                Forbid();
 
             UserDto userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
             return Ok(userDto);

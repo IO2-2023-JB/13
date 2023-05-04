@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MyWideIO.API.Models.DB_Models
+﻿namespace MyWideIO.API.Models.DB_Models
 {
     public class PlaylistModel
     {
@@ -11,8 +7,10 @@ namespace MyWideIO.API.Models.DB_Models
         public string Name { get; set; }
 
         public virtual ICollection<VideoPlaylist> VideoPlaylists { get; set; }
+        public ICollection<VideoModel> Videos { get; set; }
 
         public Guid ViewerId { get; set; }
         public virtual AppUserModel Viewer { get; set; }
+        public bool IsVisible { get; set; }
     }
 }

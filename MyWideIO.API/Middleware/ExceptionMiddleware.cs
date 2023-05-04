@@ -1,10 +1,5 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Http;
-using MyWideIO.API.Exceptions;
+﻿using MyWideIO.API.Exceptions;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
-
 namespace MyWideIO.API.Middleware
 {
     public class ExceptionMiddleware
@@ -31,37 +26,32 @@ namespace MyWideIO.API.Middleware
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var statusCode = HttpStatusCode.InternalServerError;
-
-            if (exception is UserNotFoundException)
-                statusCode = HttpStatusCode.NotFound;
-
-            else if (exception is UserNotFoundExceptionDelete)
-                statusCode = HttpStatusCode.BadRequest;
-
-            else if (exception is DuplicateEmailException)
-                statusCode = HttpStatusCode.Conflict;
-
-            else if (exception is IncorrectPasswordException)
-                statusCode = HttpStatusCode.Unauthorized;
-
-            else if (exception is ForbiddenException)
-                statusCode = HttpStatusCode.Forbidden;
-
-            else if (exception is CustomException)
-                statusCode = HttpStatusCode.BadRequest;
-
+            var statusCode = exception switch
+            {
+                UserNotFoundException or VideoNotFoundException or PlaylistNotFoundException => StatusCodes.Status404NotFound,
+                DuplicateEmailException => StatusCodes.Status409Conflict,
+                IncorrectPasswordException => StatusCodes.Status401Unauthorized,
+                VideoIsPrivateException or ForbiddenException => StatusCodes.Status403Forbidden,
+                //UserNotFoundExceptionDelete => HttpStatusCode.BadRequest,
+                CustomException => StatusCodes.Status418ImATeapot,
+                _ => StatusCodes.Status500InternalServerError
+            };
+            var Messages = new List<string> { exception.Message };
+            Exception e = exception;
+            while (e.InnerException != null)
+            {
+                e = e.InnerException;
+                if (!string.IsNullOrEmpty(e.Message))
+                    Messages.Add(e.Message);
+            }
             var response = new
             {
-                exception.Message
+                Messeges = Messages
             };
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)statusCode;
+            context.Response.StatusCode = statusCode;
 
             await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
         }
     }
-
-
-
 }

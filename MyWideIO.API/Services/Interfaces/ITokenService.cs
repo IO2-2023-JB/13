@@ -4,6 +4,6 @@ namespace MyWideIO.API.Services.Interfaces
 {
     public interface ITokenService
     {
-        public string GenerateToken(AppUserModel user, IList<string> roles);
+        public string GenerateToken(AppUserModel user, IEnumerable<string> roles);
     }
 }

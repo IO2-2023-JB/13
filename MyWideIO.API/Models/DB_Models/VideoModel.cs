@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.CompilerServices;
 using WideIO.API.Models;
 
 namespace MyWideIO.API.Models.DB_Models

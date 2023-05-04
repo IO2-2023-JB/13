@@ -65,9 +65,11 @@ namespace MyWideIO.API
 
             services.AddScoped<IVideoRepository, VideoRepository>();
             services.AddScoped<ILikeRepository, LikeRepository>();
+            services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPlaylistService, PlaylistService>();
 
             services.AddScoped<ITransactionService, TransactionService>();
 

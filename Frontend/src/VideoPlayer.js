@@ -15,7 +15,7 @@ const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
-const RESPONS_URL = '/comment/response'
+const RESPONSE_URL = '/comment/response'
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -29,6 +29,69 @@ const VideoPlayer = () => {
   const [errMsg, setErrMsg] = useState('');
   const errRef = useRef();
   const [forbiddedErr, setForbiddenErr] = useState(false);
+
+  const [commentText, setCommentText] = useState('');
+  const [responseText, setResponseText] = useState('');
+
+  const handleCommentChange = (event) => {
+    setCommentText(event.target.value);
+  };
+
+  const handleResponseChnge = (event) => {
+    setResponseText(event.target.value);
+  };
+
+  const handleCommentAdd = (event) => {
+    event.preventDefault();
+    axios.post(COMMENT_URL + "?id=" + video_id, JSON.stringify({commentText}),
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      }
+    ).catch(err => {
+      if(!err?.response) {
+          setErrMsg('No Server Response')
+      } else if(err.response?.status === 400) {
+          setErrMsg('Bad request');
+      } else if(err.response?.status === 401){
+          setErrMsg('Unauthorised');
+      } else {
+          setErrMsg('Getting metadata failed');
+      }
+    });
+    setCommentText("");
+    //refresh?
+    window.location.reload();
+  };
+
+  const handleResponseAdd = (event) => {
+    event.preventDefault();
+    axios.post(RESPONSE_URL + "?id=" + event.target.elements.commentId.value, JSON.stringify({responseText}),
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      }
+    ).catch(err => {
+      if(!err?.response) {
+          setErrMsg('No Server Response')
+      } else if(err.response?.status === 400) {
+          setErrMsg('Bad request');
+      } else if(err.response?.status === 401){
+          setErrMsg('Unauthorised');
+      } else {
+          setErrMsg('Getting metadata failed');
+      }
+    });
+    setCommentText("");
+    //refresh?
+    window.location.reload();
+  };
 
   useEffect(() => {
     localStorage.setItem("lastVisitedPage", location.pathname);
@@ -197,7 +260,7 @@ const VideoPlayer = () => {
       commentsData.forEach(comment => {
         //TODO responses
         if(comment.hasResponses){
-          axios.get(RESPONS_URL + "?id=" + comment.id,
+          axios.get(RESPONSE_URL + "?id=" + comment.id,
           {
             headers: { 
               'Content-Type': 'application/json',
@@ -490,6 +553,8 @@ const VideoPlayer = () => {
         setErrMsg('Deleting comment failed');
       }
     });
+    //refresh?
+    window.location.reload();
   }
 
   if(!isLoading){
@@ -625,10 +690,21 @@ const VideoPlayer = () => {
                     </div>
                 ))
               )}
-              {/* add responseClick */}
+              <form onSubmit={handleResponseAdd}>
+                <label>
+                  Add response:
+                  <input type="text" value={responseText} onChange={handleResponseChnge} />
+                </label>
+                <input type="hidden" name="commentId" value={comment.id} />
+                <button type="submit">Submit</button>
+              </form>
             </div>
-            // add comentClick
           ))}
+          <form onSubmit={handleCommentAdd} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+            <label style={{marginRight: '10px'}}>Add comment:</label>
+            <input type="text" value={commentText} onChange={handleCommentChange} style={{marginRight: '10px'}} />
+            <button type="submit">Submit</button>
+          </form>
       </div>
         ):(
           <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>

@@ -16,6 +16,7 @@ const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
+const SUBSCRIPTIONS_URL = '/subscriptions';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -292,6 +293,24 @@ const VideoPlayer = () => {
     }
   }, [params.videoid, auth?.accessToken, auth?.id])
 
+  const [subscriptionsData, setSubscriptionsData] = useState([]);
+
+    useEffect(() => {
+        axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+            setSubscriptionsData(response?.data?.subscriptions);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
+    }, [auth?.accessToken, auth?.id]);
+
   const handleEditClick = () => {
     setEditMode(true);
   };
@@ -557,6 +576,51 @@ const VideoPlayer = () => {
     window.location.reload();
   }
 
+  const handleSubscribeClick = () => {
+    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response1 => {
+      axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      })
+      .then(response => {
+          setSubscriptionsData(response?.data?.subscriptions);
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
+  }
+
+  const handleUnSubscribeClick = () => {
+    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response => {
+      const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== videoData.authorId);
+      setSubscriptionsData(updatedSubscriptionsData);
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
+  }
+
   if(!isLoading){
   return (
     <div>
@@ -654,7 +718,7 @@ const VideoPlayer = () => {
               {videoData.description}
             </div>
           </div>
-          {(videoData.authorId === auth.id) &&(
+          {(videoData.authorId === auth.id)?(
             <div>
               <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
                 This video is {videoData.visibility}.
@@ -664,7 +728,21 @@ const VideoPlayer = () => {
                 <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
               </div>
             </div>
-          )}
+          ):(
+            <div>
+              {!subscriptionsData.some(subscription => subscription.id === videoData.authorId) ? (
+                <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+                  <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginRight:"20px"}}>Subscribe</button>
+                </div>
+              ):(
+                <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+                  <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginRight:"20px"}}>Subscribed</button>
+                </div>
+              )
+            }
+            </div>
+          )
+          }
           <div style={{marginBottom: "50px"}}>
             <button style={{marginLeft:"15px"}} onClick={() => handleAddToPlaylistClick(videoData.id)} class="btn btn-dark">Add this video to playlist</button>
           </div>

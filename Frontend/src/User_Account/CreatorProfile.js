@@ -11,7 +11,6 @@ config.autoAddCss = false;
 const PROFILE_URL = '/user';
 const USER_VIDEOS_URL = '/user/videos';
 const USER_PLAYLISTS_URL = '/playlist/user';
-const CREATE_PLAYLIST_URL = '/addplaylist';
 const SUBSCRIPTIONS_URL = '/subscriptions';
 
 const CreatorProfile = () => {

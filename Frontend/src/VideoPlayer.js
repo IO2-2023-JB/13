@@ -15,7 +15,8 @@ const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
-const RESPONS_URL = '/comment/response'
+const RESPONSE_URL = '/comment/response'
+const SUBSCRIPTIONS_URL = '/subscriptions';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -29,6 +30,69 @@ const VideoPlayer = () => {
   const [errMsg, setErrMsg] = useState('');
   const errRef = useRef();
   const [forbiddedErr, setForbiddenErr] = useState(false);
+
+  const [commentText, setCommentText] = useState('');
+  const [responseText, setResponseText] = useState('');
+
+  const handleCommentChange = (event) => {
+    setCommentText(event.target.value);
+  };
+
+  const handleResponseChnge = (event) => {
+    setResponseText(event.target.value);
+  };
+
+  const handleCommentAdd = (event) => {
+    event.preventDefault();
+    axios.post(COMMENT_URL + "?id=" + video_id, JSON.stringify({commentText}),
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      }
+    ).catch(err => {
+      if(!err?.response) {
+          setErrMsg('No Server Response')
+      } else if(err.response?.status === 400) {
+          setErrMsg('Bad request');
+      } else if(err.response?.status === 401){
+          setErrMsg('Unauthorised');
+      } else {
+          setErrMsg('Getting metadata failed');
+      }
+    });
+    setCommentText("");
+    //refresh?
+    window.location.reload();
+  };
+
+  const handleResponseAdd = (event) => {
+    event.preventDefault();
+    axios.post(RESPONSE_URL + "?id=" + event.target.elements.commentId.value, JSON.stringify({responseText}),
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      }
+    ).catch(err => {
+      if(!err?.response) {
+          setErrMsg('No Server Response')
+      } else if(err.response?.status === 400) {
+          setErrMsg('Bad request');
+      } else if(err.response?.status === 401){
+          setErrMsg('Unauthorised');
+      } else {
+          setErrMsg('Getting metadata failed');
+      }
+    });
+    setCommentText("");
+    //refresh?
+    window.location.reload();
+  };
 
   useEffect(() => {
     localStorage.setItem("lastVisitedPage", location.pathname);
@@ -197,7 +261,7 @@ const VideoPlayer = () => {
       commentsData.forEach(comment => {
         //TODO responses
         if(comment.hasResponses){
-          axios.get(RESPONS_URL + "?id=" + comment.id,
+          axios.get(RESPONSE_URL + "?id=" + comment.id,
           {
             headers: { 
               'Content-Type': 'application/json',
@@ -228,6 +292,24 @@ const VideoPlayer = () => {
     }
     }
   }, [params.videoid, auth?.accessToken, auth?.id])
+
+  const [subscriptionsData, setSubscriptionsData] = useState([]);
+
+    useEffect(() => {
+        axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+            setSubscriptionsData(response?.data?.subscriptions);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
+    }, [auth?.accessToken, auth?.id]);
 
   const handleEditClick = () => {
     setEditMode(true);
@@ -490,6 +572,53 @@ const VideoPlayer = () => {
         setErrMsg('Deleting comment failed');
       }
     });
+    //refresh?
+    window.location.reload();
+  }
+
+  const handleSubscribeClick = () => {
+    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response1 => {
+      axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      })
+      .then(response => {
+          setSubscriptionsData(response?.data?.subscriptions);
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
+  }
+
+  const handleUnSubscribeClick = () => {
+    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response => {
+      const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== videoData.authorId);
+      setSubscriptionsData(updatedSubscriptionsData);
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
   }
 
   if(!isLoading){
@@ -589,7 +718,7 @@ const VideoPlayer = () => {
               {videoData.description}
             </div>
           </div>
-          {(videoData.authorId === auth.id) &&(
+          {(videoData.authorId === auth.id)?(
             <div>
               <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
                 This video is {videoData.visibility}.
@@ -599,7 +728,21 @@ const VideoPlayer = () => {
                 <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
               </div>
             </div>
-          )}
+          ):(
+            <div>
+              {!subscriptionsData.some(subscription => subscription.id === videoData.authorId) ? (
+                <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+                  <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginRight:"20px"}}>Subscribe</button>
+                </div>
+              ):(
+                <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+                  <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginRight:"20px"}}>Subscribed</button>
+                </div>
+              )
+            }
+            </div>
+          )
+          }
           <div style={{marginBottom: "50px"}}>
             <button style={{marginLeft:"15px"}} onClick={() => handleAddToPlaylistClick(videoData.id)} class="btn btn-dark">Add this video to playlist</button>
           </div>
@@ -625,10 +768,21 @@ const VideoPlayer = () => {
                     </div>
                 ))
               )}
-              {/* add responseClick */}
+              <form onSubmit={handleResponseAdd}>
+                <label>
+                  Add response:
+                  <input type="text" value={responseText} onChange={handleResponseChnge} />
+                </label>
+                <input type="hidden" name="commentId" value={comment.id} />
+                <button type="submit">Submit</button>
+              </form>
             </div>
-            // add comentClick
           ))}
+          <form onSubmit={handleCommentAdd} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+            <label style={{marginRight: '10px'}}>Add comment:</label>
+            <input type="text" value={commentText} onChange={handleCommentChange} style={{marginRight: '10px'}} />
+            <button type="submit">Submit</button>
+          </form>
       </div>
         ):(
           <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>

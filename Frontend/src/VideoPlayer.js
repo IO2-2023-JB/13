@@ -17,6 +17,7 @@ const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
 const SUBSCRIPTIONS_URL = '/subscriptions';
+const PROFILE_URL = '/user';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -34,11 +35,40 @@ const VideoPlayer = () => {
   const [commentText, setCommentText] = useState('');
   const [responseText, setResponseText] = useState('');
 
+  const [data, setData] = useState(null);
+  const [userData, setUserData] = useState({
+    firstName: "Loading...",
+    lastName: "Loading...",
+    nickname: "Loading...",
+    email: "Loading...",
+    accountBalance: 0,
+    avatarImage: '',
+    userType: '',
+    subscriptionsCount: 0,
+    id: '',
+  });
+
+  useEffect(() => {
+    if (data) {
+      setUserData({
+        firstName: data?.name,
+        lastName: data?.surname,
+        nickname: data?.nickname,
+        email: data?.email,
+        accountBalance: data?.accountBalance,
+        avatarImage: data?.avatarImage,
+        userType: data?.userType,
+        subscriptionsCount: data?.subscriptionsCount,
+        id: data?.id,
+      });
+    }
+  }, [data]);
+
   const handleCommentChange = (event) => {
     setCommentText(event.target.value);
   };
 
-  const handleResponseChnge = (event) => {
+  const handleResponseChange = (event) => {
     setResponseText(event.target.value);
   };
 
@@ -52,7 +82,9 @@ const VideoPlayer = () => {
         },
         withCredentials: true
       }
-    ).catch(err => {
+    ).then(() => {
+      getComments();
+    }).catch(err => {
       if(!err?.response) {
           setErrMsg('No Server Response')
       } else if(err.response?.status === 400) {
@@ -65,7 +97,6 @@ const VideoPlayer = () => {
     });
     setCommentText("");
     //refresh?
-    window.location.reload();
   };
 
   const handleResponseAdd = (event) => {
@@ -78,7 +109,9 @@ const VideoPlayer = () => {
         },
         withCredentials: true
       }
-    ).catch(err => {
+    ).then(() => {
+      getComments();
+    }).catch(err => {
       if(!err?.response) {
           setErrMsg('No Server Response')
       } else if(err.response?.status === 400) {
@@ -91,7 +124,6 @@ const VideoPlayer = () => {
     });
     setCommentText("");
     //refresh?
-    window.location.reload();
   };
 
   useEffect(() => {
@@ -141,7 +173,6 @@ const VideoPlayer = () => {
   const [commentsData, setCommentsData] = useState([]);
   const [responsesData, setResponsesData] = useState({});
   
-
   useEffect(() => {
     if (!auth?.accessToken) {
       navigate('/login', { state: { from: location } });
@@ -159,10 +190,6 @@ const VideoPlayer = () => {
     setVisibility(videoData.visibility);
   }, [videoData])
 
-  useEffect(() => {
-    localStorage.setItem("lastVisitedPage", location.pathname);
-  })
-
   useEffect( () => {
     if(params.videoid)
     {
@@ -172,7 +199,7 @@ const VideoPlayer = () => {
     else
     {
       navigate('/home');
-    }//TODO add jumpscare
+    }
     if(video_id){
       //get video metadata:
       if(auth.accessToken){
@@ -188,6 +215,20 @@ const VideoPlayer = () => {
       ).then(response => {
         setForbiddenErr(false);
         setVideoData(response?.data);
+        axios.get(PROFILE_URL + "?id=" + response?.data.authorId, {
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+          setData(response?.data);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+          navigate('/home');
+        });
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
@@ -259,7 +300,6 @@ const VideoPlayer = () => {
         }
       });
       commentsData.forEach(comment => {
-        //TODO responses
         if(comment.hasResponses){
           axios.get(RESPONSE_URL + "?id=" + comment.id,
           {
@@ -546,6 +586,64 @@ const VideoPlayer = () => {
     navigate(`/addvideotoplaylist/${id}`);
   }
 
+  const getComments = () => {
+    axios.get(COMMENT_URL + "?id=" + video_id,
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true
+          }
+      ).then(response => {
+        setCommentsData(response?.data.comments);
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+          setErrMsg('Unauthorized');
+        } else if(err.response?.status === 403){
+          setErrMsg('Forbidden');
+        } else if(err.response?.status === 404){
+          setErrMsg('Not found');
+        } else {
+            setErrMsg('Getting coments failed');
+        }
+      });
+      commentsData.forEach(comment => {
+        if(comment.hasResponses){
+          axios.get(RESPONSE_URL + "?id=" + comment.id,
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: true
+          }
+          ).then(response => {
+            setResponsesData((prevState) => ({
+              ...prevState,
+              [comment.id]: response?.data?.comments,
+            }));
+          }).catch(err => {
+            if(!err?.response) {
+                setErrMsg('No Server Response')
+            } else if(err.response?.status === 400) {
+                setErrMsg('Bad request');
+            } else if(err.response?.status === 401){
+              setErrMsg('Unauthorized');
+            } else if(err.response?.status === 404){
+              setErrMsg('Not found');
+            } else {
+              setErrMsg('Getting coments failed');
+            }
+          });
+        }
+      });
+  }
+
   const handleCommentDeleteClick = (id) => {
     axios.delete(COMMENT_URL + "?id=" + id,
     {
@@ -555,8 +653,8 @@ const VideoPlayer = () => {
       },
       withCredentials: true
     }
-    ).then(response => {
-      window.location.reload();
+    ).then(() => {
+      getComments();
     }).catch(err => {
       if(!err?.response) {
           setErrMsg('No Server Response')
@@ -572,8 +670,6 @@ const VideoPlayer = () => {
         setErrMsg('Deleting comment failed');
       }
     });
-    //refresh?
-    window.location.reload();
   }
 
   const handleSubscribeClick = () => {
@@ -584,7 +680,7 @@ const VideoPlayer = () => {
       },
       withCredentials: true 
     })
-    .then(response1 => {
+    .then(() => {
       axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
         headers: { 
           'Content-Type': 'application/json',
@@ -602,6 +698,7 @@ const VideoPlayer = () => {
     .catch(error => {
       console.log("error: ", error);
     });
+    //refresh?
   }
 
   const handleUnSubscribeClick = () => {
@@ -612,13 +709,20 @@ const VideoPlayer = () => {
       },
       withCredentials: true 
     })
-    .then(response => {
+    .then(() => {
       const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== videoData.authorId);
       setSubscriptionsData(updatedSubscriptionsData);
     })
     .catch(error => {
       console.log("error: ", error);
     });
+    //refresh?
+  }
+
+  const goToProfile = (user_id) => {
+    if(user_id){
+      navigate(`/creatorprofile/${user_id}`);
+    }
   }
 
   if(!isLoading){
@@ -704,6 +808,26 @@ const VideoPlayer = () => {
               </svg>
             </button>
           </div>
+          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+            <div style={{display: "flex", alignItems: "center"}}>
+              <img src={userData.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(userData.id)} />
+              <div style={{display: "flex", flexDirection: "column"}}>
+                <div style={{display: "flex", justifyContent: "space-between"}}>
+                  <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(userData.id)}>{userData.nickname}</h4>
+                  {(videoData.authorId !== auth.id) && (
+                    <div style={{marginLeft: "50px"}}>
+                      {!subscriptionsData.some(subscription => subscription.id === videoData.authorId) ? (
+                        <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginLeft: "10px"}}>Subscribe</button>
+                      ) : (
+                        <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Subscribed</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <p style={{fontSize: "15px", marginBottom: "15px", }}>Subscriptions: {userData.subscriptionsCount}</p>
+              </div>
+            </div>
+          </div>
           <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
               Views: {videoData.viewCount}
@@ -718,7 +842,7 @@ const VideoPlayer = () => {
               {videoData.description}
             </div>
           </div>
-          {(videoData.authorId === auth.id)?(
+          {(videoData.authorId === auth.id) && (
             <div>
               <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
                 This video is {videoData.visibility}.
@@ -728,19 +852,6 @@ const VideoPlayer = () => {
                 <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
               </div>
             </div>
-          ):(
-            <div>
-              {!subscriptionsData.some(subscription => subscription.id === videoData.authorId) ? (
-                <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
-                  <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginRight:"20px"}}>Subscribe</button>
-                </div>
-              ):(
-                <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
-                  <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginRight:"20px"}}>Subscribed</button>
-                </div>
-              )
-            }
-            </div>
           )
           }
           <div style={{marginBottom: "50px"}}>
@@ -748,30 +859,44 @@ const VideoPlayer = () => {
           </div>
           {commentsData.map(comment => (
             <div>
-            (comment.authorId == auth.id) && (
-              <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete comment</button>
-            )
-              {/*comment.avatarImage, comment.nickname*/}
-              <h5>
-                {comment.content}
-              </h5>
+              (comment.authorId === auth.id) && (
+                <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete comment</button>
+              )
+              <div style={{display: "flex", alignItems: "center"}}>
+                <img src={comment.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)} />
+                <div style={{display: "flex", flexDirection: "column"}}>
+                  <div style={{display: "flex", justifyContent: "space-between"}}>
+                    <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
+                    <div style={{marginLeft: "50px"}}>
+                      <h5> {comment.content} </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
               {comment.hasResponses &&(
                 responsesData[comment.id].map(response => (
                     <div>
-                    (response.authorId == auth.id) && (
-                      <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete response</button>
-                    )
-                    {/*response.avatarImage, response.nickname*/}
-                    <h5>
-                      {response.content}
-                    </h5>
+                      (response.authorId == auth.id) && (
+                        <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete response</button>
+                      )
+                      <div style={{display: "flex", alignItems: "center"}}>
+                        <img src={response.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)} />
+                        <div style={{display: "flex", flexDirection: "column"}}>
+                          <div style={{display: "flex", justifyContent: "space-between"}}>
+                            <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
+                            <div style={{marginLeft: "50px"}}>
+                              <h5> {response.content} </h5>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                 ))
               )}
               <form onSubmit={handleResponseAdd}>
                 <label>
                   Add response:
-                  <input type="text" value={responseText} onChange={handleResponseChnge} />
+                  <input type="text" value={responseText} onChange={handleResponseChange} />
                 </label>
                 <input type="hidden" name="commentId" value={comment.id} />
                 <button type="submit">Submit</button>

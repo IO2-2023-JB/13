@@ -47,7 +47,7 @@ const CreatorProfile = () => {
   }, [params.creatorid, auth.id])
 
   useEffect(() => {
-    if(auth?.id && (auth?.id.toUpperCase() === creator_id.toUpperCase())){
+    if(auth?.id && creator_id && (auth?.id.toUpperCase() === creator_id.toUpperCase())){
       navigate('/profile');
     }
   }, [auth?.id, creator_id])
@@ -242,7 +242,7 @@ return (
                   (video.processingProgress ==='Ready') && (video.visibility === 'Public') && (
                   <div>
                   <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"170px"}}>
+                  <div className="box" style={{width:"300px", height:"170px", cursor: "pointer"}}>
                     <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
                         <table style={{backgroundColor: "transparent"}}>
                             <tr style={{backgroundColor: "transparent"}}>
@@ -273,7 +273,7 @@ return (
                 {playlistsData.map(playlist => (
                   <div>
                   <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`}}>
+                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", backgroundRepeat:"no-repeat", cursor: "pointer", backgroundPosition:"center", backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`}}>
                     <div className="box2" style={{width:"280px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
                         <table style={{backgroundColor: "transparent"}}>
                             <tr style={{backgroundColor: "transparent"}}>

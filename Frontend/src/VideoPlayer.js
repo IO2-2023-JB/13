@@ -755,8 +755,23 @@ const VideoPlayer = () => {
             <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>
               {videoData.title}
             </div>
-            <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0px", paddingTop:"12px", height:"60px"}}>
-              Author: {videoData.authorNickname}
+            <div style={{display: "flex", alignItems: "center", marginLeft: "20px", marginTop: "-15px"}}>
+              <img src={userData.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(userData.id)} />
+              <div style={{display: "flex", flexDirection: "column"}}>
+                <div style={{display: "flex", justifyContent: "space-between"}}>
+                  <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(userData.id)}>{userData.nickname} </h4>
+                  {(videoData.authorId !== auth.id) && (
+                    <div style={{marginLeft: "50px"}}>
+                      {!subscriptionsData.some(subscription => subscription.id === videoData.authorId) ? (
+                        <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginLeft: "10px"}}>Subscribe</button>
+                      ) : (
+                        <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Subscribed</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <p style={{fontSize: "15px", marginBottom: "15px", }}>Subscriptions: {userData.subscriptionsCount} </p>
+              </div>
             </div>
           </div>
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
@@ -807,26 +822,6 @@ const VideoPlayer = () => {
                 <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
               </svg>
             </button>
-          </div>
-          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-            <div style={{display: "flex", alignItems: "center"}}>
-              <img src={userData.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(userData.id)} />
-              <div style={{display: "flex", flexDirection: "column"}}>
-                <div style={{display: "flex", justifyContent: "space-between"}}>
-                  <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(userData.id)}>{userData.nickname}</h4>
-                  {(videoData.authorId !== auth.id) && (
-                    <div style={{marginLeft: "50px"}}>
-                      {!subscriptionsData.some(subscription => subscription.id === videoData.authorId) ? (
-                        <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginLeft: "10px"}}>Subscribe</button>
-                      ) : (
-                        <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Subscribed</button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <p style={{fontSize: "15px", marginBottom: "15px", }}>Subscriptions: {userData.subscriptionsCount}</p>
-              </div>
-            </div>
           </div>
           <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>

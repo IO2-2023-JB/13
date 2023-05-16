@@ -491,7 +491,7 @@ return (
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>
                 <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"170px"}}>
+                  <div className="box" style={{width:"300px", height:"170px", cursor: "pointer"}}>
                     <div className="box2" style={{width:"280px", height:"150px"}} onClick={handelAddNewVideoClick}>
                         <div className="movie_thumbnail" style={{width:"280px", height:"150px"}}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
@@ -505,7 +505,7 @@ return (
                   video.processingProgress ==='Ready' && (
                   <div>
                   <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"170px"}}>
+                  <div className="box" style={{width:"300px", height:"170px", cursor: "pointer"}}>
                     <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
                         <table style={{backgroundColor: "transparent"}}>
                             <tr style={{backgroundColor: "transparent"}}>
@@ -534,7 +534,7 @@ return (
                         video.processingProgress !== 'Ready' && (
                         <div>
                         <li style={{listStyleType: "none"}}>
-                        <div className="box" style={{width:"300px", height:"170px" }}>
+                        <div className="box" style={{width:"300px", height:"170px", cursor: "pointer" }}>
                           <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
                               <table style={{backgroundColor: "transparent"}}>
                                   <tr style={{backgroundColor: "transparent", position:"center"}}>
@@ -566,7 +566,7 @@ return (
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>
                 <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"100px"}}>
+                  <div className="box" style={{width:"300px", height:"100px", cursor: "pointer"}}>
                     <div className="box2" style={{width:"280px", height:"80px"}} onClick={handelCreateNewPlaylistClick}>
                         <div className="movie_thumbnail" style={{width:"280px", height:"80px"}}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="white" class="bi bi-plus" viewBox="0 0 16 16">
@@ -580,7 +580,7 @@ return (
                 playlistsData.map(playlist => (
                   <div>
                   <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`}}>
+                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`}}>
                     <div className="box2" style={{width:"280px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
                         <table style={{backgroundColor: "transparent"}}>
                             <tr style={{backgroundColor: "transparent"}}>

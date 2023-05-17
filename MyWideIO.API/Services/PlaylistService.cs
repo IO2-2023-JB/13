@@ -30,7 +30,11 @@ namespace MyWideIO.API.Services
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new ForbiddenException();
-            playlist.Videos.Add(video);
+            playlist.VideoPlaylists.Add(new VideoPlaylist
+            {
+                VideoId = videoId,
+                PlaylistId = playlistId
+            });
             await _playlistRepository.UpdatePlaylistAsync(playlist);
         }
 
@@ -93,9 +97,10 @@ namespace MyWideIO.API.Services
                 throw new ForbiddenException();
             if (await _videoRepository.GetVideoAsync(videoId) is null)
                 throw new VideoNotFoundException();
-            if (!playlist.Videos.Any(v => v.Id != videoId))
-                throw new PlaylistException("Video wasn't in the playlist");
-            playlist.Videos.Remove(playlist.Videos.First(v => v.Id == videoId));
+            var a = playlist.VideoPlaylists.FirstOrDefault(p=>p.VideoId == videoId);
+            if (a is null)
+                throw new VideoNotFoundException();
+            playlist.VideoPlaylists.Remove(a);
             await _playlistRepository.UpdatePlaylistAsync(playlist);
         }
     }

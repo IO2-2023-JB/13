@@ -25,20 +25,22 @@ namespace MyWideIO.API.Data.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<PlaylistModel?> GetPlaylistAsync(Guid id)
+        public async Task<PlaylistModel?> GetPlaylistAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Playlists
-                .Include(p => p.Videos)
+                .Include(p => p.VideoPlaylists.OrderBy(vp=>vp.Order))
+                .ThenInclude(vp=>vp.Video)
                 .Where(p=>p.Id == id)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<ICollection<PlaylistModel>> GetUserPlaylists(Guid userId)
+        public async Task<ICollection<PlaylistModel>> GetUserPlaylists(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Playlists
                 .Where(p => p.ViewerId == userId)
-                .Include(p => p.Videos)
-                .ToListAsync();
+                .Include(p => p.VideoPlaylists)
+                .ThenInclude(vp=>vp.Video)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task RemovePlaylistAsync(PlaylistModel playlist)

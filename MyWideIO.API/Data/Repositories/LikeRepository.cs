@@ -27,19 +27,25 @@ namespace MyWideIO.API.Data.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<ViewerLike?> GetUserLikeOfVideoAsync(Guid userId, Guid videoId)
+        public async Task<ViewerLike?> GetUserLikeOfVideoAsync(Guid userId, Guid videoId, CancellationToken cancellationToken)
         {
-            return await _dbContext.Likes.Where(l => l.VideoId == videoId && l.ViewerId == userId).FirstOrDefaultAsync();   // nie moze byc kilka w bazie mam nadzieje
-        }                                                                                                                           // jak moze byc to trzeba dodac klucz glowny na obu id (composite pk)
-
-        public async Task<ICollection<ViewerLike>> GetUserLikesAsync(Guid userId)
-        {
-            return await _dbContext.Likes.Where(l => l.ViewerId == userId).ToListAsync();
+            return await _dbContext.Likes
+                .Where(l => l.VideoId == videoId && l.ViewerId == userId)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<ICollection<ViewerLike>> GetVideoLikesAsync(Guid videoId)
+        public async Task<ICollection<ViewerLike>> GetUserLikesAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return await _dbContext.Likes.Where(l => l.VideoId == videoId).ToListAsync();
+            return await _dbContext.Likes
+                .Where(l => l.ViewerId == userId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<ICollection<ViewerLike>> GetVideoLikesAsync(Guid videoId, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Likes
+                .Where(l => l.VideoId == videoId)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task UpdateAsync(ViewerLike like)

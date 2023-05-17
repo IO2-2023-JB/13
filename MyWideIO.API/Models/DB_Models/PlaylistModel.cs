@@ -7,7 +7,6 @@
         public string Name { get; set; }
 
         public virtual ICollection<VideoPlaylist> VideoPlaylists { get; set; }
-        public ICollection<VideoModel> Videos { get; set; }
 
         public Guid ViewerId { get; set; }
         public virtual AppUserModel Viewer { get; set; }

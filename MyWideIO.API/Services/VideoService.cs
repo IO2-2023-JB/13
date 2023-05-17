@@ -43,11 +43,14 @@ namespace MyWideIO.API.Services
             if (video.ProcessingProgress != ProcessingProgressEnum.Ready)
                 throw new VideoException("Video not avaible");
 
+            var getVideoTask = _videoStorageService.GetVideoFileAsync(video.Id, cancellationToken);
 
             video.ViewCount++;
-            await _videoRepository.UpdateVideoAsync(video);
+            var updateTask = _videoRepository.UpdateVideoAsync(video);
 
-            return await _videoStorageService.GetVideoFileAsync(video.Id, cancellationToken);
+
+            await updateTask;
+            return await getVideoTask;
         }
 
         public async Task RemoveVideoAsync(Guid videoId, Guid creatorId)
@@ -67,12 +70,16 @@ namespace MyWideIO.API.Services
             }
             await _videoRepository.RemoveVideoAsync(video);
 
+            Task removeVideoTask = Task.CompletedTask;
+            Task removeImageTask = Task.CompletedTask;
             if (video.ProcessingProgress == ProcessingProgressEnum.Ready)
-                await _videoStorageService.RemoveVideoFileAsync(video.Id);
+                removeVideoTask = _videoStorageService.RemoveVideoFileAsync(video.Id);
 
             if (video.Thumbnail is not null)
-                await _imageStorageService.RemoveImageAsync(video.Thumbnail.FileName);
+                removeImageTask = _imageStorageService.RemoveImageAsync(video.Thumbnail.FileName);
 
+            await removeVideoTask;
+            await removeImageTask;
         }
 
         public async Task UpdateVideoAsync(Guid videoId, Guid creatorId, VideoUploadDto dto)
@@ -95,7 +102,6 @@ namespace MyWideIO.API.Services
                 if (dto.Thumbnail.Contains(imagePrefix))
                     dto.Thumbnail = dto.Thumbnail.Split(imagePrefix)[1];
                 video.Thumbnail = await _imageStorageService.UploadImageAsync(dto.Thumbnail, video.Id.ToString());
-                await _videoRepository.UpdateVideoAsync(video);
             }
             else if (video.Thumbnail is not null)
             {
@@ -107,7 +113,7 @@ namespace MyWideIO.API.Services
 
 
 
-        public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId)
+        public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId,CancellationToken cancellationToken)
         {
             var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
@@ -119,33 +125,23 @@ namespace MyWideIO.API.Services
         public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile, string extension, CancellationToken cancellationToken)
         {
             VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            if (video.CreatorId != creatorId)
+                throw new ForbiddenException();
             try
-            {                
-                if (video.CreatorId != creatorId)
-                    throw new ForbiddenException();
-
-                switch (video.ProcessingProgress)
+            {
+                video.ProcessingProgress = video.ProcessingProgress switch
                 {
-                    //case ProcessingProgressEnum.Ready:
-                    case ProcessingProgressEnum.FailedToUpload:
-                    case ProcessingProgressEnum.MetadataRecordCreated:
-                        video.ProcessingProgress = ProcessingProgressEnum.Uploading;
-                        break;
-
-                    case ProcessingProgressEnum.Uploading:
-                        throw new VideoException("Already Uploading");
-
-                    case ProcessingProgressEnum.Uploaded:
-                        throw new VideoException("Video is waiting to be processed");
-
-                    case ProcessingProgressEnum.Processing:
-                        throw new VideoException("Video is being processed");
-
-                    default: throw new Exception("unknown error"); //
-                }
+                    // ProcessingProgressEnum.Ready or
+                    ProcessingProgressEnum.FailedToUpload or
+                    ProcessingProgressEnum.MetadataRecordCreated => ProcessingProgressEnum.Uploading,
+                    ProcessingProgressEnum.Uploading => throw new VideoException("Already Uploading"),
+                    ProcessingProgressEnum.Uploaded => throw new VideoException("Video is waiting to be processed"),
+                    ProcessingProgressEnum.Processing => throw new VideoException("Video is being processed"),
+                    _ => throw new Exception("unknown error")
+                };
                 await _videoRepository.UpdateVideoAsync(video);
                 var workItem = new VideoProcessWorkItem(videoId, new MemoryStream(), extension);
-                await videoFile.CopyToAsync(workItem.VideoFile,cancellationToken);
+                await videoFile.CopyToAsync(workItem.VideoFile, cancellationToken);
                 workItem.VideoFile.Position = 0;
                 video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
                 await _videoRepository.UpdateVideoAsync(video);
@@ -186,6 +182,8 @@ namespace MyWideIO.API.Services
                     IsVisible = dto.Visibility == VisibilityEnum.Public
                 };
                 await _videoRepository.AddVideoAsync(video); // id potrzebne do zdjecia
+                creator.OwnedVideos.Add(video);
+                await _userManager.UpdateAsync(creator);
                 if (dto.Thumbnail is not null)
                 {
                     string imagePrefix = @"base64,";
@@ -194,8 +192,6 @@ namespace MyWideIO.API.Services
                     video.Thumbnail = await _imageStorageService.UploadImageAsync(dto.Thumbnail, video.Id.ToString());
                     await _videoRepository.UpdateVideoAsync(video);
                 }
-                creator.OwnedVideos.Add(video);
-                await _userManager.UpdateAsync(creator);
             }
             catch
             {
@@ -229,19 +225,20 @@ namespace MyWideIO.API.Services
                 };
                 await _likeRepository.AddAsync(like);
             }
-            switch (like.Reaction)
-            {
-                case ReactionEnum.Positive:
-                    video.PositiveReactions--;
-                    break;
-                case ReactionEnum.Negative:
-                    video.NegativeReactions--;
-                    break;
-                case ReactionEnum.None:
-                    break;
-                default:
-                    throw new VideoException("Unknown reaction");
-            }
+            else
+                switch (like.Reaction)
+                {
+                    case ReactionEnum.Positive:
+                        video.PositiveReactions--;
+                        break;
+                    case ReactionEnum.Negative:
+                        video.NegativeReactions--;
+                        break;
+                    case ReactionEnum.None:
+                        break;
+                    default:
+                        throw new VideoException("Unknown reaction");
+                }
             like.Reaction = videoReactionUpdateDto.Value;
             switch (like.Reaction)
             {
@@ -257,16 +254,19 @@ namespace MyWideIO.API.Services
                     throw new VideoException("Unknown reaction");
             }
             video.LikedBy.Add(like); // None usuwamy czy zostaje
-            await _videoRepository.UpdateVideoAsync(video);
-            await _likeRepository.UpdateAsync(like);
+            var updateVideoTask = _videoRepository.UpdateVideoAsync(video);
+            var updateLikeTask = _likeRepository.UpdateAsync(like);
+
+            await updateVideoTask;
+            await updateLikeTask;
         }
 
-        public async Task<VideoReactionDto> GetVideoReactionAsync(Guid videoId, Guid viewerId)
+        public async Task<VideoReactionDto> GetVideoReactionAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
-            ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId);
+            ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId,cancellationToken);
             return new VideoReactionDto
             {
                 PositiveCount = video.PositiveReactions,
@@ -276,14 +276,14 @@ namespace MyWideIO.API.Services
 
         }
 
-        public async Task<VideoListDto> GetUserVideosAsync(Guid creatorId, Guid viewerId)
+        public async Task<VideoListDto> GetUserVideosAsync(Guid creatorId, Guid viewerId, CancellationToken cancellationToken)
         {
-            var list = (await _videoRepository.GetUserVideosAsync(creatorId)).Select( VideoMapper.VideoModelToVideoMetadataDto);
+            IEnumerable<VideoModel> list = await _videoRepository.GetUserVideosAsync(creatorId,cancellationToken);
             if (creatorId != viewerId)
-                list = list.Where(v => v.Visibility == VisibilityEnum.Public);
+                list = list.Where(v=>v.IsVisible);
             return new VideoListDto
             {
-                Videos = list.ToList()
+                Videos = list.Select(VideoMapper.VideoModelToVideoMetadataDto).ToList(),
             };
         }
     }

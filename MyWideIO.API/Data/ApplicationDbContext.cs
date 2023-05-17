@@ -113,7 +113,7 @@ namespace MyWideIO.API.Data
 
             modelBuilder.Entity<VideoModel>()
                 .HasMany(v => v.Tags)
-                .WithMany(v => v.Videos)
+                .WithMany(v => v.Videos);
         }
     }
 }

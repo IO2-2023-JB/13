@@ -79,23 +79,23 @@ namespace MyWideIO.API.Data
                 .HasForeignKey(vp => vp.PlaylistId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<CommentModel>()
-                .HasOne(c => c.Video)
-                .WithMany(v => v.Comments)
-                .HasForeignKey(c => c.VideoId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<CommentModel>()
+            //    .HasOne(c => c.Video)
+            //    .WithMany(v => v.Comments)
+            //    .HasForeignKey(c => c.VideoId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<CommentModel>()
-                .HasOne(c => c.Author)
-                .WithMany()
-                .HasForeignKey(c => c.AuthorId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<CommentModel>()
+            //    .HasOne(c => c.Author)
+            //    .WithMany()
+            //    .HasForeignKey(c => c.AuthorId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<CommentModel>()
-                .HasOne(c => c.ParentComment)
-                .WithMany(c => c.Replies)
-                .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.Restrict); 
+            //modelBuilder.Entity<CommentModel>()
+            //    .HasOne(c => c.ParentComment)
+            //    .WithMany(c => c.Replies)
+            //    .HasForeignKey(c => c.ParentCommentId)
+            //    .OnDelete(DeleteBehavior.Restrict); 
 
             //modelBuilder.Entity<VideoModel>()
             //    .OwnsOne(c => c.Thumbnail);

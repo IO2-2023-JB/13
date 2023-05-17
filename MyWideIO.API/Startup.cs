@@ -66,11 +66,12 @@ namespace MyWideIO.API
             services.AddScoped<IVideoRepository, VideoRepository>();
             services.AddScoped<ILikeRepository, LikeRepository>();
             services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
 
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPlaylistService, PlaylistService>();
-
+            services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<ITransactionService, TransactionService>();
 
             // CORS
@@ -204,7 +205,7 @@ namespace MyWideIO.API
                 return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
             });
 
-            CreateRoles(services.BuildServiceProvider()).Wait();
+            //CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {

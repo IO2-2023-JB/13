@@ -12,7 +12,9 @@ namespace MyWideIO.API.Mappers
             {
                 Name = playlist.Name,
                 Visibility = playlist.IsVisible ? VisibilityEnum.Public : VisibilityEnum.Private,
-                Videos = playlist.VideoPlaylists.Select(vp => VideoMapper.VideoModelToVideoMetadataDto(vp.Video)).ToList()
+                Videos = playlist.VideoPlaylists.Select(vp => VideoMapper.VideoModelToVideoMetadataDto(vp.Video)).ToList(),
+                AuthorId = playlist.ViewerId,
+                AuthorNickname = playlist.Viewer.UserName
             };
             return playlistDto;
         }

@@ -8,10 +8,10 @@ namespace MyWideIO.API.Data.IRepositories
 {
     public interface IVideoRepository 
     {
-        public Task<VideoModel?> GetVideoAsync(Guid id);
+        public Task<VideoModel?> GetVideoAsync(Guid id, CancellationToken cancellationToken = default);
         public Task RemoveVideoAsync(VideoModel video);
         public Task AddVideoAsync(VideoModel video);
         public Task UpdateVideoAsync(VideoModel video);
-        public Task<ICollection<VideoModel>> GetUserVideosAsync(Guid id);
+        public Task<ICollection<VideoModel>> GetUserVideosAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

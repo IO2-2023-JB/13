@@ -7,7 +7,7 @@ namespace MyWideIO.API.Data.IRepositories
         public Task AddPlaylistAsync(PlaylistModel playlist);
         public Task UpdatePlaylistAsync(PlaylistModel playlist);
         public Task RemovePlaylistAsync(PlaylistModel playlist);
-        public Task<PlaylistModel?> GetPlaylistAsync(Guid id);
-        public Task<ICollection<PlaylistModel>> GetUserPlaylists(Guid userId);
+        public Task<PlaylistModel?> GetPlaylistAsync(Guid id, CancellationToken cancellationToken = default);
+        public Task<ICollection<PlaylistModel>> GetUserPlaylists(Guid userId, CancellationToken cancellationToken = default);
     }
 }

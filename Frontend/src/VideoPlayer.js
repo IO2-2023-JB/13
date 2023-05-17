@@ -898,10 +898,10 @@ const VideoPlayer = () => {
               </form>
             </div>
           ))}
-          <form onSubmit={handleCommentAdd} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <label style={{marginRight: '10px'}}>Add comment:</label>
-            <input type="text" value={commentText} onChange={handleCommentChange} style={{marginRight: '10px'}} />
-            <button type="submit">Submit</button>
+          <form onSubmit={handleCommentAdd} style={{marginBottom:"20px", display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop:"20px", 
+                            color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
+            <input type="text" placeholder="Add comment ..." value={commentText} onChange={handleCommentChange} style={{color:"white", backgroundColor:"black", marginRight: '10px', width: "500px"}} /> 
+            <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
           </form>
       </div>
         ):(

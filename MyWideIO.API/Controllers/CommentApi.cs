@@ -3,10 +3,14 @@ using MyWideIO.API.Models.Dto_Models;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using WideIO.API.Attributes;
+using System.Net.Http;
+using MyWideIO.API.Services.Interfaces;
 
 namespace MyWideIO.API.Controllers
 {
+
     /// <summary>
     /// 
     /// </summary>
@@ -14,6 +18,14 @@ namespace MyWideIO.API.Controllers
     [Route("comment")]
     public class CommentApiController : ControllerBase
     {
+
+        private readonly ICommentService _commentService;
+
+        public CommentApiController(ICommentService commentService)
+        {
+            _commentService = commentService;
+        }
+
         /// <summary>
         /// Add comment to video
         /// </summary>
@@ -23,12 +35,14 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost]
-        [Consumes("text/plain")]
+        [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("AddCommentToVideo")]
-        public virtual IActionResult AddCommentToVideo([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
+        public async virtual Task<IActionResult> AddCommentToVideo([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
         {
-            throw new NotImplementedException();
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _commentService.AddNewComment(id, body, userId);
+            return Ok();
         }
 
         /// <summary>
@@ -40,12 +54,14 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost("response")]
-        [Consumes("text/plain")]
+        [Consumes("application/json")]
         [ValidateModelState]
         [SwaggerOperation("AddResponseToComment")]
-        public virtual IActionResult AddResponseToComment([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
+        public async virtual Task<IActionResult> AddResponseToComment([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
         {
-            throw new NotImplementedException();
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _commentService.AddResoponseToComment(id, body, userId);
+            return Ok();
         }
 
         /// <summary>
@@ -58,9 +74,10 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteComment")]
-        public virtual IActionResult DeleteComment([FromQuery(Name = "id")][Required()] Guid id)
+        public async virtual Task<IActionResult> DeleteComment([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            await _commentService.DeleteComment(id);
+            return Ok();
         }
 
         /// <summary>
@@ -74,9 +91,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetComments")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
-        public virtual IActionResult GetComments([FromQuery(Name = "id")][Required()] Guid id)
+        public async virtual Task<ActionResult<CommentListDto>> GetComments([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            return await _commentService.GetVideoComments(id);
         }
 
         /// <summary>
@@ -90,9 +107,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetResponseData")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
-        public virtual IActionResult GetResponseData([FromQuery(Name = "id")][Required()] Guid id)
+        public async virtual Task<ActionResult<CommentListDto>> GetResponseData([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            return await _commentService.GetCommentResponses(id);
         }
     }
 }

@@ -10,6 +10,7 @@ namespace MyWideIO.API.Models.DB_Models
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Required]
         public Guid Id { get; set; }
 
         [StringLength(100)]

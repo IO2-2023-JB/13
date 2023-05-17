@@ -205,7 +205,7 @@ namespace MyWideIO.API
                 return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
             });
 
-            //CreateRoles(services.BuildServiceProvider()).Wait();
+            CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {

@@ -26,8 +26,11 @@ namespace MyWideIO.API.Middleware
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            if (exception is OperationCanceledException)
+                Console.WriteLine(exception.Message);
             var statusCode = exception switch
             {
+                OperationCanceledException => StatusCodes.Status400BadRequest,
                 UserNotFoundException or VideoNotFoundException or PlaylistNotFoundException => StatusCodes.Status404NotFound,
                 DuplicateEmailException => StatusCodes.Status409Conflict,
                 IncorrectPasswordException => StatusCodes.Status401Unauthorized,

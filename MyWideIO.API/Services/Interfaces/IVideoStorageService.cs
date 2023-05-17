@@ -6,6 +6,6 @@
         // public Stream GetVideoFile(Guid id);
         public Task RemoveVideoFileAsync(Guid id);
         public Task UploadVideoFileAsync(Guid id, Stream stream);
-        public Task<int> GetVideoDurationAsync(Guid id);
+        // public Task<int> GetVideoDurationAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

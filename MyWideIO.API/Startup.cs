@@ -141,7 +141,7 @@ namespace MyWideIO.API
                             return Task.CompletedTask;
                         }
 
-                        context.Token = token.StartsWith("Bearer ") ? token[7..] : token;
+                        context.Token = token.StartsWith("Bearer ") ? token[7..] : token; // chyba zawsze powinno byc Bearer
 
                         return Task.CompletedTask;
                     }

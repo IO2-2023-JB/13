@@ -133,9 +133,8 @@ namespace MyWideIO.API.Controllers
         [Authorize(Roles = "Creator")]
         public virtual async Task<IActionResult> UploadVideoMetadata([FromBody] VideoUploadDto videoUploadDto)
         {
-            VideoUploadResponseDto result;
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, creatorId);
+            var result = await _videoService.UploadVideoMetadataAsync(videoUploadDto, creatorId);
 
             return Ok(result);
 

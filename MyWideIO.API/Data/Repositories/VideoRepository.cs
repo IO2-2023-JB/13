@@ -24,13 +24,21 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext.Videos.Add(video);
             await _dbContext.SaveChangesAsync();
         }
-        public async Task<ICollection<VideoModel>> GetUserVideosAsync(Guid id)
+        public async Task<ICollection<VideoModel>> GetUserVideosAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Videos.Where(v => v.CreatorId == id).Include(v=>v.Tags).Include(v=>v.Creator).AsNoTracking().ToListAsync();
+            return await _dbContext.Videos
+                .Where(v => v.CreatorId == id)
+                .Include(v=>v.Tags)
+                .Include(v=>v.Creator).AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
-        public async Task<VideoModel?> GetVideoAsync(Guid id)
+        public async Task<VideoModel?> GetVideoAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Videos.Include(v=>v.Creator).Include(v=>v.Tags).SingleAsync(v=>v.Id == id);
+            return await _dbContext.Videos
+                .Include(v=>v.Creator)
+                .Include(v=>v.Tags)
+                .Where(v => v.Id == id)
+                .SingleAsync(cancellationToken);
         }
 
         public async Task RemoveVideoAsync(VideoModel video)

@@ -23,6 +23,8 @@ import AddVideo from './AddVideo';
 import AddPlaylist from './AddPlaylist';
 import Playlist from './Playlist';
 import AddVideoToPlaylist from './AddVideoToPlaylist';
+import Subscriptions from './User_Account/Subscriptions';
+import CreatorProfile from './User_Account/CreatorProfile';
 
 export const cookies = new Cookies();
 
@@ -91,11 +93,11 @@ function App() {
             </NavLink>
           </li>
           }
-          {/* <li className='nav-item m-1'>
-            <NavLink className="btn btn-outline-light" to='/videoplayer'>
-                Play video
+          <li className='nav-item m-1'>
+            <NavLink className="btn btn-outline-light" to='/subscriptions'>
+                Subscriptions
               </NavLink>
-          </li> */}
+          </li>
 
           {isLoggedIn()?
             <li className='nav-item m-0 mr-auto'>
@@ -159,12 +161,14 @@ function App() {
           <Route path='/addvideo' element={<AddVideo />} />
           <Route path="/administrator" element={<Administrator />}/>
           <Route path="/addplaylist" element={<AddPlaylist />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
         </Route>
         <Route path='/videoplayer/:videoid?' element={<VideoPlayer/>} />
         <Route path='/playlist/:playlistid?' element={<Playlist/>} />
         <Route path='/addvideotoplaylist/:videoid?' element={<AddVideoToPlaylist/>} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
+        <Route path='/creatorprofile/:creatorid?' element={<CreatorProfile/>} />
+        <Route path='/login' element={<Login/>} />
+        <Route path='/register' element={<Register/>} />
       </Routes>
     </div>
   );

@@ -839,10 +839,10 @@ const VideoPlayer = () => {
           </div>
           {(videoData.authorId === auth.id) && (
             <div>
-              <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
+              <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"0px"}}>
                 This video is {videoData.visibility}.
               </div>
-              <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+              <div class="container-fluid justify-content-center" style={{marginBottom: "0px"}}>
                 <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px"}}>Edit video metadata</button>
                 <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
               </div>

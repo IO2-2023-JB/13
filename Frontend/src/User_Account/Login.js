@@ -1,9 +1,8 @@
-import { useRef, useState, useEffect, useContext } from 'react';
-import AuthContext from "../context/AuthProvider"
+import { useRef, useState, useEffect } from 'react';
 import jwt_decode  from 'jwt-decode';
 import axios from '../api/axios';
 import useAuth from '../hooks/useAuth';
-import {Link, useNavigate, useLocation} from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {cookies} from '../App'
 
 const LOGIN_URL = '/login';
@@ -24,7 +23,7 @@ const Login = () => {
 
     useEffect(() => {
         localStorage.setItem("lastVisitedPage", location.pathname);
-      })
+    })
 
     useEffect(() => {
         emailRef.current.focus();
@@ -48,14 +47,9 @@ const Login = () => {
             const payload = jwt_decode(token);
             const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
             const id = payload["sub"];
-            //console.log(id);
-            //console.log(payload.sub)
-            //console.log(roles);
             const accessToken = token;
             setAuth({user: email, pwd, roles, accessToken, id});
-            //Date.now() + 1 * 24 * 60 * 60 * 1000
             cookies.set("accessToken", accessToken, { expires: new Date(payload["exp"] * 1000)});
-            //console.log(cookies.get("accessToken"));
             setUser('');
             setPwd('');
             navigate(from, {replace: true});
@@ -63,7 +57,6 @@ const Login = () => {
         }catch(err){
             if(!err?.response) {
                 setErrMsg('No Server Response')
-                //setErrMsg('No Server Response');
             } else if(err.response?.status === 400) {
                 setErrMsg('Login Failed');
             } else if(err.response?.status === 404){

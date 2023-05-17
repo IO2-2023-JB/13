@@ -72,3 +72,8 @@
     align-items: center;
     justify-content: center;
 }
+
+.text-with-stroke {
+    -webkit-text-stroke: 2px white;
+    color: black;
+  }

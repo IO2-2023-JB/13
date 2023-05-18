@@ -14,15 +14,15 @@ namespace MyWideIO.API.Models.DB_Models
     //    public virtual VideoModel Video { get; set; }
     //}
 
-    //public class ViewerSubscription
-    //{
-    //    public Guid ViewerId { get; set; }
-    //    public virtual AppUserModel Viewer { get; set; }
+    public class ViewerSubscription
+    {
+        public Guid ViewerId { get; set; }
+        public virtual AppUserModel Viewer { get; set; }
 
-    //    public Guid CreatorId { get; set; }
-    //    public virtual AppUserModel Creator { get; set; }
+        public Guid CreatorId { get; set; }
+        public virtual AppUserModel Creator { get; set; }
 
-    //}
+    }
 
     public class ViewerLike
     {

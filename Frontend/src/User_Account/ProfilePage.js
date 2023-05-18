@@ -489,7 +489,7 @@ return (
           {userType==='Creator'?(
             <div class="row" style={{marginTop:"30px"}}>
           <div class="col-sm">
-          <h2>Your Videos</h2>
+            <h2>Your Videos</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>

@@ -34,20 +34,20 @@ namespace MyWideIO.API.Data
             //    .HasForeignKey(vw => vw.VideoId)
             //    .OnDelete(DeleteBehavior.NoAction);
 
-            //modelBuilder.Entity<ViewerSubscription>()
-            //    .HasKey(vs => new { vs.ViewerId, vs.CreatorId });
+            modelBuilder.Entity<ViewerSubscription>() 
+                .HasKey(vs => new { vs.ViewerId, vs.CreatorId });
 
-            //modelBuilder.Entity<ViewerSubscription>()
-            //    .HasOne(vs => vs.Viewer)
-            //    .WithMany(v => v.Subscriptions)
-            //    .HasForeignKey(vs => vs.ViewerId)
-            //    .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ViewerSubscription>()
+                .HasOne(vs => vs.Viewer)
+                .WithMany(v => v.Subscriptions)
+                .HasForeignKey(vs => vs.ViewerId)
+                .OnDelete(DeleteBehavior.NoAction);
 
-            //modelBuilder.Entity<ViewerSubscription>()
-            //    .HasOne(vs => vs.Creator)
-            //    .WithMany(c => c.Subscribers)
-            //    .HasForeignKey(vs => vs.CreatorId)
-            //    .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ViewerSubscription>()
+                .HasOne(vs => vs.Creator)
+                .WithMany(c => c.Subscribers)
+                .HasForeignKey(vs => vs.CreatorId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ViewerLike>()
                 .HasKey(vl => new { vl.ViewerId, vl.VideoId });

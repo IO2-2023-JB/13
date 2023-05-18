@@ -5,7 +5,7 @@ import axios from '../api/axios';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const SUBSCRIPTIONS_URL = '/subscriptions';
+const SUBSCRIPTIONS_URL = '/subscribtions'; // change to p
 
 const Subscriptions = () => {
     const { auth } = useContext(AuthContext);
@@ -48,7 +48,7 @@ const Subscriptions = () => {
                         <ul style={{padding:"0px"}}>
                             {subscriptionsData.map(subscription => (
                                 <section class="container-fluid justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", 
-                                    padding:"20px", backgroundColor:"#333333"}} onClick={handleSubscriptionClick(subscription.id)}>
+                                    padding:"20px", backgroundColor:"#333333"}} onClick={() => handleSubscriptionClick(subscription.id)}>
                                     <img key={subscription.avatarImage} src={subscription.avatarImage+"?time="+new Date()} alt="No avatar image"/>
                                     <h2>Nickname:</h2>
                                     <h2>{subscription.nickname}</h2>

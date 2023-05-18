@@ -459,8 +459,17 @@ return (
                 <button onClick={handleEditClick} class="btn btn-dark">Edit</button>
               </div>
             </section>
-
-            <div class="container-fluid justify-content-center" style={{marginTop:"20px", 
+          </div>
+          <div class="col-sm">
+            <h2>Avatar Image</h2>
+            <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
+              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+              <img key={userData.avatarImage} src = {userData.avatarImage+"?time="+new Date()} alt="No avatar image"/>
+            </section>
+          </div>
+          <div class="col-sm">
+          <h2>Danger zone</h2>
+          <div class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", marginBottom:"100px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <div className="row">
                 <div className="col">
@@ -476,15 +485,9 @@ return (
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col-sm">
-            <h2>Avatar Image</h2>
-            <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
-              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-              <img key={userData.avatarImage} src = {userData.avatarImage+"?time="+new Date()} alt="No avatar image"/>
-            </section>
-          </div>
+            </div>
           {userType==='Creator'?(
+            <div class="row" style={{marginTop:"40px"}}>
           <div class="col-sm">
           <h2>Your Videos</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
@@ -560,7 +563,8 @@ return (
                 )}
               </ul>
             </section>
-
+            </div>
+          <div class="col-sm">
           <h2>Your Playlists</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
@@ -597,6 +601,7 @@ return (
                 ).reverse()}
               </ul>
             </section>
+          </div>
           </div>
           ):(
             <div class="col-sm">

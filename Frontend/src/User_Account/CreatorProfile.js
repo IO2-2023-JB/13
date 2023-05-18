@@ -11,7 +11,7 @@ config.autoAddCss = false;
 const PROFILE_URL = '/user';
 const USER_VIDEOS_URL = '/user/videos';
 const USER_PLAYLISTS_URL = '/playlist/user';
-const SUBSCRIPTIONS_URL = '/subscriptions';
+const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
 
 const CreatorProfile = () => {
   const { auth } = useContext(AuthContext);
@@ -152,7 +152,7 @@ const CreatorProfile = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?id=" + creator_id, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?subId=" + creator_id, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -181,7 +181,7 @@ const CreatorProfile = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?id=" + creator_id, {
+    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + creator_id, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`

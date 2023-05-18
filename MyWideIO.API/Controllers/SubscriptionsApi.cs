@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
+using System.Security.Claims;
 using WideIO.API.Attributes;
 
 namespace MyWideIO.API.Controllers
@@ -12,8 +17,18 @@ namespace MyWideIO.API.Controllers
     /// </summary>
     [ApiController]
     [Route("subscribtions")]
+    [Authorize]
     public class SubscriptionsApiController : ControllerBase
     {
+        private readonly ISubscriptionService _subscriptionService;
+
+        public SubscriptionsApiController(ISubscriptionService subscriptionService)
+        {
+            _subscriptionService = subscriptionService;
+        }
+
+
+
         /// <summary>
         /// Subscribe to another user
         /// </summary>
@@ -22,11 +37,27 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost]
+        [Authorize]
         [ValidateModelState]
         [SwaggerOperation("AddSubscription")]
-        public virtual IActionResult AddSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
+        public virtual async Task<IActionResult> AddSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
         {
-            throw new NotImplementedException();
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
+                viewerId = Guid.Empty;
+            try
+            {
+                await _subscriptionService.Subscribe(viewerId, subId);
+            }
+            catch (DataException exception)
+            {
+                return NotFound(exception.Message);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+            return Ok();
+
         }
 
         /// <summary>
@@ -37,11 +68,26 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpDelete]
+        [Authorize]
         [ValidateModelState]
         [SwaggerOperation("DeleteSubscription")]
-        public virtual IActionResult DeleteSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
+        public virtual async Task<IActionResult> DeleteSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
         {
-            throw new NotImplementedException();
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
+                viewerId = Guid.Empty;
+            try
+            {
+                await _subscriptionService.UnSubscribe(viewerId, subId);
+            }
+            catch (DataException exception)
+            {
+                return NotFound(exception.Message);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -55,9 +101,23 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetSubscriptions")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserSubscriptionListDto), description: "OK")]
-        public virtual IActionResult GetSubscriptions([FromQuery(Name = "id")][Required()] Guid id)
+        [AllowAnonymous]
+        public virtual async Task<IActionResult> GetSubscriptions([FromQuery(Name = "id")][Required()] Guid id)
         {
-            throw new NotImplementedException();
+            UserSubscriptionListDto subs;
+            try
+            {
+                subs = await _subscriptionService.Subscriptions(id);
+            }
+            catch (DataException exception)
+            {   
+                return NotFound(exception.Message);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+            return Ok(subs);
         }
     }
 }

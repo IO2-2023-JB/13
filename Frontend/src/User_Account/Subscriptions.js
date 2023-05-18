@@ -40,26 +40,25 @@ const Subscriptions = () => {
 
     return(
         <div style={{marginTop: "200px"}}>
-            <h2 class="display-5" style={{marginLeft:"100px", textAlign: "left"}}> Your Subscriptions: </h2>
-            <div style={{marginTop:"20px", 
+            <h2 class="display-5" style={{textAlign: "center"}}> Your Subscriptions: </h2>
+            <div style={{marginTop:"20px", marginLeft:"200px", marginRight:"200px",
                             color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
-                <div class ="mt-2 row justify-content-center">
-                    <div style={{margin:"20px",
-                                color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#222222", width:"300px", height:"300px"}}/>
-                    <div style={{margin:"20px",
-                                color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#222222", width:"300px", height:"300px"}}/>
-                    
-                    <ul style={{padding:"0px"}}>
+                    <ul style={{padding:"0px", display:"inline"}}>
                         {subscriptionsData.map(subscription => (
-                            <section class="container-fluid justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", 
-                                    padding:"20px", backgroundColor:"#333333"}} onClick={() => handleSubscriptionClick(subscription.id)}>
-                                <img key={subscription.avatarImage} src={subscription.avatarImage+"?time="+new Date()} alt="No avatar image"/>
-                                <h2>Nickname:</h2>
-                                <h2>{subscription.nickname}</h2>
-                            </section>
+                            <li class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                                    padding:"20px", backgroundColor:"#222222"}} onClick={() => handleSubscriptionClick(subscription.id)}>
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <img key={subscription.avatarImage} width="200px" height="200px" src={subscription.avatarImage+"?time="+new Date()} alt="No avatar image"/>
+                                    </div>
+                                    <div class="col-sm">
+                                        <h4>Nickname:</h4>
+                                        <h1 style={{marginTop:"30px"}}>{subscription.nickname}</h1>
+                                    </div>
+                                </div>
+                            </li>
                         )).reverse()}
                     </ul>
-                </div>
             </div>
         </div>
     );

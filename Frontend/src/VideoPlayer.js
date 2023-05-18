@@ -860,60 +860,77 @@ const VideoPlayer = () => {
             </div>
           )
           }
-          <div style={{marginBottom: "50px"}}>
+          <div style={{marginBottom: "30px"}}>
             <button style={{marginLeft:"15px"}} onClick={() => handleAddToPlaylistClick(videoData.id)} class="btn btn-dark">Add this video to playlist</button>
           </div>
-          {commentsData.map((comment, index) => (
-            <div>
-              {(comment.authorId === auth.id) && (
-                <button onClick={() => handleCommentDeleteClick(comment.id)} class="btn btn-danger">Delete comment</button>
-              )}
-              <div style={{display: "flex", alignItems: "center"}}>
-                <img src={comment.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)} />
-                <div style={{display: "flex", flexDirection: "column"}}>
-                  <div style={{display: "flex", justifyContent: "space-between"}}>
-                    <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
-                    <div style={{marginLeft: "50px"}}>
-                      <h5> {comment.content} </h5>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {comment.hasResponses && responsesData[comment.id] &&(
-                responsesData[comment.id].map(response => (
-                    <div>
-                      {(response.authorId == auth.id) && (
-                        <button onClick={() => handleCommentDeleteClick(response.id)} class="btn btn-danger">Delete response</button>
-                      )}
-                      <div style={{display: "flex", alignItems: "center"}}>
-                        <img src={response.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)} />
-                        <div style={{display: "flex", flexDirection: "column"}}>
-                          <div style={{display: "flex", justifyContent: "space-between"}}>
-                            <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
-                            <div style={{marginLeft: "50px"}}>
-                              <h5> {response.content} </h5>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                ))
-              )}
-              <form onSubmit={(event) => handleResponseAdd(event, index)}>
-                <label>
-                  Add response:
-                  <input type="text" value={responseTexts[index] || ''} onChange={(event) => handleResponseChange(event, index)} />
-                </label>
-                <input type="hidden" name="commentId" value={comment.id} />
-                <button type="submit">Submit</button>
-              </form>
-            </div>
-          ))}
           <form onSubmit={handleCommentAdd} style={{marginBottom:"20px", display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop:"20px", 
                             color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
             <input type="text" placeholder="Add comment ..." value={commentText} onChange={handleCommentChange} style={{color:"white", backgroundColor:"black", marginRight: '10px', width: "500px"}} /> 
             <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
           </form>
+          <h4 class="container-fluid justify-content-center">Comments:</h4>
+          {commentsData.map((comment, index) => (
+            <div style={{marginBottom:"20px", marginTop:"20px", 
+                            color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", backgroundColor:"#222222"}}>
+              <div style={{display: "flex", marginLeft:"20px", alignItems: "center"}}>
+                <div style={{display: "flex", flexDirection: "column"}}>
+                  <div style={{display: "flex", justifyContent: "space-between", marginTop:"20px"}}>
+                    <img src={comment.avatarImage} alt="Avatar" style={{marginTop:"2px", width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)} />
+                    <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
+                    <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
+                      <h6> {comment.content} </h6>
+                    </div>
+                  </div>
+                </div>
+              {(comment.authorId === auth.id) && (
+                <button class="btn btn-danger ms-auto" style={{marginRight:"20px"}} onClick={() => handleCommentDeleteClick(comment.id)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                  </svg>
+                </button>
+              )}
+              </div>
+
+              <form onSubmit={(event) => handleResponseAdd(event, index)} style={{marginLeft:"20px", marginRight:"20px", marginBottom:"15px", display: 'flex', flexDirection: 'row', 
+                            alignItems: 'center', marginTop:"20px", color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", 
+                            backgroundColor:"#111111"}}>
+
+                <input type="text" placeholder="Add response ..." value={responseTexts[index] || ''} onChange={(event) => handleResponseChange(event, index)}
+                  style={{color:"white", backgroundColor:"black", marginRight: '10px', width: "500px"}} /> 
+                <input type="hidden" name="commentId" value={comment.id} />
+                <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
+              </form>
+              <div style={{marginLeft:"20px", marginRight:"20px", marginBottom:"15px", display: 'flex', flexDirection: 'column', 
+                    marginTop:"20px", color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", 
+                    backgroundColor:"#111111"}}>
+                {comment.hasResponses && responsesData[comment.id] &&(
+                  responsesData[comment.id].map(response => (
+                      <div style={{display: "flex", marginLeft:"20px", alignItems: "center"}}>
+                        <div style={{display: "flex", alignItems: "center"}}>
+                          <img src={response.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)} />
+                          <div style={{display: "flex", flexDirection: "column"}}>
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                              <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
+                              <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
+                                <h6> {response.content} </h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {(comment.authorId === auth.id) && (
+                          <button class="btn btn-dark ms-auto" style={{marginRight:"20px", marginBottom:"20px"}} onClick={() => handleCommentDeleteClick(response.id)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                              <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                  ))
+                ).reverse()}
+              </div>
+            </div>
+          )).reverse()}
+          
       </div>
         ):(
           <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>

@@ -16,7 +16,7 @@ const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
-const SUBSCRIPTIONS_URL = '/subscriptions';
+const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
 const PROFILE_URL = '/user';
 
 const VideoPlayer = () => {
@@ -34,7 +34,6 @@ const VideoPlayer = () => {
 
   const [commentText, setCommentText] = useState('');
   const [responseTexts, setResponseTexts] = useState([]);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
@@ -685,7 +684,7 @@ const VideoPlayer = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -714,7 +713,7 @@ const VideoPlayer = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
+    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`

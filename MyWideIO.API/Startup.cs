@@ -63,13 +63,16 @@ namespace MyWideIO.API
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IVideoStorageService, AzureBlobVideoStorageService>();
 
+
             services.AddScoped<IVideoRepository, VideoRepository>();
             services.AddScoped<ILikeRepository, LikeRepository>();
             services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+            services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPlaylistService, PlaylistService>();
+            services.AddScoped<ISubscriptionService, SubscriptionService>();
 
             services.AddScoped<ITransactionService, TransactionService>();
 
@@ -204,6 +207,7 @@ namespace MyWideIO.API
                 return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
             });
 
+            //comment this
             CreateRoles(services.BuildServiceProvider()).Wait();
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)

@@ -850,10 +850,10 @@ const VideoPlayer = () => {
           </div>
           {(videoData.authorId === auth.id) && (
             <div>
-              <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
+              <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"0px"}}>
                 This video is {videoData.visibility}.
               </div>
-              <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+              <div class="container-fluid justify-content-center" style={{marginBottom: "0px"}}>
                 <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px"}}>Edit video metadata</button>
                 <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
               </div>
@@ -909,10 +909,10 @@ const VideoPlayer = () => {
               </form>
             </div>
           ))}
-          <form onSubmit={handleCommentAdd} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <label style={{marginRight: '10px'}}>Add comment:</label>
-            <input type="text" value={commentText} onChange={handleCommentChange} style={{marginRight: '10px'}} />
-            <button type="submit">Submit</button>
+          <form onSubmit={handleCommentAdd} style={{marginBottom:"20px", display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop:"20px", 
+                            color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
+            <input type="text" placeholder="Add comment ..." value={commentText} onChange={handleCommentChange} style={{color:"white", backgroundColor:"black", marginRight: '10px', width: "500px"}} /> 
+            <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
           </form>
       </div>
         ):(

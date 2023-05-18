@@ -14,7 +14,7 @@ namespace MyWideIO.API.Models.DB_Models
         public string Surname { get; set; } = string.Empty;
 
         public virtual ICollection<VideoModel> WatchLater { get; set; } = new Collection<VideoModel>();
-        public virtual ICollection<AppUserModel> Subscriptions { get; set; } = new Collection<AppUserModel>();
+        public virtual ICollection<ViewerSubscription> Subscriptions { get; set; } = new Collection<ViewerSubscription>();
 
         public virtual ICollection<ViewerLike> Likes { get; set; } = new Collection<ViewerLike>();
         public virtual ICollection<PlaylistModel> Playlists { get; set; } = new Collection<PlaylistModel>();
@@ -25,7 +25,7 @@ namespace MyWideIO.API.Models.DB_Models
         // CREATOR
         public virtual ICollection<VideoModel> OwnedVideos { get; set; } = new Collection<VideoModel>();
 
-        public virtual ICollection<AppUserModel> Subscribers { get; set; } = new Collection<AppUserModel>();
+        public virtual ICollection<ViewerSubscription> Subscribers { get; set; } = new Collection<ViewerSubscription>();
 
         public float? Money { get; set; }
 

@@ -37,6 +37,8 @@ namespace MyWideIO.API.Services
 
         public async Task UnSubscribe(Guid vieverId, Guid subId) // UnSubscribeAsync
         {
+            // s = getSubscription(vieverId, subId)
+            // removesubscription(s)
             await _subscriptionRepository.UnSubscribe(vieverId, subId);
         }
     }

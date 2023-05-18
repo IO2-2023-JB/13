@@ -32,8 +32,7 @@ namespace MyWideIO.API.Data.Repositories
                 {
                     ViewerId = viewerId,
                     CreatorId = subId,
-                    Creator = creator,
-                    // Viewer = viewer ?
+                    Creator = creator
                 };
                 _dbContext.Subscriptions.Add(subscription);
                 _dbContext.SaveChanges();

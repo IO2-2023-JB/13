@@ -112,6 +112,9 @@ const VideoPlayer = () => {
         withCredentials: true
       }
     ).then(() => {
+      const newTexts = [...responseTexts];
+      newTexts[index] = '';
+      setResponseTexts(newTexts);
       getComments();
     }).catch(err => {
       if(!err?.response) {
@@ -124,9 +127,6 @@ const VideoPlayer = () => {
           setErrMsg('Getting metadata failed');
       }
     });
-    const newTexts = [...responseTexts];
-    newTexts[index] = '';
-    setResponseTexts(newTexts);
   };
 
   useEffect(() => {
@@ -608,6 +608,36 @@ const VideoPlayer = () => {
           }
       ).then(response => {
         setCommentsData(response?.data.comments);
+        response?.data.comments.forEach(comment => {
+          if(comment.hasResponses){
+            axios.get(RESPONSE_URL + "?id=" + comment.id,
+            {
+              headers: { 
+                'Content-Type': 'application/json',
+                "Authorization" : `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true
+            }
+            ).then(response => {
+              setResponsesData((prevState) => ({
+                ...prevState,
+                [comment.id]: response?.data.comments,
+              }));
+            }).catch(err => {
+              if(!err?.response) {
+                  setErrMsg('No Server Response')
+              } else if(err.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if(err.response?.status === 401){
+                setErrMsg('Unauthorized');
+              } else if(err.response?.status === 404){
+                setErrMsg('Not found');
+              } else {
+                setErrMsg('Getting coments failed');
+              }
+            });
+          }
+        });
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
@@ -623,36 +653,7 @@ const VideoPlayer = () => {
             setErrMsg('Getting coments failed');
         }
       });
-      commentsData.forEach(comment => {
-        if(comment.hasResponses){
-          axios.get(RESPONSE_URL + "?id=" + comment.id,
-          {
-            headers: { 
-              'Content-Type': 'application/json',
-              "Authorization" : `Bearer ${auth?.accessToken}`
-            },
-            withCredentials: true
-          }
-          ).then(response => {
-            setResponsesData((prevState) => ({
-              ...prevState,
-              [comment.id]: response?.data.comments,
-            }));
-          }).catch(err => {
-            if(!err?.response) {
-                setErrMsg('No Server Response')
-            } else if(err.response?.status === 400) {
-                setErrMsg('Bad request');
-            } else if(err.response?.status === 401){
-              setErrMsg('Unauthorized');
-            } else if(err.response?.status === 404){
-              setErrMsg('Not found');
-            } else {
-              setErrMsg('Getting coments failed');
-            }
-          });
-        }
-      });
+      
   }
 
   const handleCommentDeleteClick = (id) => {
@@ -684,7 +685,7 @@ const VideoPlayer = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -713,7 +714,7 @@ const VideoPlayer = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {
+    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -917,7 +918,7 @@ const VideoPlayer = () => {
                             </div>
                           </div>
                         </div>
-                        {(comment.authorId === auth.id) && (
+                        {(response.authorId === auth.id) && (
                           <button class="btn btn-dark ms-auto" style={{marginRight:"20px", marginBottom:"20px"}} onClick={() => handleCommentDeleteClick(response.id)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                               <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>

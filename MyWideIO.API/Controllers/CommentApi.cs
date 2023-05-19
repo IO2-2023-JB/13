@@ -58,6 +58,7 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteComment")]
+        [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public virtual IActionResult DeleteComment([FromQuery(Name = "id")][Required()] Guid id)
         {
             throw new NotImplementedException();
@@ -74,6 +75,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetComments")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
+        [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public virtual IActionResult GetComments([FromQuery(Name = "id")][Required()] Guid id)
         {
             throw new NotImplementedException();
@@ -90,6 +92,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetResponseData")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
+        [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public virtual IActionResult GetResponseData([FromQuery(Name = "id")][Required()] Guid id)
         {
             throw new NotImplementedException();

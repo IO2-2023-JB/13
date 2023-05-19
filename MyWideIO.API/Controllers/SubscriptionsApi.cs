@@ -24,7 +24,7 @@ namespace MyWideIO.API.Controllers
         [HttpPost]
         [ValidateModelState]
         [SwaggerOperation("AddSubscription")]
-        public virtual IActionResult AddSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
+        public virtual IActionResult AddSubscription([FromQuery(Name = "id")][Required()] Guid subId)
         {
             throw new NotImplementedException();
         }
@@ -39,7 +39,7 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteSubscription")]
-        public virtual IActionResult DeleteSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
+        public virtual IActionResult DeleteSubscription([FromQuery(Name = "id")][Required()] Guid subId)
         {
             throw new NotImplementedException();
         }

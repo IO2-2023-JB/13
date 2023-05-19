@@ -685,7 +685,7 @@ const VideoPlayer = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -714,7 +714,7 @@ const VideoPlayer = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {
+    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`

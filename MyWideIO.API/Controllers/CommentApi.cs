@@ -74,6 +74,7 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteComment")]
+        [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public async virtual Task<IActionResult> DeleteComment([FromQuery(Name = "id")][Required()] Guid id)
         {
             await _commentService.DeleteComment(id);
@@ -91,6 +92,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetComments")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
+        [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public async virtual Task<ActionResult<CommentListDto>> GetComments([FromQuery(Name = "id")][Required()] Guid id)
         {
             return await _commentService.GetVideoComments(id);
@@ -107,6 +109,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetResponseData")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
+        [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public async virtual Task<ActionResult<CommentListDto>> GetResponseData([FromQuery(Name = "id")][Required()] Guid id)
         {
             return await _commentService.GetCommentResponses(id);

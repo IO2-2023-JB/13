@@ -113,7 +113,7 @@ namespace MyWideIO.API.Models.Dto_Models
         /// <value>(hh:)mm:ss</value>
         /// <example>&quot;743&quot;</example>
         [DataMember(Name = "duration", EmitDefaultValue = false)]
-        public string Duration { get; set; }
+        public string? Duration { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

@@ -59,6 +59,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetSubscribedVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
+        [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         public virtual IActionResult GetSubscribedVideos()
         {
             throw new NotImplementedException();

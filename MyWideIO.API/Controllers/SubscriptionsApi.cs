@@ -42,7 +42,7 @@ namespace MyWideIO.API.Controllers
         [Authorize] // nie potrzebne, jest przed calym kontrolerem
         [ValidateModelState]
         [SwaggerOperation("AddSubscription")]
-        public virtual async Task<IActionResult> AddSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
+        public virtual async Task<IActionResult> AddSubscription([FromQuery(Name = "id")][Required()] Guid subId)
         {
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty;//  jesli jest Authorize, ale nie ma ClaimTypes.NameIdentifier, to blad jest(raczej nigdy tak nie bedzie)
@@ -77,7 +77,7 @@ namespace MyWideIO.API.Controllers
         [Authorize] // nie potrzebne, jest przed calym kontrolerem
         [ValidateModelState]
         [SwaggerOperation("DeleteSubscription")]
-        public virtual async Task<IActionResult> DeleteSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
+        public virtual async Task<IActionResult> DeleteSubscription([FromQuery(Name = "id")][Required()] Guid subId)
         {
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty; //  jesli jest Authorize, ale nie ma ClaimTypes.NameIdentifier, to blad jest(raczej nigdy tak nie bedzie)

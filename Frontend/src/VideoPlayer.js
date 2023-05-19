@@ -16,7 +16,7 @@ const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
-const SUBSCRIPTIONS_URL = '/subscriptions';
+const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
 const PROFILE_URL = '/user';
 
 const VideoPlayer = () => {
@@ -33,7 +33,7 @@ const VideoPlayer = () => {
   const [forbiddedErr, setForbiddenErr] = useState(false);
 
   const [commentText, setCommentText] = useState('');
-  const [responseText, setResponseText] = useState('');
+  const [responseTexts, setResponseTexts] = useState([]);
 
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
@@ -68,13 +68,15 @@ const VideoPlayer = () => {
     setCommentText(event.target.value);
   };
 
-  const handleResponseChange = (event) => {
-    setResponseText(event.target.value);
+  const handleResponseChange = (event, index) => {
+    const newTexts = [...responseTexts];
+    newTexts[index] = event.target.value;
+    setResponseTexts(newTexts);
   };
 
   const handleCommentAdd = (event) => {
     event.preventDefault();
-    axios.post(COMMENT_URL + "?id=" + video_id, JSON.stringify({commentText}),
+    axios.post(COMMENT_URL + "?id=" + video_id, commentText,
       {
         headers: { 
           'Content-Type': 'application/json',
@@ -96,12 +98,12 @@ const VideoPlayer = () => {
       }
     });
     setCommentText("");
-    //refresh?
   };
 
-  const handleResponseAdd = (event) => {
+  const handleResponseAdd = (event, index) => {
     event.preventDefault();
-    axios.post(RESPONSE_URL + "?id=" + event.target.elements.commentId.value, JSON.stringify({responseText}),
+    const responseText = responseTexts[index];
+    axios.post(RESPONSE_URL + "?id=" + event.target.elements.commentId.value, responseText,
       {
         headers: { 
           'Content-Type': 'application/json',
@@ -122,8 +124,9 @@ const VideoPlayer = () => {
           setErrMsg('Getting metadata failed');
       }
     });
-    setCommentText("");
-    //refresh?
+    const newTexts = [...responseTexts];
+    newTexts[index] = '';
+    setResponseTexts(newTexts);
   };
 
   useEffect(() => {
@@ -190,7 +193,7 @@ const VideoPlayer = () => {
     setVisibility(videoData.visibility);
   }, [videoData])
 
-  useEffect( () => {
+  useEffect(() => {
     if(params.videoid)
     {
       video_id = params.videoid;
@@ -261,7 +264,6 @@ const VideoPlayer = () => {
           negativeCount: response.data.negativeCount,
           currentUserReaction: response.data.currentUserReaction,
         });
-        setIsLoading(false);
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
@@ -284,6 +286,45 @@ const VideoPlayer = () => {
           }
       ).then(response => {
         setCommentsData(response?.data.comments);
+        const promises = response?.data.comments.map(comment => {
+          if(comment.hasResponses){
+            axios.get(RESPONSE_URL + "?id=" + comment.id,
+            {
+              headers: { 
+                'Content-Type': 'application/json',
+                "Authorization" : `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: true
+            }
+            ).then(response => {
+              setResponsesData((prevState) => ({
+                ...prevState,
+                [comment.id]: response?.data?.comments,
+              }));
+            }).catch(err => {
+              if(!err?.response) {
+                  setErrMsg('No Server Response')
+              } else if(err.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if(err.response?.status === 401){
+                setErrMsg('Unauthorized');
+              } else if(err.response?.status === 404){
+                setErrMsg('Not found');
+              } else {
+                setErrMsg('Getting coments failed');
+              }
+              return Promise.resolve([]);
+            });
+          }
+          return Promise.resolve([]);
+        });
+        Promise.all(promises)
+        .then(() => {
+          setIsLoading(false);
+        });
+        if(commentsData.length === 0){
+          setIsLoading(false);
+        }
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
@@ -297,36 +338,6 @@ const VideoPlayer = () => {
           setErrMsg('Not found');
         } else {
             setErrMsg('Getting coments failed');
-        }
-      });
-      commentsData.forEach(comment => {
-        if(comment.hasResponses){
-          axios.get(RESPONSE_URL + "?id=" + comment.id,
-          {
-            headers: { 
-              'Content-Type': 'application/json',
-              "Authorization" : `Bearer ${auth?.accessToken}`
-            },
-            withCredentials: true
-          }
-          ).then(response => {
-            setResponsesData((prevState) => ({
-              ...prevState,
-              [comment.id]: response?.data?.comments,
-            }));
-          }).catch(err => {
-            if(!err?.response) {
-                setErrMsg('No Server Response')
-            } else if(err.response?.status === 400) {
-                setErrMsg('Bad request');
-            } else if(err.response?.status === 401){
-              setErrMsg('Unauthorized');
-            } else if(err.response?.status === 404){
-              setErrMsg('Not found');
-            } else {
-              setErrMsg('Getting coments failed');
-            }
-          });
         }
       });
     }
@@ -586,8 +597,8 @@ const VideoPlayer = () => {
     navigate(`/addvideotoplaylist/${id}`);
   }
 
-  const getComments = () => {
-    axios.get(COMMENT_URL + "?id=" + video_id,
+  const getComments = async () => {
+    await axios.get(COMMENT_URL + "?id=" + video_id,
           {
             headers: { 
               'Content-Type': 'application/json',
@@ -625,7 +636,7 @@ const VideoPlayer = () => {
           ).then(response => {
             setResponsesData((prevState) => ({
               ...prevState,
-              [comment.id]: response?.data?.comments,
+              [comment.id]: response?.data.comments,
             }));
           }).catch(err => {
             if(!err?.response) {
@@ -673,7 +684,7 @@ const VideoPlayer = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -702,7 +713,7 @@ const VideoPlayer = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
+    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -839,70 +850,87 @@ const VideoPlayer = () => {
           </div>
           {(videoData.authorId === auth.id) && (
             <div>
-              <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"200px"}}>
+              <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"20px", marginBottom:"0px"}}>
                 This video is {videoData.visibility}.
               </div>
-              <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+              <div class="container-fluid justify-content-center" style={{marginBottom: "0px"}}>
                 <button onClick={handleEditClick} class="btn btn-dark" style={{marginRight:"20px"}}>Edit video metadata</button>
                 <button onClick={handleDeleteClick} class="btn btn-danger">Delete video</button>
               </div>
             </div>
           )
           }
-          <div style={{marginBottom: "50px"}}>
+          <div style={{marginBottom: "30px"}}>
             <button style={{marginLeft:"15px"}} onClick={() => handleAddToPlaylistClick(videoData.id)} class="btn btn-dark">Add this video to playlist</button>
           </div>
-          {commentsData.map(comment => (
-            <div>
-              (comment.authorId === auth.id) && (
-                <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete comment</button>
-              )
-              <div style={{display: "flex", alignItems: "center"}}>
-                <img src={comment.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)} />
+          <form onSubmit={handleCommentAdd} style={{marginBottom:"20px", display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop:"20px", 
+                            color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
+            <input type="text" placeholder="Add comment ..." value={commentText} onChange={handleCommentChange} style={{color:"white", backgroundColor:"black", marginRight: '10px', width: "500px"}} /> 
+            <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
+          </form>
+          <h4 class="container-fluid justify-content-center">Comments:</h4>
+          {commentsData.map((comment, index) => (
+            <div style={{marginBottom:"20px", marginTop:"20px", 
+                            color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", backgroundColor:"#222222"}}>
+              <div style={{display: "flex", marginLeft:"20px", alignItems: "center"}}>
                 <div style={{display: "flex", flexDirection: "column"}}>
-                  <div style={{display: "flex", justifyContent: "space-between"}}>
-                    <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
-                    <div style={{marginLeft: "50px"}}>
-                      <h5> {comment.content} </h5>
+                  <div style={{display: "flex", justifyContent: "space-between", marginTop:"20px"}}>
+                    <img src={comment.avatarImage} alt="Avatar" style={{marginTop:"2px", width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)} />
+                    <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
+                    <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
+                      <h6> {comment.content} </h6>
                     </div>
                   </div>
                 </div>
+              {(comment.authorId === auth.id) && (
+                <button class="btn btn-danger ms-auto" style={{marginRight:"20px"}} onClick={() => handleCommentDeleteClick(comment.id)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                  </svg>
+                </button>
+              )}
               </div>
-              {comment.hasResponses &&(
-                responsesData[comment.id].map(response => (
-                    <div>
-                      (response.authorId == auth.id) && (
-                        <button onClick={handleCommentDeleteClick} class="btn btn-danger">Delete response</button>
-                      )
-                      <div style={{display: "flex", alignItems: "center"}}>
-                        <img src={response.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)} />
-                        <div style={{display: "flex", flexDirection: "column"}}>
-                          <div style={{display: "flex", justifyContent: "space-between"}}>
-                            <h4 style={{fontSize: "30px", marginTop: "25px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
-                            <div style={{marginLeft: "50px"}}>
-                              <h5> {response.content} </h5>
+
+              <form onSubmit={(event) => handleResponseAdd(event, index)} style={{marginLeft:"20px", marginRight:"20px", marginBottom:"15px", display: 'flex', flexDirection: 'row', 
+                            alignItems: 'center', marginTop:"20px", color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", 
+                            backgroundColor:"#111111"}}>
+
+                <input type="text" placeholder="Add response ..." value={responseTexts[index] || ''} onChange={(event) => handleResponseChange(event, index)}
+                  style={{color:"white", backgroundColor:"black", marginRight: '10px', width: "500px"}} /> 
+                <input type="hidden" name="commentId" value={comment.id} />
+                <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
+              </form>
+              <div style={{marginLeft:"20px", marginRight:"20px", marginBottom:"15px", display: 'flex', flexDirection: 'column', 
+                    marginTop:"20px", color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", 
+                    backgroundColor:"#111111"}}>
+                {comment.hasResponses && responsesData[comment.id] &&(
+                  responsesData[comment.id].map(response => (
+                      <div style={{display: "flex", marginLeft:"20px", alignItems: "center"}}>
+                        <div style={{display: "flex", alignItems: "center"}}>
+                          <img src={response.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)} />
+                          <div style={{display: "flex", flexDirection: "column"}}>
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                              <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
+                              <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
+                                <h6> {response.content} </h6>
+                              </div>
                             </div>
                           </div>
                         </div>
+                        {(comment.authorId === auth.id) && (
+                          <button class="btn btn-dark ms-auto" style={{marginRight:"20px", marginBottom:"20px"}} onClick={() => handleCommentDeleteClick(response.id)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                              <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                            </svg>
+                          </button>
+                        )}
                       </div>
-                    </div>
-                ))
-              )}
-              <form onSubmit={handleResponseAdd}>
-                <label>
-                  Add response:
-                  <input type="text" value={responseText} onChange={handleResponseChange} />
-                </label>
-                <input type="hidden" name="commentId" value={comment.id} />
-                <button type="submit">Submit</button>
-              </form>
+                  ))
+                ).reverse()}
+              </div>
             </div>
-          ))}
-          <form onSubmit={handleCommentAdd} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <label style={{marginRight: '10px'}}>Add comment:</label>
-            <input type="text" value={commentText} onChange={handleCommentChange} style={{marginRight: '10px'}} />
-            <button type="submit">Submit</button>
-          </form>
+          )).reverse()}
+          
       </div>
         ):(
           <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>

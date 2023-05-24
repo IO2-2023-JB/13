@@ -30,6 +30,7 @@ namespace MyWideIO.API.Data.Repositories
             return await _dbContext.Playlists
                 .Include(p => p.VideoPlaylists.OrderBy(vp=>vp.Order))
                 .ThenInclude(vp=>vp.Video)
+                .ThenInclude(v=>v.Creator)
                 .Include(p=>p.Viewer)
                 .Where(p=>p.Id == id)
                 .FirstOrDefaultAsync(cancellationToken);

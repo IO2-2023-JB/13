@@ -225,8 +225,6 @@ const Playlist = () => {
                 });
             }
           });
-          //const results = await Promise.all(requests);
-          //if (results.every(result => result.success)) {
           const requests2 = await videosList.map( (video_id) => {
             if(!editedVideosList.some(vid_id => vid_id === video_id)){
                 axios.delete(PLAYLIST_URL + "/" + playlist_id + "/" + video_id,
@@ -256,8 +254,6 @@ const Playlist = () => {
             }
           });
           Promise.all([...requests, ...requests2]).then(() => {
-          //const results2 =  await Promise.all(requests2);
-          //if (results2.every(result => result.success)) {
       
           axios.get(PLAYLIST_VIDEOS_URL + "?id=" + playlist_id, 
           {
@@ -287,8 +283,6 @@ const Playlist = () => {
             console.log("error: ", error);
           });
         })
-        //}
-        //}
         } catch (err) {
           if (!err?.response) {
               setErrMsg('No Server Response');
@@ -388,7 +382,53 @@ const Playlist = () => {
                         <label htmlFor="name">
                             Select videos you want on your playlist:
                         </label>
-    
+                        {videosData.map(video => (
+                            video.processingProgress ==='Ready' && 
+                            !allUserVideosData.some(v => v.id === video.id) && (
+                              !editedVideosList.includes(video.id)?(
+                                  <div>
+                                  <li style={{listStyleType: "none"}}>
+                                  <div className="box" style={{width:"300px", height:"170px"}}>
+                                    <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                                        <table style={{backgroundColor: "transparent"}}>
+                                            <tr style={{backgroundColor: "transparent"}}>
+                                              <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                                                <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{video.title}</h2>
+                                              </div>
+                                            </tr>
+                                            <tr style={{backgroundColor: "transparent"}}>
+                                              <div className="movie_thumbnail" style={{width:"280px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoAddClick(video.id)} />
+                                            </tr>
+                                        </table>
+                                      </div> 
+                                    </div>
+                                    </li>
+                                  </div>
+                              ):(
+                                  <div>
+                                  <li style={{listStyleType: "none"}}>
+                                  <div className="box" style={{width:"300px", height:"170px", backgroundColor: "rgba(0, 255, 0, 0.3)"}}>
+                                    <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                                        <table style={{backgroundColor: "rgba(0, 255, 0, 0.2)"}}>
+                                            <tr style={{backgroundColor: "transparent"}}>
+                                              <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                                                <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{video.title}</h2>
+                                              </div>
+                                            </tr>
+                                            <tr style={{backgroundColor: "transparent"}}>
+                                              <div className="movie_thumbnail" style={{width:"280px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoRemoveClick(video.id)}>
+                                                    <FontAwesomeIcon icon={faCheckCircle} size="5x" width="40" height="40" class="bi bi-play-circle-fill" style={{ color: 'green', borderRadius: "100%", marginBottom: "40px" }} />
+                                              </div>
+                                            </tr>
+                                        </table>
+                                      </div> 
+                                    </div>
+                                    </li>
+                                  </div>
+                              )
+                            )
+                          )).reverse()
+                        }
                         {allUserVideosData.map(video => (
                           video.processingProgress ==='Ready' && (
                             !editedVideosList.includes(video.id)?(

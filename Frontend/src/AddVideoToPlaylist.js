@@ -5,7 +5,7 @@ import axios from './api/axios';
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const PLAYLIST_VIDEOS_URL = '/playlist/video';
 const USER_PLAYLISTS_URL = '/playlist/user';
@@ -131,7 +131,8 @@ const AddVideoToPlaylist = () => {
         setNewPlaylist(false);
     }
 
-    const handleSubmitNewPlaylist = async () => {
+    const handleSubmitNewPlaylist = async (e) => {
+      e.preventDefault();
         try {
             setSubmiting(true);
             const response = await axios.post(PLAYLIST_DETAILS_URL,
@@ -147,7 +148,8 @@ const AddVideoToPlaylist = () => {
                 withCredentials: true //cred
               }
             );
-            axios.post(PLAYLIST_URL + "/" + response?.data.id + "/" + video_id,
+            console.log(video_id);
+            await axios.post(PLAYLIST_URL + "/" + response?.data.id + "/" + video_id, {},
             {
               headers: { 
                 'Content-Type': 'application/json',

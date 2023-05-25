@@ -29,6 +29,8 @@ import CreatorProfile from './User_Account/CreatorProfile';
 export const cookies = new Cookies();
 
 const LOGIN_URL = '/login';
+const SEARCH_URL = '/search';
+const [inputValue, setInputValue] = useState('');
 
 function App() {
 
@@ -63,6 +65,13 @@ function App() {
   const [sidebar, setSidebar] = useState(false);
 
   const showSidebar = () => setSidebar(!sidebar);
+
+  const showSearchResults = (event) => {
+    if(event.key == 'Enter'){
+      setInputValue(event.target.value);
+      navigate(SEARCH_URL); 
+    }
+  }
 
   const logout = async () => {
     setAuth({});
@@ -122,11 +131,13 @@ function App() {
         </ul>
 
         <div class = "nav-item m-auto">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" class="bi bi-search" viewBox="0 0 16 16" className="buttons">
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-          </svg>
+          {/* <button class="btn btn-dark" style={{width:"50", height:"50"}}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" class="bi bi-search" viewBox="0 0 16 16" className="buttons">
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+          </button> */}
 
-          <input type="text" placeholder="what are you looking for? ..." width="300" className="search-bars"/>
+          <input type="text" placeholder="what are you looking for? ..." onKeyDown={showSearchResults} width="500px" className="search-bars"/>
         </div>
         <button className='btn btn-outline-light navbar-toggle ms-auto my-0 mx-3' onClick={showSidebar}>
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="white" class="bi bi-list" viewBox="0 0 16 16">
@@ -168,6 +179,7 @@ function App() {
         <Route path='/addvideotoplaylist/:videoid?' element={<AddVideoToPlaylist/>} />
         <Route path='/creatorprofile/:creatorid?' element={<CreatorProfile/>} />
         <Route path='/login' element={<Login/>} />
+        <Route path='/search' element={<Search query={inputValue} />} />
         <Route path='/register' element={<Register/>} />
       </Routes>
     </div>

@@ -9,5 +9,6 @@ namespace MyWideIO.API.Data.IRepositories
         public Task RemovePlaylistAsync(PlaylistModel playlist);
         public Task<PlaylistModel?> GetPlaylistAsync(Guid id, CancellationToken cancellationToken = default);
         public Task<ICollection<PlaylistModel>> GetUserPlaylists(Guid userId, CancellationToken cancellationToken = default);
+        public IQueryable<PlaylistModel> GetIQuerablePlaylists();
     }
 }

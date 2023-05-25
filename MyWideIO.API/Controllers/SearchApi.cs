@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyWideIO.API.Models.Dto_Models;
+using MyWideIO.API.Models.Enums;
+using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -14,6 +16,13 @@ namespace MyWideIO.API.Controllers
     [Route("search")]
     public class SearchApiController : ControllerBase
     {
+        private readonly ISearchService _searchService;
+
+        public SearchApiController(ISearchService searchService)
+        {
+            _searchService = searchService;
+        }
+
         /// <summary>
         /// Get search results
         /// </summary>
@@ -29,9 +38,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetSearchResults")]
         [SwaggerResponse(statusCode: 200, type: typeof(SearchResultsDto), description: "OK")]
-        public virtual IActionResult GetSearchResults([FromQuery(Name = "query")][Required()] string query, [FromQuery(Name = "sortingCriterion")][Required()] SortingTypes sortingCriterion, [FromQuery(Name = "sortingType")][Required()] SortingDirections sortingType, [FromQuery(Name = "beginDate")] DateTime? beginDate, [FromQuery(Name = "endDate")] DateTime? endDate)
+        public async Task<IActionResult> GetSearchResults([FromQuery(Name = "query")][Required()] string query, [FromQuery(Name = "sortingCriterion")][Required()] SortingTypesEnum sortingCriterion, [FromQuery(Name = "sortingType")][Required()] SortingDirectionsEnum sortingType, [FromQuery(Name = "beginDate")] DateTime? beginDate, [FromQuery(Name = "endDate")] DateTime? endDate)
         {
-            throw new NotImplementedException();
+            return Ok(await _searchService.GetSearchResultsAsync(query, sortingCriterion, sortingType, beginDate, endDate)); 
         }
     }
 }

@@ -18,26 +18,26 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using WideIO.API.Converters;
 
-namespace MyWideIO.API.Models.Dto_Models
+namespace MyWideIO.API.Models.Enums
 {
     /// <summary>
     /// Gets or Sets SortingDirections
     /// </summary>
-    [TypeConverter(typeof(CustomEnumConverter<SortingDirections>))]
+    [TypeConverter(typeof(CustomEnumConverter<SortingDirectionsEnum>))]
     [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    public enum SortingDirections
+    public enum SortingDirectionsEnum
     {
 
         /// <summary>
         /// Enum AscendingEnum for Ascending
         /// </summary>
         [EnumMember(Value = "Ascending")]
-        AscendingEnum = 1,
+        Ascending = 1,
 
         /// <summary>
         /// Enum DescendingEnum for Descending
         /// </summary>
         [EnumMember(Value = "Descending")]
-        DescendingEnum = 2
+        Descending = 2
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
+using MyWideIO.API.Mappers;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
@@ -175,7 +176,7 @@ namespace MyWideIO.API.Services
                 throw;
             }
             await _transactionService.CommitAsync();
-            return await ConvertUserModelToDto(user);
+            return UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
         }
 
         public async Task<UserDto> GetUserAsync(Guid id)
@@ -183,29 +184,10 @@ namespace MyWideIO.API.Services
             AppUserModel user = await _userManager.FindByIdAsync(id.ToString());
             return user == null
                 ? throw new UserNotFoundException()
-                : await ConvertUserModelToDto(user);
+                : UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
         }
 
-        private async Task<UserDto> ConvertUserModelToDto(AppUserModel user)
-        {
-            var userDto = new UserDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Surname = user.Surname,
-                Email = user.Email,
-                Nickname = user.UserName,
-                UserType = (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()),
-                AvatarImage = Random.Shared.NextDouble() <= 0.2 ? "https://videioblob.blob.core.windows.net/blob1/burger.png" : user?.ProfilePicture?.Url,
-                AccountBalance = user?.AccountBalance
-            };
-            if (userDto.UserType != UserTypeEnum.Creator)
-                return userDto;
-            if (user.Money is null)
-                throw new UserException("Creator doesn't have required properties");
-            userDto.SubscriptionsCount = user.Subscribers.Count;
-            return userDto;
-        }
+       
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
         {

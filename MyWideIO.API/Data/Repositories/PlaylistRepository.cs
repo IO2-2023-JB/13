@@ -50,5 +50,12 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext.Playlists.Remove(playlist);
             await _dbContext.SaveChangesAsync();
         }
+
+        public IQueryable<PlaylistModel> GetIQuerablePlaylists()
+        {
+            return _dbContext.Playlists
+                .Include(p=>p.Viewer)
+                .AsNoTracking();
+        }
     }
 }

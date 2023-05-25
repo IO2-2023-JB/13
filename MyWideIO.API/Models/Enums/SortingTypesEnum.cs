@@ -18,32 +18,32 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using WideIO.API.Converters;
 
-namespace MyWideIO.API.Models.Dto_Models
+namespace MyWideIO.API.Models.Enums
 {
     /// <summary>
     /// Gets or Sets SortingTypes
     /// </summary>
-    [TypeConverter(typeof(CustomEnumConverter<SortingTypes>))]
+    [TypeConverter(typeof(CustomEnumConverter<SortingTypesEnum>))]
     [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    public enum SortingTypes
+    public enum SortingTypesEnum
     {
 
         /// <summary>
         /// Enum PublishDateEnum for PublishDate
         /// </summary>
         [EnumMember(Value = "PublishDate")]
-        PublishDateEnum = 1,
+        PublishDate = 1,
 
         /// <summary>
         /// Enum AlphabeticalEnum for Alphabetical
         /// </summary>
         [EnumMember(Value = "Alphabetical")]
-        AlphabeticalEnum = 2,
+        Alphabetical = 2,
 
         /// <summary>
         /// Enum PopularityEnum for Popularity
         /// </summary>
         [EnumMember(Value = "Popularity")]
-        PopularityEnum = 3
+        Popularity = 3
     }
 }

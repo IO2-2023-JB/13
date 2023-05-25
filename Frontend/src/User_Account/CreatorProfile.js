@@ -152,7 +152,7 @@ const CreatorProfile = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?subId=" + creator_id, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?id=" + creator_id, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -181,7 +181,7 @@ const CreatorProfile = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + creator_id, {
+    axios.delete(SUBSCRIPTIONS_URL + "?id=" + creator_id, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`

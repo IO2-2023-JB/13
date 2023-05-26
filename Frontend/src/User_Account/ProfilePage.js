@@ -9,6 +9,7 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {cookies} from '../App';
+import TextField from "@material-ui/core/TextField";
 
 config.autoAddCss = false;
 
@@ -20,6 +21,7 @@ const ADD_VIDEO_URL = '/addvideo';
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const NAME_REGEX = /^[A-Z][a-z]{2,17}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const DONATE_WITHDRAW_URL = '/donate/withdraw';
 
 
 const ProfilePage = () => {
@@ -34,6 +36,9 @@ const ProfilePage = () => {
 
   const [videosData, setVideosData] = useState([]);
   const [playlistsData, setPlaylistsData] = useState([]);
+
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState(1);
 
   const location = useLocation();
 
@@ -437,6 +442,51 @@ const handelPlaylistClick = (id) => {
   navigate(`/playlist/${id}`);
 }
 
+const handleWithdrawClick = () => {
+  setWithdrawAmount(1);
+  setIsWithdrawing(!isWithdrawing);
+}
+
+const handleWithdrawAmountChange = (event) => {
+  const newAmount = parseInt(event.target.value);
+  if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+    setWithdrawAmount(newAmount);
+  }
+};
+
+const handleWithdrawCancelClick = () => {
+  setWithdrawAmount(1);
+  setIsWithdrawing(false);
+}
+
+const handleWithdrawConfirmClick = () => {
+  axios.post(DONATE_WITHDRAW_URL, {},
+      {
+        params: {
+          amount: withdrawAmount
+        },
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true
+      }
+    ).then(() => {
+      setWithdrawAmount(1);
+      setIsWithdrawing(false);
+    }).catch(err => {
+      if(!err?.response) {
+          setErrMsg('No Server Response')
+      } else if(err.response?.status === 400) {
+          setErrMsg('Bad request');
+      } else if(err.response?.status === 401){
+          setErrMsg('Unauthorised');
+      } else {
+          setErrMsg('Getting metadata failed');
+      }
+    });
+}
+
 return (
   <div style={{marginTop: "200px"}} class="container">
     {!editMode ? (
@@ -468,7 +518,7 @@ return (
             </section>
           </div>
           <div class="col-sm">
-          <h2>Danger zone</h2>
+          <h2>Account management</h2>
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", marginBottom:"100px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <div className="row">
@@ -484,10 +534,37 @@ return (
                   <button class="btn btn-danger mb-4" onClick={handleDeleteClick}>Delete account</button>
                 </div>
               </div>
+              <div className="row">
+                <div className="col">
+                <button onClick={handleWithdrawClick} class="btn btn-success mb-4">Withdraw money</button>
+                </div>
+              </div>
             </div>
+            {isWithdrawing && (
+              <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p style={{ color: 'white' }}>Your current balance: {userData.accountBalance}</p>
+                </div>
+                <TextField
+                  label={<span style={{ color: 'white' }}>Amount</span>}
+                  type="number"
+                  style={{color: "white", width: "160px"}}
+                  value={withdrawAmount}
+                  onChange={(event) => handleWithdrawAmountChange(event)}
+                  InputProps={{
+                    inputProps: {
+                      style: { textAlign: 'right', color: 'white' },
+                    },
+                    style: { color: 'white' },
+                  }}
+                />
+                <button onClick={handleWithdrawConfirmClick} class="btn btn-success" style={{marginLeft: "10px"}}>Withdraw</button>
+                <button onClick={handleWithdrawCancelClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Cancel</button>
+              </div>
+            )}
             </div>
-          {userType==='Creator'?(
             <div class="row" style={{marginTop:"30px"}}>
+            {userType==='Creator' && (
           <div class="col-sm">
             <h2>Your Videos</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
@@ -564,6 +641,7 @@ return (
               </ul>
             </section>
             </div>
+            )}
           <div class="col-sm">
           <h2>Your Playlists</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
@@ -602,12 +680,12 @@ return (
               </ul>
             </section>
           </div>
-          </div>
-          ):(
+          {userType!=='Creator' && (
             <div class="col-sm">
               <button onClick={handleCreatorClick}>Become Creator</button>
             </div>
           )}
+          </div> 
         </div>
       </div>
     ) : (

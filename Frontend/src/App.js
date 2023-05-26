@@ -19,6 +19,7 @@ import * as AiIcons from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import './Sidebar.css';
+import Search from './Search'; 
 import AddVideo from './AddVideo';
 import AddPlaylist from './AddPlaylist';
 import Playlist from './Playlist';
@@ -30,14 +31,14 @@ export const cookies = new Cookies();
 
 const LOGIN_URL = '/login';
 const SEARCH_URL = '/search';
-const [inputValue, setInputValue] = useState('');
 
 function App() {
-
+  
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuth } = useAuth();
   const { auth } = useContext(AuthContext);
+  const [inputValue, setInputValue] = useState('');
 
   const from = location.state?.from?.pathname || "/home";
 

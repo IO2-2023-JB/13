@@ -11,9 +11,6 @@ import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
-import IconButton from "@material-ui/core/IconButton";
-import AddIcon from "@material-ui/icons/Add";
-import RemoveIcon from "@material-ui/icons/Remove";
 
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
@@ -29,7 +26,7 @@ const VideoPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let video_id = params.videoid;
-  const baseURL = 'https://io2test.azurewebsites.net';
+  const baseURL = 'https://io2.azurewebsites.net/api/';
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');

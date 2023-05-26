@@ -39,16 +39,27 @@ const Search = (props) => {
       <h2 class="display-5"> Results: </h2>
       <ul style={{padding:"0px", display:"inline"}}>
           {videosData.map(video => (
-              <li class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
-                      padding:"20px", backgroundColor:"#222222"}} onClick={() => handleVideoClick(video.id)}>
+              <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                      padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>
                   <div class="row">
-                      <div class="col-sm">
-                          {video.title}
-                      </div>
-                      <div class="col-sm">
-                          <h4>Nickname:</h4>
-                          <h1 style={{marginTop:"30px"}}>{video.authorNickname}</h1>
-                      </div>
+                    <div className="box3" style={{width:"300px", height:"170px", cursor: "pointer"}}>
+                      <div className="box4" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                          <table style={{backgroundColor: "transparent"}}>
+                              <tr style={{backgroundColor: "transparent"}}>
+                              <div className="movie_thumbnail" style={{width:"280px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoClick(video.id)}>
+
+                              </div>
+                              </tr>
+                          </table>
+                        </div> 
+                    </div>
+                    <div class="col-sm">
+                        <h1 style={{marginTop:"30px"}}>{video.title}</h1>
+                        <h4 style={{marginTop:"30px"}}>{video.authorNickname}</h4>
+                    </div>
+                    <div class="col-sm">
+                        <h4 style={{marginTop:"30px"}}>Views: {video.viewCount}</h4>
+                    </div>
                   </div>
               </li>
           )).reverse()}

@@ -10,6 +10,7 @@ import { faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
+import TextField from "@material-ui/core/TextField";
 
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
@@ -25,7 +26,7 @@ const VideoPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let video_id = params.videoid;
-  const baseURL = 'https://io2test.azurewebsites.net';
+  const baseURL = 'https://io2.azurewebsites.net/api/';
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
@@ -34,6 +35,8 @@ const VideoPlayer = () => {
 
   const [commentText, setCommentText] = useState('');
   const [responseTexts, setResponseTexts] = useState([]);
+
+  const [isDonating, setIsDonating] = useState(false);
 
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
@@ -163,6 +166,7 @@ const VideoPlayer = () => {
   const [validthumbnail_picture, setValidthumbnail_picture] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [donateAmount, setDonateAmount] = useState(1);
 
   const [reactionsData, setReactionsData] = useState({
     positiveCount: 0,
@@ -375,7 +379,7 @@ const VideoPlayer = () => {
             },
             withCredentials: true
           }
-      ).then(response => {
+      ).then(() => {
         navigate('/profile');
       }).catch(err => {
         if(!err?.response) {
@@ -737,6 +741,29 @@ const VideoPlayer = () => {
     }
   }
 
+  const handleDonateClick = () => {
+    setDonateAmount(1);
+    setIsDonating(!isDonating);
+  }
+
+  const handleDonateAmountChange = (event) => {
+    const newAmount = parseInt(event.target.value);
+    if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+      setDonateAmount(newAmount);
+    }
+  };
+
+  const handleDonateCancelClick = () => {
+    setDonateAmount(1);
+    setIsDonating(false);
+  }
+
+  const handleSendDonateClick = () => {
+    //call do api
+    setDonateAmount(1);
+    setIsDonating(false);
+  }
+
   if(!isLoading){
   return (
     <div>
@@ -779,6 +806,7 @@ const VideoPlayer = () => {
                       ) : (
                         <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Subscribed</button>
                       )}
+                      <button onClick={handleDonateClick} class="btn btn-success" style={{marginLeft: "10px"}}>Donate</button>
                     </div>
                   )}
                 </div>
@@ -786,6 +814,29 @@ const VideoPlayer = () => {
               </div>
             </div>
           </div>
+          {isDonating && (
+          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>Your current balance: {userData.accountBalance}</p>
+              <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
+            </div>
+            <TextField
+              label={<span style={{ color: 'white' }}>Amount</span>}
+              type="number"
+              style={{color: "white", width: "160px"}}
+              value={donateAmount}
+              onChange={(event) => handleDonateAmountChange(event)}
+              InputProps={{
+                inputProps: {
+                  style: { textAlign: 'right', color: 'white' },
+                },
+                style: { color: 'white' },
+              }}
+            />
+            <button onClick={handleSendDonateClick} class="btn btn-success" style={{marginLeft: "10px"}}>Send</button>
+            <button onClick={handleDonateCancelClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Cancel</button>
+          </div>
+          )}
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
             {reactionsData.currentUserReaction === 'Positive'?(
               <button class="btn btn-light" style={{marginRight:"20px"}} onClick={reactNone} ref={reactionsData}>

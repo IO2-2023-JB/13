@@ -45,7 +45,7 @@ const Subscriptions = () => {
                             color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
                     <ul style={{padding:"0px", display:"inline"}}>
                         {subscriptionsData.map(subscription => (
-                            <li class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                            <li class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px", cursor: "pointer",
                                     padding:"20px", backgroundColor:"#222222"}} onClick={() => handleSubscriptionClick(subscription.id)}>
                                 <div class="row">
                                     <div class="col-sm">

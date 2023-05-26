@@ -19,6 +19,7 @@ const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
 const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
 const PROFILE_URL = '/user';
+const DONATE_SEND_URL = '/donate/send';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -37,6 +38,7 @@ const VideoPlayer = () => {
   const [responseTexts, setResponseTexts] = useState([]);
 
   const [isDonating, setIsDonating] = useState(false);
+  const [donateAmount, setDonateAmount] = useState(1);
 
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
@@ -79,28 +81,30 @@ const VideoPlayer = () => {
 
   const handleCommentAdd = (event) => {
     event.preventDefault();
-    axios.post(COMMENT_URL + "?id=" + video_id, commentText,
-      {
-        headers: { 
-          'Content-Type': 'application/json',
-          "Authorization" : `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
-      }
-    ).then(() => {
-      getComments();
-    }).catch(err => {
-      if(!err?.response) {
-          setErrMsg('No Server Response')
-      } else if(err.response?.status === 400) {
-          setErrMsg('Bad request');
-      } else if(err.response?.status === 401){
-          setErrMsg('Unauthorised');
-      } else {
-          setErrMsg('Getting metadata failed');
-      }
-    });
-    setCommentText("");
+    if(commentText.length > 0){
+      axios.post(COMMENT_URL + "?id=" + video_id, commentText,
+        {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true
+        }
+      ).then(() => {
+        getComments();
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+            setErrMsg('Unauthorised');
+        } else {
+            setErrMsg('Getting metadata failed');
+        }
+      });
+      setCommentText("");
+    }
   };
 
   const handleResponseAdd = (event, index) => {
@@ -166,7 +170,6 @@ const VideoPlayer = () => {
   const [validthumbnail_picture, setValidthumbnail_picture] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [donateAmount, setDonateAmount] = useState(1);
 
   const [reactionsData, setReactionsData] = useState({
     positiveCount: 0,
@@ -714,7 +717,6 @@ const VideoPlayer = () => {
     .catch(error => {
       console.log("error: ", error);
     });
-    //refresh?
   }
 
   const handleUnSubscribeClick = () => {
@@ -732,7 +734,6 @@ const VideoPlayer = () => {
     .catch(error => {
       console.log("error: ", error);
     });
-    //refresh?
   }
 
   const goToProfile = (user_id) => {
@@ -759,9 +760,32 @@ const VideoPlayer = () => {
   }
 
   const handleSendDonateClick = () => {
-    //call do api
-    setDonateAmount(1);
-    setIsDonating(false);
+    axios.post(DONATE_SEND_URL, {},
+        {
+          params: {
+            id: videoData.authorId,
+            amount: donateAmount
+          },
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true
+        }
+      ).then(() => {
+        setDonateAmount(1);
+        setIsDonating(false);
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+            setErrMsg('Unauthorised');
+        } else {
+            setErrMsg('Getting metadata failed');
+        }
+      });
   }
 
   if(!isLoading){

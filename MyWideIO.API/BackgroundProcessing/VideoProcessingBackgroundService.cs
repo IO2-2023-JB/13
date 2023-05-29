@@ -12,12 +12,14 @@ namespace MyWideIO.API.BackgroundProcessing
         public IBackgroundTaskQueue<VideoProcessWorkItem> TaskQueue { get; }
         private readonly IServiceProvider _serviceProvider;
         private readonly IVideoStorageService _videoStorageService;
+        private readonly IImageStorageService _imageStorageService;
 
-        public VideoProcessingBackgroundService(IBackgroundTaskQueue<VideoProcessWorkItem> taskQueue, IServiceProvider serviceProvider, IVideoStorageService videoStorageService)
+        public VideoProcessingBackgroundService(IBackgroundTaskQueue<VideoProcessWorkItem> taskQueue, IServiceProvider serviceProvider, IVideoStorageService videoStorageService, IImageStorageService imageStorageService)
         {
             TaskQueue = taskQueue;
             _serviceProvider = serviceProvider;
             _videoStorageService = videoStorageService;
+            _imageStorageService = imageStorageService;
         }
 
 
@@ -59,16 +61,23 @@ namespace MyWideIO.API.BackgroundProcessing
                 if (workItem.Extension == ".mp4")
                 {
                     Console.WriteLine("Extension is mp4, so uploading");
+                    if(video.Thumbnail is null)
+                    {
+                        var thumbnailStream = await GetThumbnail(workItem.VideoFile);
+                        video.Thumbnail = await _imageStorageService.UploadImageAsync(thumbnailStream, video.Id.ToString());
+                        workItem.VideoFile.Position = 0;
+                    }
                     await _videoStorageService.UploadVideoFileAsync(workItem.VideoId, workItem.VideoFile);
                     video.ProcessingProgress = ProcessingProgressEnum.Ready;
                 }
                 else
                 {
                     Console.WriteLine($"Extension is {workItem.Extension}, so converting first");
-                    var convertedStream = await ConvertVideoStreamToMp4(workItem.VideoFile, workItem.Extension[1..], "mp4");
-                    Console.WriteLine("Converting stream created");
-                    await _videoStorageService.UploadVideoFileAsync(workItem.VideoId, convertedStream);
-                    convertedStream.Dispose();
+                    var (convertedVideoStream, thumbnailStream) = await ConvertVideoStreamToMp4(workItem.VideoFile, "mp4");
+                    Console.WriteLine("Converted stream created");
+                    await _videoStorageService.UploadVideoFileAsync(workItem.VideoId, convertedVideoStream);
+                    convertedVideoStream.Dispose();
+                    video.Thumbnail ??= await _imageStorageService.UploadImageAsync(thumbnailStream, video.Id.ToString());
                     workItem.VideoFile.Dispose();
                     Console.WriteLine($"File uploaded https://videioblob.blob.core.windows.net/video/{workItem.VideoId}.mp4");
                     video.ProcessingProgress = ProcessingProgressEnum.Ready;
@@ -76,7 +85,7 @@ namespace MyWideIO.API.BackgroundProcessing
 
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("Error while processing");
                 video.ProcessingProgress = ProcessingProgressEnum.FailedToUpload; // failed to process
@@ -89,8 +98,23 @@ namespace MyWideIO.API.BackgroundProcessing
                 await _videoRepository.UpdateVideoAsync(video);
             }
         }
+        private async Task<Stream> GetThumbnail(Stream video)
+        {
+            var ffmpeg = new FFMpegConverter();
+            var outputThumbnailStream = new MemoryStream();
+            var tempFilePath = Path.GetTempFileName();
+            using (var fileStream = File.Create(tempFilePath)) // nie ladnie
+            {
+                await video.CopyToAsync(fileStream);
 
-        private async Task<Stream> ConvertVideoStreamToMp4(Stream inputStream, string inputFormat, string outputFormat)
+            }
+            ffmpeg.GetVideoThumbnail(tempFilePath, outputThumbnailStream);
+            File.Delete(tempFilePath);
+            outputThumbnailStream.Position = 0;
+            return outputThumbnailStream;
+        }
+
+            private async Task<(Stream video, Stream thumbnail)> ConvertVideoStreamToMp4(Stream inputStream, string outputFormat)
         {
             var tempFilePath = Path.GetTempFileName();
             using (var fileStream = File.Create(tempFilePath))
@@ -98,11 +122,14 @@ namespace MyWideIO.API.BackgroundProcessing
                 await inputStream.CopyToAsync(fileStream);
             }
             var ffmpeg = new FFMpegConverter();
-            var outputStream = new MemoryStream();
-            ffmpeg.ConvertMedia(tempFilePath, inputFormat, outputStream, outputFormat, null);
+            var outputVideoStream = new MemoryStream();
+            var outputThumbnailStream = new MemoryStream();
+            ffmpeg.ConvertMedia(tempFilePath, outputVideoStream, outputFormat);
+            ffmpeg.GetVideoThumbnail(tempFilePath, outputThumbnailStream);
             File.Delete(tempFilePath);
-            outputStream.Position = 0;
-            return outputStream;
+            outputVideoStream.Position = 0;
+            outputThumbnailStream.Position = 0;
+            return (outputVideoStream, outputThumbnailStream);
         }
     }
 }

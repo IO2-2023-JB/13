@@ -5,6 +5,7 @@ using System.Data;
 using System;
 using MyWideIO.API.Models.Dto_Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyWideIO.API.Data.Repositories
 {
@@ -42,20 +43,22 @@ namespace MyWideIO.API.Data.Repositories
                 throw new DataException("no User with specified Id"); // co to za wyjatek
             }
         }
-        // ewentualnie mozna zwracac IQuerable, ale w tym projektcie nigdzie tak nie ma
+        // ewentualnie mozna zwracac IQuerable
         // public async Task<IEnumerable/IList/List/ICollection/Collection> GetSubscruptionsAsync(Guid viewerId)
         public async Task<UserSubscriptionListDto> Subscriptions(Guid id) // GetSubscriptionsAsync
         {
+            // return await _dbContext.Subscriptions.Where(s => s.ViewerId == id).Include(s => s.Creator).ToListAsync(); 
+
             AppUserModel? user = _dbContext.Users.Find(id);
 
             if (user != null)
             {
                 // nie ma logiki w repozytorium
                 List<SubscribtionDto> subscriptions = new List<SubscribtionDto>();
-                foreach (var sub in _dbContext.Subscriptions.Where(s => s.ViewerId == id).ToList())
+                foreach (var sub in _dbContext.Subscriptions.Where(s => s.ViewerId == id).ToList()) // najpierw ToList, a potem enumerowanie?
                 {
                     var creator = _dbContext.Users.Find(sub.CreatorId);
-                    if (creator == null) //konto twórcy zostało usunięte
+                    if (creator == null) // konto twórcy zostało usunięte
                                          // no to przy usuwaniu konta tworcy powinny byc usuwane subskrypcje
                                          // albo przy zmianie typu konta na widza
                     {

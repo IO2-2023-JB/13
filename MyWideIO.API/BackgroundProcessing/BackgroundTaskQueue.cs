@@ -34,6 +34,8 @@ namespace MyWideIO.API.BackgroundProcessing
                 throw new ArgumentNullException(nameof(workItem));
             }
 
+            // await _queue.Writer.WaitToWriteAsync(); // mozna poczekac az sie zwolni miejsce - wtedy user tez musi czekac
+
             await _queue.Writer.WriteAsync(workItem);
         }
 

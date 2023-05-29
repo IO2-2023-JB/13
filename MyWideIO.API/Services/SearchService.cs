@@ -37,7 +37,7 @@ namespace MyWideIO.API.Services
                 allVideos = allVideos.Where(v => v.UploadDate <= endDate.Value);
             }
 
-            var videos = allVideos.Where(v => v.Title.Contains(query));
+            var videos = allVideos.Where(v => v.Title.Contains(query) || v.Tags.Select(t => t.Content).Contains(query));
             //videos = videos.UnionBy(allVideos.Where(v => v.Tags.Select(t => t.Content).Contains(query)),v =>v.Id);
             //videos = videos.UnionBy(allVideos.Where(v => v.Description.Contains(query)), v => v.Id);
             //videos = videos.UnionBy(allVideos.Where(v => v.Creator.Name.Contains(query) || v.Creator.Surname.Contains(query) || v.Creator.Email.Contains(query) || v.Creator.UserName.Contains(query)), v => v.Id);
@@ -49,7 +49,7 @@ namespace MyWideIO.API.Services
                 SortingTypesEnum.Popularity => videos = sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.ViewCount) : videos.OrderByDescending(v => v.ViewCount),
             };
 
-            var videoList = await videos.Take(10).ToListAsync();
+            var videoList = await videos.Take(10).ToListAsync(); // paginacja by sie przydala
 
             var playlists = _playlistRepository.GetIQuerablePlaylists();
 
@@ -59,7 +59,7 @@ namespace MyWideIO.API.Services
                 playlists = sortingType == SortingDirectionsEnum.Ascending ? playlists.OrderBy(p => p.Name) : playlists.OrderByDescending(p => p.Name);
 
 
-            var playlistList = await playlists.Take(10).ToListAsync();
+            var playlistList = await playlists.Take(10).ToListAsync(); // paginacja by sie przydala
 
             var users = _userManager.Users;
 
@@ -68,7 +68,7 @@ namespace MyWideIO.API.Services
             if (sortingCriteria is SortingTypesEnum.Alphabetical)
                 users = sortingType == SortingDirectionsEnum.Ascending ? users.OrderBy(u => u.Name) : users.OrderByDescending(u => u.Name);
 
-            var userList = await users.Take(10).ToListAsync();
+            var userList = await users.Take(10).ToListAsync(); // paginacja by sie przydala
             var userRoles = await userList.ToAsyncEnumerable().SelectAwait(async u=> (await _userManager.GetRolesAsync(u)).First()).ToListAsync();
 
             return new SearchResultsDto

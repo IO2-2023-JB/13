@@ -5,6 +5,7 @@ import axios from '../api/axios';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import TextField from "@material-ui/core/TextField";
 
 config.autoAddCss = false;
 
@@ -12,6 +13,7 @@ const PROFILE_URL = '/user';
 const USER_VIDEOS_URL = '/user/videos';
 const USER_PLAYLISTS_URL = '/playlist/user';
 const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
+const DONATE_SEND_URL = '/donate/send';
 
 const CreatorProfile = () => {
   const { auth } = useContext(AuthContext);
@@ -24,6 +26,10 @@ const CreatorProfile = () => {
   const [videosData, setVideosData] = useState([]);
   const [playlistsData, setPlaylistsData] = useState([]);
   const [subscriptionsData, setSubscriptionsData] = useState([]);
+
+  const [errMsg, setErrMsg] = useState('');
+  const [isDonating, setIsDonating] = useState(false);
+  const [donateAmount, setDonateAmount] = useState(1);
 
   const location = useLocation();
 
@@ -137,12 +143,6 @@ const CreatorProfile = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    if(userData.userType === 'Simple'){
-      navigate('/home');
-    }
-  }, [userData])
-
   const handleVideoClick = (id) => {
     navigate(`/videoplayer/${id}`);
   }
@@ -177,7 +177,6 @@ const CreatorProfile = () => {
     .catch(error => {
       console.log("error: ", error);
     });
-    //refresh?
   }
 
   const handleUnSubscribeClick = () => {
@@ -195,7 +194,52 @@ const CreatorProfile = () => {
     .catch(error => {
       console.log("error: ", error);
     });
-    //refresh?
+  }
+
+  const handleDonateClick = () => {
+    setDonateAmount(1);
+    setIsDonating(!isDonating);
+  }
+
+  const handleDonateAmountChange = (event) => {
+    const newAmount = parseInt(event.target.value);
+    if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+      setDonateAmount(newAmount);
+    }
+  };
+
+  const handleDonateCancelClick = () => {
+    setDonateAmount(1);
+    setIsDonating(false);
+  }
+
+  const handleSendDonateClick = () => {
+    axios.post(DONATE_SEND_URL, {},
+        {
+          params: {
+            id: creator_id,
+            amount: donateAmount
+          },
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true
+        }
+      ).then(() => {
+        setDonateAmount(1);
+        setIsDonating(false);
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+            setErrMsg('Unauthorised');
+        } else {
+            setErrMsg('Getting metadata failed');
+        }
+      });
   }
 
 return (
@@ -216,13 +260,41 @@ return (
               <label>Email:</label>
               <div>{userData.email}</div>
             </section>
-            {!subscriptionsData.some(subscription => subscription.id === creator_id) ? (
-              <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
-                <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginRight:"20px", marginLeft:"-15px"}}>Subscribe</button>
+            {userData.userType !== 'Simple' && (
+              <div style={{display: "flex", alignItems: "center", marginLeft: "20px", marginTop: "-15px"}}>
+                {!subscriptionsData.some(subscription => subscription.id === creator_id) ? (
+                  <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+                    <button onClick={handleSubscribeClick} class="btn btn-dark" style={{marginRight:"20px", marginLeft:"-20px"}}>Subscribe</button>
+                  </div>
+                ):(
+                  <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
+                    <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginRight:"20px", marginLeft:"-20px"}}>Subscribed</button>
+                  </div>
+                )}
+                  <button onClick={handleDonateClick} class="btn btn-success" style={{marginRight:"80px", marginLeft: "-20px", marginBottom: "50px"}}>Donate</button>
               </div>
-            ):(
-              <div class="container-fluid justify-content-center" style={{marginBottom: "50px"}}>
-                <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginRight:"20px", marginLeft:"-15px"}}>Subscribed</button>
+            )}
+            {isDonating && (
+              <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p style={{ color: 'white' }}>Your current balance: {userData.accountBalance}</p>
+                  <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
+                </div>
+                <TextField
+                  label={<span style={{ color: 'white' }}>Amount</span>}
+                  type="number"
+                  style={{color: "white", width: "160px"}}
+                  value={donateAmount}
+                  onChange={(event) => handleDonateAmountChange(event)}
+                  InputProps={{
+                    inputProps: {
+                      style: { textAlign: 'right', color: 'white' },
+                    },
+                    style: { color: 'white' },
+                  }}
+                />
+                <button onClick={handleSendDonateClick} class="btn btn-success" style={{marginLeft: "10px"}}>Send</button>
+                <button onClick={handleDonateCancelClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Cancel</button>
               </div>
             )}
           </div>
@@ -230,7 +302,7 @@ return (
             <h2>Avatar Image</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-              <img key={userData.avatarImage} src = {userData.avatarImage+"?time="+new Date()} alt="No avatar image"/>
+              <img key={userData.avatarImage} src = {userData.avatarImage+"?time=" + new Date()} alt="No avatar image"/>
             </section>
           </div>
           <div class="col-sm">

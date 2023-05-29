@@ -10,6 +10,7 @@ import { faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
+import TextField from "@material-ui/core/TextField";
 
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
@@ -18,6 +19,7 @@ const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
 const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
 const PROFILE_URL = '/user';
+const DONATE_SEND_URL = '/donate/send';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -25,7 +27,7 @@ const VideoPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let video_id = params.videoid;
-  const baseURL = 'https://io2test.azurewebsites.net';
+  const baseURL = 'https://io2.azurewebsites.net/api/';
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
@@ -34,6 +36,9 @@ const VideoPlayer = () => {
 
   const [commentText, setCommentText] = useState('');
   const [responseTexts, setResponseTexts] = useState([]);
+
+  const [isDonating, setIsDonating] = useState(false);
+  const [donateAmount, setDonateAmount] = useState(1);
 
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
@@ -76,28 +81,30 @@ const VideoPlayer = () => {
 
   const handleCommentAdd = (event) => {
     event.preventDefault();
-    axios.post(COMMENT_URL + "?id=" + video_id, commentText,
-      {
-        headers: { 
-          'Content-Type': 'application/json',
-          "Authorization" : `Bearer ${auth?.accessToken}`
-        },
-        withCredentials: true
-      }
-    ).then(() => {
-      getComments();
-    }).catch(err => {
-      if(!err?.response) {
-          setErrMsg('No Server Response')
-      } else if(err.response?.status === 400) {
-          setErrMsg('Bad request');
-      } else if(err.response?.status === 401){
-          setErrMsg('Unauthorised');
-      } else {
-          setErrMsg('Getting metadata failed');
-      }
-    });
-    setCommentText("");
+    if(commentText.length > 0){
+      axios.post(COMMENT_URL + "?id=" + video_id, commentText,
+        {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true
+        }
+      ).then(() => {
+        getComments();
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+            setErrMsg('Unauthorised');
+        } else {
+            setErrMsg('Getting metadata failed');
+        }
+      });
+      setCommentText("");
+    }
   };
 
   const handleResponseAdd = (event, index) => {
@@ -375,7 +382,7 @@ const VideoPlayer = () => {
             },
             withCredentials: true
           }
-      ).then(response => {
+      ).then(() => {
         navigate('/profile');
       }).catch(err => {
         if(!err?.response) {
@@ -710,7 +717,6 @@ const VideoPlayer = () => {
     .catch(error => {
       console.log("error: ", error);
     });
-    //refresh?
   }
 
   const handleUnSubscribeClick = () => {
@@ -728,13 +734,58 @@ const VideoPlayer = () => {
     .catch(error => {
       console.log("error: ", error);
     });
-    //refresh?
   }
 
   const goToProfile = (user_id) => {
     if(user_id){
       navigate(`/creatorprofile/${user_id}`);
     }
+  }
+
+  const handleDonateClick = () => {
+    setDonateAmount(1);
+    setIsDonating(!isDonating);
+  }
+
+  const handleDonateAmountChange = (event) => {
+    const newAmount = parseInt(event.target.value);
+    if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+      setDonateAmount(newAmount);
+    }
+  };
+
+  const handleDonateCancelClick = () => {
+    setDonateAmount(1);
+    setIsDonating(false);
+  }
+
+  const handleSendDonateClick = () => {
+    axios.post(DONATE_SEND_URL, {},
+        {
+          params: {
+            id: videoData.authorId,
+            amount: donateAmount
+          },
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true
+        }
+      ).then(() => {
+        setDonateAmount(1);
+        setIsDonating(false);
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+            setErrMsg('Unauthorised');
+        } else {
+            setErrMsg('Getting metadata failed');
+        }
+      });
   }
 
   if(!isLoading){
@@ -779,6 +830,7 @@ const VideoPlayer = () => {
                       ) : (
                         <button onClick={handleUnSubscribeClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Subscribed</button>
                       )}
+                      <button onClick={handleDonateClick} class="btn btn-success" style={{marginLeft: "10px"}}>Donate</button>
                     </div>
                   )}
                 </div>
@@ -786,6 +838,29 @@ const VideoPlayer = () => {
               </div>
             </div>
           </div>
+          {isDonating && (
+          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>Your current balance: {userData.accountBalance}</p>
+              <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
+            </div>
+            <TextField
+              label={<span style={{ color: 'white' }}>Amount</span>}
+              type="number"
+              style={{color: "white", width: "160px"}}
+              value={donateAmount}
+              onChange={(event) => handleDonateAmountChange(event)}
+              InputProps={{
+                inputProps: {
+                  style: { textAlign: 'right', color: 'white' },
+                },
+                style: { color: 'white' },
+              }}
+            />
+            <button onClick={handleSendDonateClick} class="btn btn-success" style={{marginLeft: "10px"}}>Send</button>
+            <button onClick={handleDonateCancelClick} class="btn btn-danger" style={{marginLeft: "10px"}}>Cancel</button>
+          </div>
+          )}
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
             {reactionsData.currentUserReaction === 'Positive'?(
               <button class="btn btn-light" style={{marginRight:"20px"}} onClick={reactNone} ref={reactionsData}>

@@ -40,6 +40,8 @@ const VideoPlayer = () => {
   const [isDonating, setIsDonating] = useState(false);
   const [donateAmount, setDonateAmount] = useState(1);
 
+  const [showMessage, setShowMessage] = useState(false);
+
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
     firstName: "Loading...",
@@ -788,6 +790,19 @@ const VideoPlayer = () => {
       });
   }
 
+  const hangleShareClick = () => {
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      setShowMessage(true);
+      setTimeout(() => {
+        setShowMessage(false);
+      }, 1500);
+    })
+    .catch((error) => {
+      console.error('Failed to copy link:', error);
+    });
+  }
+
   if(!isLoading){
   return (
     <div>
@@ -862,6 +877,7 @@ const VideoPlayer = () => {
           </div>
           )}
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
+            {showMessage && <div className="message" style={{color:"green", padding:"10px", marginTop:"10px"}}>Link copied to clipboard!</div>}
             {reactionsData.currentUserReaction === 'Positive'?(
               <button class="btn btn-light" style={{marginRight:"20px"}} onClick={reactNone} ref={reactionsData}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-hand-thumbs-up" viewBox="0 0 16 16">
@@ -892,8 +908,7 @@ const VideoPlayer = () => {
               {' ' + reactionsData.negativeCount}
             </button>
             )}
-            
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
+            <button class="btn btn-dark" style={{marginRight:"20px"}} onClick={hangleShareClick}>
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
                 <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
               </svg>

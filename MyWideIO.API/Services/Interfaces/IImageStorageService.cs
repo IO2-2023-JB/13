@@ -11,6 +11,7 @@ namespace MyWideIO.API.Services.Interfaces
         /// <param name="fileName">name for the image file</param>
         /// <returns>uploaded image's url and filename</returns>
         public Task<ImageModel> UploadImageAsync(string base64Image, string fileName);
+        public Task<ImageModel> UploadImageAsync(Stream stream, string fileName);
         /// <summary>
         /// Removes the image file
         /// </summary>

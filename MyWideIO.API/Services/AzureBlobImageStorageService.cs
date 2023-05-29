@@ -4,6 +4,7 @@ using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using SixLabors.ImageSharp.Formats;
+using System;
 
 namespace MyWideIO.API.Services
 {
@@ -92,6 +93,44 @@ namespace MyWideIO.API.Services
                 Url = blobClient.Uri.AbsoluteUri,
                 FileName = fileName
             };
+        }
+
+        public async Task<ImageModel> UploadImageAsync(Stream stream, string fileName)
+        {
+            IImageFormat format;
+
+            try
+            {
+                format = await Image.DetectFormatAsync(stream);
+            }
+            catch (InvalidImageContentException e)
+            {
+                throw new UserException(e.Message);
+            }
+            catch (UnknownImageFormatException e)
+            {
+                throw new UserException(e.Message);
+            }
+            stream.Position = 0;
+            var blobClient = _blobContainerClient.GetBlobClient(fileName);
+            var response = (await blobClient.UploadAsync(stream, true)).GetRawResponse();
+            if (response.IsError)
+            {
+                throw new UserException("Image upload error");
+            }
+
+            response = (await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders
+            {
+                ContentType = format.DefaultMimeType,
+            })).GetRawResponse();
+            if (response.IsError)
+                throw new UserException("Image upload error");
+            return new ImageModel
+            {
+                Url = blobClient.Uri.AbsoluteUri,
+                FileName = fileName
+            };
+
         }
     }
 }

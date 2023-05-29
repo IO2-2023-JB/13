@@ -58,7 +58,8 @@ namespace MyWideIO.API.Services
             };
 
             var rawComments = await _commentRepository.GetVideoComments(videoId);
-            foreach (var cmnt in rawComments)
+            foreach (var cmnt in rawComments) // mozna zrobic oddzielna funkcje - 'mapper', jak sie w kilku miejscach to samo robi
+                                              // tylko wtedy trzeba dodac pole Author w komentarzu i go includowac w repository
             {
                 UserDto user = await _userService.GetUserAsync(cmnt.AuthorId);
                 comments.Comments.Add(new CommentDto()

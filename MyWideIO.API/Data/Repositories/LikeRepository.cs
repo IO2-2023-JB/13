@@ -17,8 +17,7 @@ namespace MyWideIO.API.Data.Repositories
         public async Task AddAsync(ViewerLike like)
         {
             _dbContext.Likes.Add(like);
-            if (await _dbContext.SaveChangesAsync() == 0)
-                throw new CustomException("Adding to database error"); // nie wiem czy to jest potrzebne
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(ViewerLike like)

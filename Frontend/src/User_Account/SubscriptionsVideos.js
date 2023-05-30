@@ -55,7 +55,7 @@ const SubscriptionsVideos = () => {
                 </ul>
             </nav>
             <h2 class="display-5" style={{textAlign: "center"}}> Videos of creators that you subscribe: </h2>
-            <ul style={{padding:"0px", display:"inline"}}>
+            <ul style={{padding:"0px", display:"inline", marginBottom:"200px"}}>
                 {videosData.map(video => (
                     <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
                             padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>

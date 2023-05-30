@@ -55,7 +55,7 @@ const Subscriptions = () => {
                 </ul>
             </nav>
             <h2 class="display-5" style={{textAlign: "center"}}> Your Subscriptions: </h2>
-            <div style={{marginTop:"20px", marginLeft:"200px", marginRight:"200px", color:"white", borderRadius:"15px", 
+            <div style={{marginTop:"20px", marginLeft:"200px", marginRight:"200px", marginBottom:"200px", color:"white", borderRadius:"15px", 
                 paddingBottom:"20px", paddingTop:"20px", backgroundColor:"#333333"}}>
                 <ul style={{padding:"0px", display:"inline"}}>
                     {subscriptionsData.map(subscription => (

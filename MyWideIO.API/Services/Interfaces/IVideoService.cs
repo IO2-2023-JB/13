@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using MyWideIO.API.Models.Dto_Models;
 
 namespace MyWideIO.API.Services.Interfaces
@@ -13,5 +14,6 @@ namespace MyWideIO.API.Services.Interfaces
         public Task<VideoReactionDto> GetVideoReactionAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken = default);
         public Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken = default);
         public Task<VideoListDto> GetUserVideosAsync(Guid creatorId, Guid viewerId, CancellationToken cancellationToken = default);
+        public Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriber);
     }
 }

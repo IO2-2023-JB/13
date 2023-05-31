@@ -3,8 +3,9 @@ using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using NReco.VideoConverter;
-using WideIO.API.Models;
 using MyWideIO.API.Exceptions;
+using MyWideIO.API.Models.Enums;
+
 namespace MyWideIO.API.BackgroundProcessing
 {
     public class VideoProcessingBackgroundService : BackgroundService

@@ -3,6 +3,7 @@ using MyWideIO.API.Services.Interfaces;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using Microsoft.AspNetCore.Identity;
+using MyWideIO.API.Mappers;
 
 namespace MyWideIO.API.Services
 {
@@ -17,7 +18,7 @@ namespace MyWideIO.API.Services
             _userService = userService;
         }
 
-        public async Task AddResoponseToComment(Guid commentId, string content, Guid userId)
+        public async Task AddResponseToComment(Guid commentId, string content, Guid userId)
         {
             await _commentRepository.AddComment(new CommentModel()
             {
@@ -98,6 +99,14 @@ namespace MyWideIO.API.Services
                     });
             }
             return comments;
+        }
+        public async Task<CommentDto> GetCommentById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<CommentDto> GetCommentResponseById(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

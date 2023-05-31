@@ -31,10 +31,14 @@ namespace MyWideIO.API.Middleware
             var statusCode = exception switch
             {
                 OperationCanceledException => StatusCodes.Status400BadRequest,
-                UserNotFoundException or VideoNotFoundException or PlaylistNotFoundException => StatusCodes.Status404NotFound,
+                UserNotFoundException or
+                VideoNotFoundException or
+                PlaylistNotFoundException or
+                TicketNotFoundException => StatusCodes.Status404NotFound,
                 DuplicateEmailException => StatusCodes.Status409Conflict,
                 IncorrectPasswordException => StatusCodes.Status401Unauthorized,
-                VideoIsPrivateException or ForbiddenException => StatusCodes.Status403Forbidden,
+                VideoIsPrivateException or 
+                ForbiddenException => StatusCodes.Status403Forbidden,
                 //UserNotFoundExceptionDelete => HttpStatusCode.BadRequest,
                 CustomException => StatusCodes.Status418ImATeapot,
                 _ => StatusCodes.Status500InternalServerError

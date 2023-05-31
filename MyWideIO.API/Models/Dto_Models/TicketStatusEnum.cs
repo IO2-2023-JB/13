@@ -23,21 +23,21 @@ namespace MyWideIO.API.Models.Dto_Models
     /// <summary>
     /// Gets or Sets TicketStatus
     /// </summary>
-    [TypeConverter(typeof(CustomEnumConverter<TicketStatus>))]
+    [TypeConverter(typeof(CustomEnumConverter<TicketStatusEnum>))]
     [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    public enum TicketStatus
+    public enum TicketStatusEnum
     {
 
         /// <summary>
         /// Enum SubmittedEnum for Submitted
         /// </summary>
         [EnumMember(Value = "Submitted")]
-        SubmittedEnum = 1,
+        Submitted = 1,
 
         /// <summary>
         /// Enum ResolvedEnum for Resolved
         /// </summary>
         [EnumMember(Value = "Resolved")]
-        ResolvedEnum = 2
+        Resolved = 2
     }
 }

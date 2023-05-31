@@ -17,7 +17,7 @@ namespace MyWideIO.API.Mappers
                 Email = user.Email,
                 Nickname = user.UserName,
                 UserType = userType,
-                AvatarImage = Random.Shared.NextDouble() <= 0.2 ? "https://videioblob.blob.core.windows.net/blob1/burger.png" : user?.ProfilePicture?.Url,
+                AvatarImage = Random.Shared.NextDouble() <= 0.002 ? "https://videioblob.blob.core.windows.net/blob1/burger.png" : user?.ProfilePicture?.Url,
                 AccountBalance = user?.AccountBalance
             };
             if (userDto.UserType != UserTypeEnum.Creator)

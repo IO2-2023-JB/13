@@ -9,6 +9,8 @@ using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
 using NReco.VideoConverter;
 using System;
+using System.Threading;
+using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -21,7 +23,10 @@ namespace MyWideIO.API.Services
         private readonly UserManager<AppUserModel> _userManager;
         private readonly ITransactionService _transactionService;
         private readonly IBackgroundTaskQueue<VideoProcessWorkItem> _backgroundTaskQueue;
-        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService, IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue)
+        private readonly ISubscriptionService _subscriptionService;
+
+        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService, 
+            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ISubscriptionService subscriptionService)
         {
             _videoRepository = videoRepository;
             _imageStorageService = imageService;
@@ -30,6 +35,7 @@ namespace MyWideIO.API.Services
             _userManager = userManager;
             _transactionService = transactionService;
             _backgroundTaskQueue = backgroundTaskQueue;
+            _subscriptionService = subscriptionService;
         }
 
         public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
@@ -302,6 +308,22 @@ namespace MyWideIO.API.Services
             {
                 Videos = list.Select(VideoMapper.VideoModelToVideoMetadataDto).ToList(),
             };
+        }
+
+        public async Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriber)
+        {
+            VideoListDto videos = new VideoListDto()
+            { 
+                Videos = new List<VideoMetadataDto>() 
+            };
+            UserSubscriptionListDto subs = await _subscriptionService.Subscriptions(subscriber);
+            foreach(var s in subs.Subscriptions)
+            {
+                IEnumerable<VideoModel> list = 
+                    await _videoRepository.GetUserVideosAsync(s.Id, default);
+                videos.Videos.AddRange(list.Select(VideoMapper.VideoModelToVideoMetadataDto));
+            }
+            return videos;
         }
     }
 }

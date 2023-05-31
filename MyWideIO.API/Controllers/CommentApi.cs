@@ -115,10 +115,21 @@ namespace MyWideIO.API.Controllers
             return Ok(await _commentService.GetCommentResponses(id));
         }
 
+
+        [HttpGet("commentById")]
+        [ValidateModelState]
+        [SwaggerOperation("GetCommentById")]
+        [SwaggerResponse(statusCode: 200, type: typeof(CommentDto), description: "OK")]
         public async Task<IActionResult> GetCommentById([FromQuery(Name = "id")][Required()] Guid id)
         {
             return Ok(await _commentService.GetCommentById(id));
         }
+
+
+        [HttpGet("responseById")]
+        [ValidateModelState]
+        [SwaggerOperation("getCommentResponseById")]
+        [SwaggerResponse(statusCode: 200, type: typeof(CommentDto), description: "OK")]
         public async Task<IActionResult> GetCommentResponseById([FromQuery(Name = "id")][Required()] Guid id)
         {
             return Ok(await _commentService.GetCommentResponseById(id));

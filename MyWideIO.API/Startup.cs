@@ -59,7 +59,7 @@ namespace MyWideIO.API
             services.AddControllers();
 
 
-            services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>(); // singleton powinien byc ok
+            services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IVideoStorageService, AzureBlobVideoStorageService>();
 
@@ -69,6 +69,7 @@ namespace MyWideIO.API
             services.AddScoped<IPlaylistRepository, PlaylistRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+            services.AddScoped<ITicketRepository, TicketRepository>();
 
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
@@ -77,6 +78,7 @@ namespace MyWideIO.API
             services.AddScoped<ISubscriptionService, SubscriptionService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ISearchService, SearchService>();
+            services.AddScoped<ITicketService, TicketService>();
 
             // CORS
             services.AddCors(options =>

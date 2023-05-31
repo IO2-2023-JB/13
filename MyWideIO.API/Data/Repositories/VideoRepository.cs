@@ -6,7 +6,6 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Data.Repositories
 {

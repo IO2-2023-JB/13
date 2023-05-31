@@ -17,43 +17,37 @@ namespace MyWideIO.API.Models.Enums
     /// Gets or Sets ProcessingProgressEnum
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum ProcessingProgressEnum
+    public enum TicketTargetTypeEnum
     {
 
         /// <summary>
         /// Enum MetadataRecordCreated for MetadataRecordCreated
         /// </summary>
-        [EnumMember(Value = "MetadataRecordCreated")]
-        MetadataRecordCreated = 1,
+        [EnumMember(Value = "Video")]
+        Video = 1,
 
         /// <summary>
         /// Enum Uploading for Uploading
         /// </summary>
-        [EnumMember(Value = "Uploading")]
-        Uploading = 2,
+        [EnumMember(Value = "User")]
+        User = 2,
 
         /// <summary>
         /// Enum Uploaded for Uploaded
         /// </summary>
-        [EnumMember(Value = "Uploaded")]
-        Uploaded = 3,
+        [EnumMember(Value = "Playlist")]
+        Playlist = 3,
 
         /// <summary>
         /// Enum FailedToUpload for FailedToUpload
         /// </summary>
-        [EnumMember(Value = "FailedToUpload")]
-        FailedToUpload = 4,
+        [EnumMember(Value = "Comment")]
+        Comment = 4,
 
         /// <summary>
         /// Enum Processing for Processing
         /// </summary>
-        [EnumMember(Value = "Processing")]
-        Processing = 5,
-
-        /// <summary>
-        /// Enum Ready for Ready
-        /// </summary>
-        [EnumMember(Value = "Ready")]
-        Ready = 6
+        [EnumMember(Value = "CommentResponse")]
+        CommentResponse = 5
     }
 }

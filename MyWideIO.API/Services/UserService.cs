@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Update.Internal;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Mappers;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
-using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 
 namespace MyWideIO.API.Services
 {
@@ -31,7 +28,6 @@ namespace MyWideIO.API.Services
         }
         public async Task RegisterUserAsync(RegisterDto registerDto)
         {
-            IdentityResult result;
             await _transactionService.BeginTransactionAsync();
             try
             {
@@ -46,7 +42,7 @@ namespace MyWideIO.API.Services
                 {
                     user.Money = 0f;
                 }
-                result = await _userManager.CreateAsync(user, registerDto.Password);
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded)
                 {
                     throw (_userManager.ErrorDescriber.DuplicateEmail(registerDto.Email).Code == result.Errors.First().Code) ?

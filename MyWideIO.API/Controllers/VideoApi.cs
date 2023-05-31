@@ -60,9 +60,11 @@ namespace MyWideIO.API.Controllers
         [SwaggerOperation("GetSubscribedVideos")]
         [SwaggerResponse(statusCode: 200, type: typeof(VideoListDto), description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
-        public virtual IActionResult GetSubscribedVideos()
+        public virtual async Task<IActionResult> GetSubscribedVideos()
         {
-            throw new NotImplementedException();
+            Guid subscriber = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            VideoListDto subscribedVideos = await _videoService.GetVideosSubscribedByUser(subscriber);
+            return Ok(subscribedVideos);
         }
 
         /// <summary>

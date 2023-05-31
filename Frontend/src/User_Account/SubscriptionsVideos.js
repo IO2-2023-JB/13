@@ -39,7 +39,7 @@ const SubscriptionsVideos = () => {
     }
 
     return(
-        <div style={{marginTop: "200px"}} class="container">
+        <div style={{marginTop: "200px", marginBottom:"200px"}} class="container">
             <nav className='navbar fixed-bottom navbar-expand-sm m-0 bg-dark'>
                 <ul className='navbar-nav mx-2' style={{ justifyContent: "center" }}>
                   <li className='nav-item m-1' style={{ justifyContent: "center" }}>

@@ -33,9 +33,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetTicket")]
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketDto), description: "OK")]
-        public async Task<IActionResult> GetTicket([FromQuery(Name = "id")][Required()] Guid id)
+        public async Task<IActionResult> GetTicket([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
-            return Ok(await _ticketService.GetTicketAsync(id));
+            return Ok(await _ticketService.GetTicketAsync(id, cancellationToken));
         }
 
         /// <summary>
@@ -47,10 +47,10 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetTicketList")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<GetTicketDto>), description: "OK")]
-        public async Task<IActionResult> GetTicketList()
+        public async Task<IActionResult> GetTicketList(CancellationToken cancellationToken)
         {
             Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            return Ok(await _ticketService.GetUserTicketsAsync(userId));
+            return Ok(await _ticketService.GetUserTicketsAsync(userId, cancellationToken));
         }
 
         /// <summary>
@@ -63,9 +63,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetTicketStatus")]
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketStatusDto), description: "OK")]
-        public async Task<IActionResult> GetTicketStatus([FromQuery(Name = "id")][Required()] Guid id)
+        public async Task<IActionResult> GetTicketStatus([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
-            return Ok(await _ticketService.GetTicketStatusAsync(id));
+            return Ok(await _ticketService.GetTicketStatusAsync(id, cancellationToken));
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("RespondToTicket")]
         [SwaggerResponse(statusCode: 200, type: typeof(SubmitTicketResponseDto), description: "OK")]
-        public async Task<IActionResult> RespondToTicket([FromBody] RespondToTicketDto respondToTicketDto, [FromQuery(Name="id")] Guid ticketId)
+        public async Task<IActionResult> RespondToTicket([FromBody] RespondToTicketDto respondToTicketDto, [FromQuery(Name = "id")] Guid ticketId)
         {
             return Ok(await _ticketService.AddResponseToTicketAsync(respondToTicketDto, ticketId));
         }

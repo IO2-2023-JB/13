@@ -210,23 +210,6 @@ namespace MyWideIO.API
                 return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
             });
 
-            //comment this
-            //CreateRoles(services.BuildServiceProvider()).Wait();
-
-        }
-        private async Task CreateRoles(IServiceProvider serviceProvider)
-        {
-            // role init
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
-
-            string[] roleNames = Enum.GetValues(typeof(UserTypeEnum)).Cast<UserTypeEnum>().Select(t => t.ToString()).ToArray();
-
-            foreach (var roleName in roleNames)
-            {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                    await roleManager.CreateAsync(new UserRole(roleName));
-            }
         }
         public void Configure(IApplicationBuilder app, IHostApplicationLifetime lifetime)
         {

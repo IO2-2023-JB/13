@@ -41,6 +41,12 @@ const Search = (props) => {
       navigate(`/playlist/${id}`);
     }
 
+    const goToProfile = (user_id) => {
+      if(user_id){
+        navigate(`/creatorprofile/${user_id}`);
+      }
+    }
+
   // Component logic
   return (
     <div style={{marginTop:"200px"}} class="container">
@@ -80,7 +86,7 @@ const Search = (props) => {
               <ul style={{padding:"0px", display:"inline"}}>
                   {usersData.map(user => (
                       <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
-                              padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} >
+                              padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => goToProfile(user.id)}>
                           <div class="row">
                             <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
                               <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${user.avatarImage})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>

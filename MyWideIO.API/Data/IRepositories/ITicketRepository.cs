@@ -9,6 +9,7 @@ namespace MyWideIO.API.Data.IRepositories
         public Task RemoveTicketAsync(TicketModel ticket);
         public Task<TicketModel?> GetTicketAsync(Guid id, CancellationToken cancellationToken = default);
         public Task<List<TicketModel>> GetUserTicketsAsync(Guid userId, CancellationToken cancellationToken = default);
+        public Task<List<TicketModel>> GetSubbmitedTicketsAsync(CancellationToken cancellationToken  = default);
         
     }
 }

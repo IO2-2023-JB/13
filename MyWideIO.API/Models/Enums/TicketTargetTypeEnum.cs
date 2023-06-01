@@ -20,33 +20,18 @@ namespace MyWideIO.API.Models.Enums
     public enum TicketTargetTypeEnum
     {
 
-        /// <summary>
-        /// Enum MetadataRecordCreated for MetadataRecordCreated
-        /// </summary>
         [EnumMember(Value = "Video")]
         Video = 1,
 
-        /// <summary>
-        /// Enum Uploading for Uploading
-        /// </summary>
         [EnumMember(Value = "User")]
         User = 2,
 
-        /// <summary>
-        /// Enum Uploaded for Uploaded
-        /// </summary>
         [EnumMember(Value = "Playlist")]
         Playlist = 3,
 
-        /// <summary>
-        /// Enum FailedToUpload for FailedToUpload
-        /// </summary>
         [EnumMember(Value = "Comment")]
         Comment = 4,
 
-        /// <summary>
-        /// Enum Processing for Processing
-        /// </summary>
         [EnumMember(Value = "CommentResponse")]
         CommentResponse = 5
     }

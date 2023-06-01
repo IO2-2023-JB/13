@@ -19,14 +19,24 @@ namespace MyWideIO.API.Data.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<List<TicketModel>> GetSubbmitedTicketsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Tickets
+                .Where(t => t.Status == Models.Enums.TicketStatusEnum.Submitted)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<TicketModel?> GetTicketAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Tickets.FindAsync(new object?[] { id },  cancellationToken); // xd
+            return await _dbContext.Tickets
+                .FindAsync(new object?[] { id },  cancellationToken); // xd
         }
 
         public async Task<List<TicketModel>> GetUserTicketsAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return await _dbContext.Tickets.Where(t=>t.SubmitterId == userId).ToListAsync(cancellationToken);
+            return await _dbContext.Tickets
+                .Where(t=>t.SubmitterId == userId)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task RemoveTicketAsync(TicketModel ticket)

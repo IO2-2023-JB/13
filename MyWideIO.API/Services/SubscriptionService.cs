@@ -2,16 +2,13 @@
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
-using System.Data;
-using System;
-using System.Security.Claims;
 using MyWideIO.API.Models.Dto_Models;
 
 namespace MyWideIO.API.Services
 {
     public class SubscriptionService : ISubscriptionService
     {
-        private readonly UserManager<AppUserModel> _userManager;
+        private readonly UserManager<AppUserModel> _userManager; // ?
         private readonly ISubscriptionRepository _subscriptionRepository;
 
         public SubscriptionService(UserManager<AppUserModel> userManager, ISubscriptionRepository subscriptionRepository)

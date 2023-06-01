@@ -3,8 +3,9 @@ using MyWideIO.API.Data.Repositories;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Services.Interfaces;
 using NReco.VideoConverter;
-using WideIO.API.Models;
 using MyWideIO.API.Exceptions;
+using MyWideIO.API.Models.Enums;
+
 namespace MyWideIO.API.BackgroundProcessing
 {
     public class VideoProcessingBackgroundService : BackgroundService
@@ -51,6 +52,7 @@ namespace MyWideIO.API.BackgroundProcessing
             var _videoRepository = scope.ServiceProvider.GetRequiredService<IVideoRepository>();
             VideoModel video = await _videoRepository.GetVideoAsync(workItem.VideoId) ?? throw new VideoNotFoundException();
             Console.WriteLine("Video found");
+
             try
             {
                 if (video.ProcessingProgress != ProcessingProgressEnum.Uploaded)
@@ -61,7 +63,7 @@ namespace MyWideIO.API.BackgroundProcessing
                 if (workItem.Extension == ".mp4")
                 {
                     Console.WriteLine("Extension is mp4, so uploading");
-                    if(video.Thumbnail is null)
+                    if (video.Thumbnail is null)
                     {
                         var thumbnailStream = await GetThumbnail(workItem.VideoFile);
                         video.Thumbnail = await _imageStorageService.UploadImageAsync(thumbnailStream, video.Id.ToString());
@@ -114,7 +116,7 @@ namespace MyWideIO.API.BackgroundProcessing
             return outputThumbnailStream;
         }
 
-            private async Task<(Stream video, Stream thumbnail)> ConvertVideoStreamToMp4(Stream inputStream, string outputFormat)
+        private async Task<(Stream video, Stream thumbnail)> ConvertVideoStreamToMp4(Stream inputStream, string outputFormat)
         {
             var tempFilePath = Path.GetTempFileName();
             using (var fileStream = File.Create(tempFilePath))

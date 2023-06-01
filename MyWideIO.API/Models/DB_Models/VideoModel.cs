@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using WideIO.API.Models;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Models.DB_Models
 {

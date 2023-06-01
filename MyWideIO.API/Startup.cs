@@ -22,7 +22,6 @@ namespace MyWideIO.API
 {
     public class Startup
     {
-        // todo - allow request with size > 5mb
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -59,7 +58,7 @@ namespace MyWideIO.API
             services.AddControllers();
 
 
-            services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>(); // singleton powinien byc ok
+            services.AddSingleton<IImageStorageService, AzureBlobImageStorageService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IVideoStorageService, AzureBlobVideoStorageService>();
 
@@ -69,6 +68,7 @@ namespace MyWideIO.API
             services.AddScoped<IPlaylistRepository, PlaylistRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+            services.AddScoped<ITicketRepository, TicketRepository>();
 
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
@@ -77,6 +77,7 @@ namespace MyWideIO.API
             services.AddScoped<ISubscriptionService, SubscriptionService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ISearchService, SearchService>();
+            services.AddScoped<ITicketService, TicketService>();
 
             // CORS
             services.AddCors(options =>
@@ -84,11 +85,11 @@ namespace MyWideIO.API
                 options.AddPolicy("AllowLocalhost3000",
                     builder =>
                     {
-                        //builder.WithOrigins("http://localhost:3000")
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins("http://localhost:3000")
+                        //builder.AllowAnyOrigin()
                                .AllowAnyHeader()
-                               .AllowAnyMethod();
-                        //       .AllowCredentials();
+                               .AllowAnyMethod()
+                               .AllowCredentials();
                     });
             });
 
@@ -186,13 +187,13 @@ namespace MyWideIO.API
                     }
                 });
                 config.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
-                config.SwaggerDoc("1.0.6", new OpenApiInfo
+                config.SwaggerDoc("1.0.7", new OpenApiInfo
                 {
                     Title = "VideIO API",
                     Description = "VideIO project API specification.",
-                    Version = "1.0.6",
+                    Version = "1.0.7",
                 });
-                config.DocumentFilter<BasePathFilter>("/VideIO/1.0.6");
+                config.DocumentFilter<BasePathFilter>("/VideIO/1.0.7");
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
@@ -209,31 +210,20 @@ namespace MyWideIO.API
                 return new BackgroundTaskQueue<VideoProcessWorkItem>(queueCapacity);
             });
 
-            //comment this
-            CreateRoles(services.BuildServiceProvider()).Wait();
         }
-        private async Task CreateRoles(IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostApplicationLifetime lifetime)
         {
-            // role init
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<UserRole>>();
-
-            string[] roleNames = Enum.GetValues(typeof(UserTypeEnum)).Cast<UserTypeEnum>().Select(t => t.ToString()).ToArray();
-
-            foreach (var roleName in roleNames)
+            lifetime.ApplicationStarted.Register(async () =>
             {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                    await roleManager.CreateAsync(new UserRole(roleName));
-            }
-        }
-        public void Configure(IApplicationBuilder app)
-        {
+                using var serviceScope = app.ApplicationServices.CreateScope();
+                await DataInitializer.SeedData(serviceScope.ServiceProvider, Configuration["AdminImage"]);
+            });
             app.UseCors("AllowLocalhost3000");
 
             {
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/openapi/1.0.6/openapi.json", "VideIO API");
+                    c.SwaggerEndpoint("/openapi/1.0.7/openapi.json", "VideIO API");
                 });
                 app.UseSwagger(c =>
                 {
@@ -261,9 +251,6 @@ namespace MyWideIO.API
                 config.MapControllers();
             });
 
-            // CORS
-
-            app.UseDeveloperExceptionPage(); // do wywalenia
         }
     }
 }

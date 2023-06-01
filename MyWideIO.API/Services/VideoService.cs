@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Identity.Client;
 using MyWideIO.API.BackgroundProcessing;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
@@ -10,7 +8,6 @@ using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
 using NReco.VideoConverter;
-using WideIO.API.Models;
 
 namespace MyWideIO.API.Services
 {
@@ -23,7 +20,10 @@ namespace MyWideIO.API.Services
         private readonly UserManager<AppUserModel> _userManager;
         private readonly ITransactionService _transactionService;
         private readonly IBackgroundTaskQueue<VideoProcessWorkItem> _backgroundTaskQueue;
-        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService, IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue)
+        private readonly ISubscriptionService _subscriptionService;
+
+        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService, 
+            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ISubscriptionService subscriptionService)
         {
             _videoRepository = videoRepository;
             _imageStorageService = imageService;
@@ -32,16 +32,17 @@ namespace MyWideIO.API.Services
             _userManager = userManager;
             _transactionService = transactionService;
             _backgroundTaskQueue = backgroundTaskQueue;
+            _subscriptionService = subscriptionService;
         }
 
         public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
 
             if (video.ProcessingProgress != ProcessingProgressEnum.Ready)
-                throw new VideoException("Video not avaible");
+                throw new VideoException("Video not available");
 
 
             video.ViewCount++;
@@ -97,17 +98,47 @@ namespace MyWideIO.API.Services
             }
             else if (video.Thumbnail is not null)
             {
-                await _imageStorageService.RemoveImageAsync(video.Thumbnail.FileName);
-                video.Thumbnail = null;
+                if (video.ProcessingProgress is ProcessingProgressEnum.Ready)
+                {
+                    Stream thumbnail = await GetThumbnailFromUploadedVideo(video.Id);
+                    video.Thumbnail = await _imageStorageService.UploadImageAsync(thumbnail, video.Id.ToString());
+                }
+                else
+                {
+                    await _imageStorageService.RemoveImageAsync(video.Thumbnail.FileName);
+                    video.Thumbnail = null;
+                }
             }
             await _videoRepository.UpdateVideoAsync(video);
         }
+        private async Task<Stream> GetThumbnailFromUploadedVideo(Guid videoId)
+        {
+            Stream video = await _videoStorageService.GetVideoFileAsync(videoId);
+            var ffmpeg = new FFMpegConverter();
+            var outputThumbnailStream = new MemoryStream();
 
+            const int byteLimit = 5 * 1024 * 1024; // 5MB
+
+            byte[] buffer = new byte[byteLimit];
+
+            int bytesRead = await video.ReadAsync(buffer.AsMemory(0, byteLimit));
+
+            if (bytesRead == 0)
+                throw new VideoException("The video is empty or could not be read.");
+
+            string tempFilePath = Path.GetTempFileName();
+            await File.WriteAllBytesAsync(tempFilePath, buffer);
+
+            ffmpeg.GetVideoThumbnail(tempFilePath, outputThumbnailStream);
+            File.Delete(tempFilePath);
+            outputThumbnailStream.Position = 0;
+            return outputThumbnailStream;
+        }
 
 
         public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
-            var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
 
@@ -116,7 +147,7 @@ namespace MyWideIO.API.Services
 
         public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile, string extension, CancellationToken cancellationToken)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (video.CreatorId != creatorId)
                 throw new ForbiddenException();
             try
@@ -124,8 +155,8 @@ namespace MyWideIO.API.Services
                 video.ProcessingProgress = video.ProcessingProgress switch
                 {
                     // ProcessingProgressEnum.Ready or
-                    ProcessingProgressEnum.FailedToUpload or
-                    ProcessingProgressEnum.MetadataRecordCreated => ProcessingProgressEnum.Uploading,
+                    ProcessingProgressEnum.FailedToUpload or 
+                        ProcessingProgressEnum.MetadataRecordCreated => ProcessingProgressEnum.Uploading,
                     ProcessingProgressEnum.Uploading => throw new VideoException("Already Uploading"),
                     ProcessingProgressEnum.Uploaded => throw new VideoException("Video is waiting to be processed"),
                     ProcessingProgressEnum.Processing => throw new VideoException("Video is being processed"),
@@ -208,7 +239,7 @@ namespace MyWideIO.API.Services
             if (like is null)
             {
                 like = new ViewerLike
-                { 
+                {
                     Viewer = user,
                     Video = video,
                     VideoId = videoId,
@@ -274,6 +305,22 @@ namespace MyWideIO.API.Services
             {
                 Videos = list.Select(VideoMapper.VideoModelToVideoMetadataDto).ToList(),
             };
+        }
+
+        public async Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriber)
+        {
+            VideoListDto videos = new VideoListDto()
+            { 
+                Videos = new List<VideoMetadataDto>() 
+            };
+            UserSubscriptionListDto subs = await _subscriptionService.Subscriptions(subscriber);
+            foreach(var s in subs.Subscriptions)
+            {
+                IEnumerable<VideoModel> list = 
+                    await _videoRepository.GetUserVideosAsync(s.Id, default);
+                videos.Videos.AddRange(list.Select(VideoMapper.VideoModelToVideoMetadataDto));
+            }
+            return videos;
         }
     }
 }

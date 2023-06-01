@@ -15,16 +15,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using WideIO.API.Converters;
+using System.Text.Json.Serialization;
 
 namespace MyWideIO.API.Models.Enums
 {
     /// <summary>
     /// Gets or Sets SortingTypes
     /// </summary>
-    [TypeConverter(typeof(CustomEnumConverter<SortingTypesEnum>))]
-    [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum SortingTypesEnum
     {
 

@@ -77,7 +77,14 @@ namespace MyWideIO.API.Services
         }
         public async Task<List<GetTicketDto>> GetUserTicketsAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var tickets = await _ticketRepository.GetUserTicketsAsync(userId, cancellationToken);
+            List<TicketModel> tickets;
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+
+            if (role == UserTypeEnum.Administrator.ToString())
+                tickets = await _ticketRepository.GetSubbmitedTicketsAsync(cancellationToken);
+            else
+                tickets = await _ticketRepository.GetUserTicketsAsync(userId, cancellationToken);
             return tickets.Select(TicketMapper.MapTicketModelToGetTicketDto).ToList();
         }
         public async Task<SubmitTicketResponseDto> AddResponseToTicketAsync(RespondToTicketDto respondToTicketDto, Guid ticketId)

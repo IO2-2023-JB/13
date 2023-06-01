@@ -1,6 +1,6 @@
 import './App.css';
 import {Home} from './Home';
-import {Administrator} from './Administrator'
+import Administrator from './Administrator'
 import { Route, Routes, NavLink } from 'react-router-dom';
 import Register from './User_Account/Register'
 import Login from './User_Account/Login'
@@ -27,6 +27,7 @@ import AddVideoToPlaylist from './AddVideoToPlaylist';
 import Subscriptions from './User_Account/Subscriptions';
 import CreatorProfile from './User_Account/CreatorProfile';
 import SubscriptionsVideos from './User_Account/SubscriptionsVideos';
+import Reports from './User_Account/Reports';
 
 export const cookies = new Cookies();
 
@@ -111,11 +112,18 @@ function App() {
           </li>
 
           {isLoggedIn()?
+            <>
             <li className='nav-item m-0 mr-auto'>
                <button className="btn btn-outline-light m-1" onClick={logout} style={{ verticalAlign: 'middle' }}>
                 Logout
               </button> 
             </li>
+            <li className='nav-item m-1'>
+              <NavLink className="btn btn-outline-light" to='/reports'>
+                Reports
+              </NavLink>
+            </li>
+            </>
             :
             <li className='nav-item m-1'>
               <NavLink className="btn btn-outline-light" to='/login'>
@@ -176,6 +184,7 @@ function App() {
           <Route path="/addplaylist" element={<AddPlaylist />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/subscriptionsvideos" element={<SubscriptionsVideos />} />
+          <Route path='/reports' element={<Reports />} />
         </Route>
         <Route path='/videoplayer/:videoid?' element={<VideoPlayer/>} />
         <Route path='/playlist/:playlistid?' element={<Playlist/>} />

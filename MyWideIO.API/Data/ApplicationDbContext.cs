@@ -13,6 +13,7 @@ namespace MyWideIO.API.Data
         public DbSet<CommentModel> Comments { get; set; }
         public DbSet<ViewerLike> Likes { get; set; }
         public DbSet<ViewerSubscription> Subscriptions { get; set; }
+        public DbSet<TicketModel> Tickets { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

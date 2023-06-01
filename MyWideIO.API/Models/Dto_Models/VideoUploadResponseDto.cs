@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Runtime.Serialization;
 using System.Text;
-using WideIO.API.Models;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Models.Dto_Models
 {

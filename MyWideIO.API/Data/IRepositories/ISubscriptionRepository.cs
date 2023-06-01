@@ -1,4 +1,5 @@
-﻿using MyWideIO.API.Models.Dto_Models;
+﻿using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Dto_Models;
 
 namespace MyWideIO.API.Data.IRepositories
 {

@@ -15,29 +15,28 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using WideIO.API.Converters;
+using System.Text.Json.Serialization;
 
-namespace MyWideIO.API.Models.Dto_Models
+namespace MyWideIO.API.Models.Enums
 {
     /// <summary>
     /// Gets or Sets TicketStatus
     /// </summary>
-    [TypeConverter(typeof(CustomEnumConverter<TicketStatus>))]
-    [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    public enum TicketStatus
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum TicketStatusEnum
     {
 
         /// <summary>
         /// Enum SubmittedEnum for Submitted
         /// </summary>
         [EnumMember(Value = "Submitted")]
-        SubmittedEnum = 1,
+        Submitted = 1,
 
         /// <summary>
         /// Enum ResolvedEnum for Resolved
         /// </summary>
         [EnumMember(Value = "Resolved")]
-        ResolvedEnum = 2
+        Resolved = 2
     }
 }

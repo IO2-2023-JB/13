@@ -3,6 +3,9 @@ using MyWideIO.API.Models.Dto_Models;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using MyWideIO.API.Services.Interfaces;
 using WideIO.API.Attributes;
 
 namespace MyWideIO.API.Controllers
@@ -12,8 +15,14 @@ namespace MyWideIO.API.Controllers
     /// </summary>
     [ApiController]
     [Route("ticket")]
+    [Authorize]
     public class TicketApiController : ControllerBase
     {
+        private readonly ITicketService _ticketService;
+        public TicketApiController(ITicketService ticketService)
+        {
+            _ticketService = ticketService;
+        }
         /// <summary>
         /// Get ticket details
         /// </summary>
@@ -24,9 +33,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetTicket")]
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketDto), description: "OK")]
-        public virtual IActionResult GetTicket([FromQuery(Name = "id")][Required()] Guid id)
+        public async Task<IActionResult> GetTicket([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Ok(await _ticketService.GetTicketAsync(id, cancellationToken));
         }
 
         /// <summary>
@@ -38,9 +47,10 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetTicketList")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<GetTicketDto>), description: "OK")]
-        public virtual IActionResult GetTicketList()
+        public async Task<IActionResult> GetTicketList(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(await _ticketService.GetUserTicketsAsync(userId, cancellationToken));
         }
 
         /// <summary>
@@ -53,9 +63,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetTicketStatus")]
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketStatusDto), description: "OK")]
-        public virtual IActionResult GetTicketStatus([FromQuery(Name = "id")][Required()] Guid id)
+        public async Task<IActionResult> GetTicketStatus([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Ok(await _ticketService.GetTicketStatusAsync(id, cancellationToken));
         }
 
         /// <summary>
@@ -70,9 +80,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("RespondToTicket")]
         [SwaggerResponse(statusCode: 200, type: typeof(SubmitTicketResponseDto), description: "OK")]
-        public virtual IActionResult RespondToTicket([FromBody] RespondToTicketDto respondToTicketDto)
+        public async Task<IActionResult> RespondToTicket([FromBody] RespondToTicketDto respondToTicketDto, [FromQuery(Name = "id")] Guid ticketId)
         {
-            throw new NotImplementedException();
+            return Ok(await _ticketService.AddResponseToTicketAsync(respondToTicketDto, ticketId));
         }
 
         /// <summary>
@@ -86,9 +96,10 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("SubmitTicket")]
         [SwaggerResponse(statusCode: 200, type: typeof(SubmitTicketResponseDto), description: "OK")]
-        public virtual IActionResult SubmitTicket([FromBody] SubmitTicketDto submitTicketDto)
+        public async Task<IActionResult> SubmitTicket([FromBody] SubmitTicketDto submitTicketDto)
         {
-            throw new NotImplementedException();
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(await _ticketService.CreateTicketAsync(submitTicketDto, userId));
         }
     }
 }

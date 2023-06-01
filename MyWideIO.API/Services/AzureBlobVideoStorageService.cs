@@ -24,6 +24,7 @@ namespace MyWideIO.API.Services
         {
             var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
 
+
             return await blobClient.OpenReadAsync(cancellationToken: cancellationToken);
         }
         public async Task RemoveVideoFileAsync(Guid id)

@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using WideIO.API.Converters;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Models.Dto_Models
 {
@@ -30,7 +31,7 @@ namespace MyWideIO.API.Models.Dto_Models
         /// Gets or Sets Status
         /// </summary>
         [DataMember(Name = "status", EmitDefaultValue = true)]
-        public TicketStatus Status { get; set; }
+        public TicketStatusEnum Status { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

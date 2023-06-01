@@ -26,6 +26,7 @@ import Playlist from './Playlist';
 import AddVideoToPlaylist from './AddVideoToPlaylist';
 import Subscriptions from './User_Account/Subscriptions';
 import CreatorProfile from './User_Account/CreatorProfile';
+import SubscriptionsVideos from './User_Account/SubscriptionsVideos';
 
 export const cookies = new Cookies();
 
@@ -174,6 +175,7 @@ function App() {
           <Route path="/administrator" element={<Administrator />}/>
           <Route path="/addplaylist" element={<AddPlaylist />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
+          <Route path="/subscriptionsvideos" element={<SubscriptionsVideos />} />
         </Route>
         <Route path='/videoplayer/:videoid?' element={<VideoPlayer/>} />
         <Route path='/playlist/:playlistid?' element={<Playlist/>} />

@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using MyWideIO.API.Models.Enums;
 using Newtonsoft.Json;
 using WideIO.API.Converters;
 
@@ -31,7 +32,9 @@ namespace MyWideIO.API.Models.Dto_Models
         /// </summary>
         /// <example>&quot;123e4567-e89b-12d3-a456-426614174000&quot;</example>
         [DataMember(Name = "targetId", EmitDefaultValue = true)]
-        public Guid? TargetId { get; set; }
+        public Guid TargetId { get; set; }
+        
+        public TicketTargetTypeEnum TargetType { get; set; }
 
         /// <summary>
         /// Gets or Sets Reason
@@ -49,6 +52,7 @@ namespace MyWideIO.API.Models.Dto_Models
             var sb = new StringBuilder();
             sb.Append("class SubmitTicketDto {\n");
             sb.Append("  TargetId: ").Append(TargetId).Append("\n");
+            sb.Append("  TargetType: ").Append(TargetType).Append("\n");
             sb.Append("  Reason: ").Append(Reason).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -92,6 +96,11 @@ namespace MyWideIO.API.Models.Dto_Models
                     TargetId.Equals(other.TargetId)
                 ) &&
                 (
+                    TargetType == other.TargetType ||
+                    TargetType != null &&
+                    TargetType.Equals(other.TargetType)
+                ) &&
+                (
                     Reason == other.Reason ||
                     Reason != null &&
                     Reason.Equals(other.Reason)
@@ -110,6 +119,8 @@ namespace MyWideIO.API.Models.Dto_Models
                 // Suitable nullity checks etc, of course :)
                 if (TargetId != null)
                     hashCode = hashCode * 59 + TargetId.GetHashCode();
+                if (TargetType != null)
+                    hashCode = hashCode * 59 + TargetType.GetHashCode();
                 if (Reason != null)
                     hashCode = hashCode * 59 + Reason.GetHashCode();
                 return hashCode;

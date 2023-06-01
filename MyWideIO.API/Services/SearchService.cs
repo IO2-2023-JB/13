@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MyWideIO.API.Data;
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Mappers;
 using MyWideIO.API.Models.DB_Models;
@@ -44,9 +43,9 @@ namespace MyWideIO.API.Services
 
             videos = sortingCriteria switch
             {
-                SortingTypesEnum.PublishDate => videos = sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.UploadDate) : videos.OrderByDescending(v => v.UploadDate),
-                SortingTypesEnum.Alphabetical => videos = sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.Title) : videos.OrderByDescending(v => v.Title),
-                SortingTypesEnum.Popularity => videos = sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.ViewCount) : videos.OrderByDescending(v => v.ViewCount),
+                SortingTypesEnum.PublishDate => sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.UploadDate) : videos.OrderByDescending(v => v.UploadDate),
+                SortingTypesEnum.Alphabetical => sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.Title) : videos.OrderByDescending(v => v.Title),
+                SortingTypesEnum.Popularity => sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.ViewCount) : videos.OrderByDescending(v => v.ViewCount),
             };
 
             var videoList = await videos.Take(10).ToListAsync(); // paginacja by sie przydala

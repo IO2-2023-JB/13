@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Models.DB_Models

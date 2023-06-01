@@ -34,6 +34,7 @@ namespace MyWideIO.API.Middleware
                 UserNotFoundException or
                 VideoNotFoundException or
                 PlaylistNotFoundException or
+                CommentNotFoundException or
                 TicketNotFoundException => StatusCodes.Status404NotFound,
                 DuplicateEmailException => StatusCodes.Status409Conflict,
                 IncorrectPasswordException => StatusCodes.Status401Unauthorized,

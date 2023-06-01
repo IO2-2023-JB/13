@@ -24,7 +24,7 @@ namespace MyWideIO.API.Mappers
                 return userDto;
             if (user.Money is null)
                 throw new UserException("Creator doesn't have required properties");
-            userDto.SubscriptionsCount = user.Subscribers.Count;
+            userDto.SubscriptionsCount = user.SubscribersAmount;
             return userDto;
         }
     }

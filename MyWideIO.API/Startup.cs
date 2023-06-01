@@ -22,7 +22,6 @@ namespace MyWideIO.API
 {
     public class Startup
     {
-        // todo - allow request with size > 5mb
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -188,13 +187,13 @@ namespace MyWideIO.API
                     }
                 });
                 config.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
-                config.SwaggerDoc("1.0.6", new OpenApiInfo
+                config.SwaggerDoc("1.0.7", new OpenApiInfo
                 {
                     Title = "VideIO API",
                     Description = "VideIO project API specification.",
-                    Version = "1.0.6",
+                    Version = "1.0.7",
                 });
-                config.DocumentFilter<BasePathFilter>("/VideIO/1.0.6");
+                config.DocumentFilter<BasePathFilter>("/VideIO/1.0.7");
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
@@ -212,7 +211,8 @@ namespace MyWideIO.API
             });
 
             //comment this
-            CreateRoles(services.BuildServiceProvider()).Wait();
+            //CreateRoles(services.BuildServiceProvider()).Wait();
+
         }
         private async Task CreateRoles(IServiceProvider serviceProvider)
         {
@@ -228,14 +228,19 @@ namespace MyWideIO.API
                     await roleManager.CreateAsync(new UserRole(roleName));
             }
         }
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IHostApplicationLifetime lifetime)
         {
+            lifetime.ApplicationStarted.Register(async () =>
+            {
+                using var serviceScope = app.ApplicationServices.CreateScope();
+                await DataInitializer.SeedData(serviceScope.ServiceProvider, Configuration["AdminImage"]);
+            });
             app.UseCors("AllowLocalhost3000");
 
             {
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/openapi/1.0.6/openapi.json", "VideIO API");
+                    c.SwaggerEndpoint("/openapi/1.0.7/openapi.json", "VideIO API");
                 });
                 app.UseSwagger(c =>
                 {
@@ -263,9 +268,6 @@ namespace MyWideIO.API
                 config.MapControllers();
             });
 
-            // CORS
-
-            app.UseDeveloperExceptionPage(); // do wywalenia
         }
     }
 }

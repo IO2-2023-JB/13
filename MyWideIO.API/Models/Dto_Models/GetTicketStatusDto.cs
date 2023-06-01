@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using WideIO.API.Converters;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Models.Dto_Models
 {

@@ -313,7 +313,7 @@ namespace MyWideIO.API.Services
             { 
                 Videos = new List<VideoMetadataDto>() 
             };
-            UserSubscriptionListDto subs = await _subscriptionService.Subscriptions(subscriber);
+            UserSubscriptionListDto subs = await _subscriptionService.GetSubscriptionsAsync(subscriber);
             foreach(var s in subs.Subscriptions)
             {
                 IEnumerable<VideoModel> list = 

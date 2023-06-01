@@ -70,6 +70,7 @@ namespace MyWideIO.API
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             services.AddScoped<ITicketRepository, TicketRepository>();
+            services.AddScoped<IDonateRepository, DonateRepository>();
 
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IUserService, UserService>();
@@ -79,6 +80,7 @@ namespace MyWideIO.API
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<ITicketService, TicketService>();
+            services.AddScoped<IDonateService, DonateService>();
 
             // CORS
             services.AddCors(options =>

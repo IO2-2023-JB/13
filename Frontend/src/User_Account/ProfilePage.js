@@ -675,7 +675,7 @@ return (
                 playlistsData.map(playlist => (
                   <div>
                   <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`}}>
+                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: '#FF4500'}}>
                     <div className="box2" style={{width:"280px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
                         <table style={{backgroundColor: "transparent"}}>
                             <tr style={{backgroundColor: "transparent"}}>

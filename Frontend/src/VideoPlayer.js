@@ -20,6 +20,7 @@ const RESPONSE_URL = '/comment/response'
 const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
 const PROFILE_URL = '/user';
 const DONATE_SEND_URL = '/donate/send';
+const REPORT_URL = '/ticket';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
@@ -41,6 +42,11 @@ const VideoPlayer = () => {
   const [donateAmount, setDonateAmount] = useState(1);
 
   const [showMessage, setShowMessage] = useState(false);
+
+  const [showModal, setShowModal] = useState(false);
+  const [reason, setReason] = useState('');
+  const [idToReport, setIdToReport] = useState('');
+  const [ticketTargetType, setTicketTargetType] = useState('');
 
   const [data, setData] = useState(null);
   const [userData, setUserData] = useState({
@@ -803,6 +809,70 @@ const VideoPlayer = () => {
     });
   }
 
+  const reportResponse = (id) => {
+    setTicketTargetType("CommentResponse");
+    setIdToReport(id);
+    setShowModal(true);
+  }
+
+  const reportVideo = (id) => {
+    setTicketTargetType("Video");
+    setIdToReport(id);
+    setShowModal(true);
+  }
+
+  const reportComment = (id) => {
+    setTicketTargetType("Comment");
+    setIdToReport(id);
+    setShowModal(true);
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setReason('');
+    setIdToReport('');
+    setTicketTargetType('');
+  };
+
+  const handleReasonChange = (event) => {
+    setReason(event.target.value);
+  };
+
+  const handleReportSubmit = () => {
+    axios.post(REPORT_URL, 
+      {
+        "targetId": idToReport,
+        "targetType": ticketTargetType,
+        "reason": reason
+      },
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true //cred
+      }
+      ).catch(err => {
+        if (!err?.response) {
+          setErrMsg('No Server Response');
+        } else if (err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if (err.response?.status === 401) {
+          setErrMsg('Unauthorized');
+        }else if (err.response?.status === 403) {
+          setErrMsg('Forbidden');
+        }else if (err.response?.status === 404) {
+          setErrMsg('Not found');
+        }else {
+          setErrMsg('Reporting failed');
+        }
+      });
+    setShowModal(false);
+    setReason('');
+    setIdToReport('');
+    setTicketTargetType('');
+  };
+
   if(!isLoading){
   return (
     <div>
@@ -811,10 +881,6 @@ const VideoPlayer = () => {
       justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
       {videoData.processingProgress === 'Ready' && (
         <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
-
-        {/* <video id="videoPlayer" width="830" controls autoplay loop muted playsinline ref={videoRef}>
-          <source src={videoUrl} type="video/mp4" />
-        </video> */}
           <ReactPlayer
             id="videoPlayer"
             ref={videoRef}
@@ -919,11 +985,13 @@ const VideoPlayer = () => {
                 <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
               </svg>
             </button>
-            <button class="btn btn-dark" style={{marginRight:"20px", position: "absolute", right: "10px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+            {(videoData.authorId !== auth.id) && (
+            <button class="btn btn-danger" style={{marginRight:"20px", position: "absolute", right: "10px"}} onClick={() => reportVideo(videoData.id)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-flag" viewBox="0 0 16 16">
+                <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001M14 1.221c-.22.078-.48.167-.766.255-.81.252-1.872.523-2.734.523-.886 0-1.592-.286-2.203-.534l-.008-.003C7.662 1.21 7.139 1 6.5 1c-.669 0-1.606.229-2.415.478A21.294 21.294 0 0 0 3 1.845v6.433c.22-.078.48-.167.766-.255C4.576 7.77 5.638 7.5 6.5 7.5c.847 0 1.548.28 2.158.525l.028.01C9.32 8.29 9.86 8.5 10.5 8.5c.668 0 1.606-.229 2.415-.478A21.317 21.317 0 0 0 14 7.655V1.222z"/>
               </svg>
             </button>
+            )}
           </div>
           <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>
@@ -973,15 +1041,20 @@ const VideoPlayer = () => {
                     </div>
                   </div>
                 </div>
-              {(comment.authorId === auth.id) && (
-                <button class="btn btn-danger ms-auto" style={{marginRight:"20px"}} onClick={() => handleCommentDeleteClick(comment.id)}>
+              {(comment.authorId === auth.id) ? (
+                <button class="btn btn-dark ms-auto" style={{marginRight:"20px"}} onClick={() => handleCommentDeleteClick(comment.id)}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                     <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
                   </svg>
                 </button>
+              ):(
+                <button class="btn btn-danger ms-auto" style={{marginRight:"20px"}} onClick={() => reportComment(comment.id)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-flag" viewBox="0 0 16 16">
+                    <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001M14 1.221c-.22.078-.48.167-.766.255-.81.252-1.872.523-2.734.523-.886 0-1.592-.286-2.203-.534l-.008-.003C7.662 1.21 7.139 1 6.5 1c-.669 0-1.606.229-2.415.478A21.294 21.294 0 0 0 3 1.845v6.433c.22-.078.48-.167.766-.255C4.576 7.77 5.638 7.5 6.5 7.5c.847 0 1.548.28 2.158.525l.028.01C9.32 8.29 9.86 8.5 10.5 8.5c.668 0 1.606-.229 2.415-.478A21.317 21.317 0 0 0 14 7.655V1.222z"/>
+                  </svg>
+                </button>
               )}
               </div>
-
               <form onSubmit={(event) => handleResponseAdd(event, index)} style={{marginLeft:"20px", marginRight:"20px", marginBottom:"15px", display: 'flex', flexDirection: 'row', 
                             alignItems: 'center', marginTop:"20px", color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", 
                             backgroundColor:"#111111"}}>
@@ -1008,10 +1081,16 @@ const VideoPlayer = () => {
                             </div>
                           </div>
                         </div>
-                        {(response.authorId === auth.id) && (
+                        {(response.authorId === auth.id) ? (
                           <button class="btn btn-dark ms-auto" style={{marginRight:"20px", marginBottom:"20px"}} onClick={() => handleCommentDeleteClick(response.id)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                               <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                            </svg>
+                          </button>
+                        ):(
+                          <button class="btn btn-danger ms-auto" style={{marginRight:"20px", marginBottom:"20px"}} onClick={() => reportResponse(response.id)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-flag" viewBox="0 0 16 16">
+                              <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001M14 1.221c-.22.078-.48.167-.766.255-.81.252-1.872.523-2.734.523-.886 0-1.592-.286-2.203-.534l-.008-.003C7.662 1.21 7.139 1 6.5 1c-.669 0-1.606.229-2.415.478A21.294 21.294 0 0 0 3 1.845v6.433c.22-.078.48-.167.766-.255C4.576 7.77 5.638 7.5 6.5 7.5c.847 0 1.548.28 2.158.525l.028.01C9.32 8.29 9.86 8.5 10.5 8.5c.668 0 1.606-.229 2.415-.478A21.317 21.317 0 0 0 14 7.655V1.222z"/>
                             </svg>
                           </button>
                         )}
@@ -1192,6 +1271,27 @@ const VideoPlayer = () => {
       )}
     </div>
     )}
+    {showModal && (
+        <div className="modal" tabIndex="-1" role="dialog" style={{ display: "block" }}>
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content" style={{ backgroundColor: "black", color: "white" }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Report this {ticketTargetType}</h5>
+              </div>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label htmlFor="reasonInput">Reason:</label>
+                  <textarea className="form-control" id="reasonInput" rows="3" value={reason} onChange={handleReasonChange}></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-dark" onClick={handleCloseModal}>Close</button>
+                <button type="button" className="btn btn-danger" onClick={handleReportSubmit}>Submit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }else{

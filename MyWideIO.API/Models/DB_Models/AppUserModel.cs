@@ -20,7 +20,7 @@ namespace MyWideIO.API.Models.DB_Models
         public virtual ICollection<PlaylistModel> Playlists { get; set; } = new Collection<PlaylistModel>();
         public DateTime EndOfBan { get; set; }
         public virtual ImageModel? ProfilePicture { get; set; }
-        public decimal? AccountBalance { get; set; }
+        public decimal AccountBalance { get; set; }
 
         // CREATOR
         public virtual ICollection<VideoModel> OwnedVideos { get; set; } = new Collection<VideoModel>();
@@ -28,7 +28,7 @@ namespace MyWideIO.API.Models.DB_Models
         public virtual ICollection<ViewerSubscription> Subscribers { get; set; } = new Collection<ViewerSubscription>();
 
         public float? Money { get; set; }
-
+        public int SubscribersAmount { get; set; }
 
         // public UserTypeEnum UserTypeDto { get; set; } = UserTypeEnum.Simple;
     }

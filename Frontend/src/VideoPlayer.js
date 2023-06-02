@@ -814,7 +814,7 @@ const VideoPlayer = () => {
 
   const handleDonateAmountChange = (event) => {
     const newAmount = parseInt(event.target.value);
-    if (newAmount >= 1 && newAmount <= currnetUserData.accountBalance) {
+    if (newAmount >= 1) {
       setDonateAmount(newAmount);
     }
   };
@@ -990,15 +990,11 @@ const VideoPlayer = () => {
             </div>
           </div>
           {isDonating && (
-          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p>Your current balance: {currnetUserData.accountBalance}</p>
-              <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
-            </div>
+          <div class="container-fluid justify-content-center" style={{marginTop:"10px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
             <TextField
               label={<span style={{ color: 'white' }}>Amount</span>}
               type="number"
-              style={{color: "white", width: "160px"}}
+              style={{color: "white", width: "160px", alignContent: "center", marginTop:"20px"}}
               value={donateAmount}
               onChange={(event) => handleDonateAmountChange(event)}
               InputProps={{

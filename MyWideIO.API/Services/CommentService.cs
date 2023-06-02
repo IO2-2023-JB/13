@@ -102,11 +102,35 @@ namespace MyWideIO.API.Services
         }
         public async Task<CommentDto> GetCommentById(Guid id)
         {
-            throw new NotImplementedException();
+            var model = await _commentRepository.GetComment(id);
+            if (model.VideoId == null || model.ParentCommentId != null)
+                throw new Exception("Comment of given id is not a video comment (probably a response)");
+            UserDto user = await _userService.GetUserAsync(model.AuthorId);
+            return new CommentDto()
+            {
+                Id = model.Id,
+                AuthorId = model.AuthorId,
+                Content = model.Content,
+                AvatarImage = user.AvatarImage,
+                Nickname = user.Nickname,
+                HasResponses = model.hasResponses
+            };
         }
         public async Task<CommentDto> GetCommentResponseById(Guid id)
         {
-            throw new NotImplementedException();
+            var model = await _commentRepository.GetComment(id);
+            if (model.VideoId != null || model.ParentCommentId == null)
+                throw new Exception("Comment of given id is not a response (probably a video comment)");
+            UserDto user = await _userService.GetUserAsync(model.AuthorId);
+            return new CommentDto()
+            {
+                Id = model.Id,
+                AuthorId = model.AuthorId,
+                Content = model.Content,
+                AvatarImage = user.AvatarImage,
+                Nickname = user.Nickname,
+                HasResponses = model.hasResponses
+            };
         }
     }
 }

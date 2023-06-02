@@ -474,6 +474,19 @@ const handleWithdrawConfirmClick = () => {
     ).then(() => {
       setWithdrawAmount(1);
       setIsWithdrawing(false);
+      axios.get(PROFILE_URL, {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: true 
+      })
+      .then(response => {
+        setData(response?.data);
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
     }).catch(err => {
       if(!err?.response) {
           setErrMsg('No Server Response')

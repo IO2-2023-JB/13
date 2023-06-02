@@ -7,6 +7,18 @@ const SEARCH_URL = '/search';
 
 const Search = (props) => {
 
+    const [activeCriterion, setActiveCriterion] = useState(0);
+    const handleClickCriterion = (num) => {
+      setActiveCriterion(num);
+      setSortingCriterion(num)
+    };
+
+    const [activeType, setActiveType] = useState(0);
+    const handleClickType = (num) => {
+      setActiveType(num);
+      setSortingType(num)
+    };
+
     const [videosData, setVideosData] = useState([]);
     const [usersData, setUsersData] = useState([]);
     const [playlistsData, setPlaylistsData] = useState([]);
@@ -56,14 +68,14 @@ const Search = (props) => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
             <h2 class="display-6"> Sorting criterion: </h2>
             <div class="row" style={{marginBottom:"50px"}}>
-              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingCriterion(1)}>Views descending</button>
-              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingCriterion(2)}>Alphabetical order</button>
-              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingCriterion(3)}>Views ascending</button>
+              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==1 ? "gray" : "black" }} onClick={()=>handleClickCriterion(1)}>Views ascending</button>
+              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==2 ? "gray" : "black" }} onClick={()=>handleClickCriterion(2)}>Reversed alphabetical order</button>
+              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==3 ? "gray" : "black" }} onClick={()=>handleClickCriterion(3)}>Views descending</button>
             </div>
             <h2 class="display-6"> Sorting type: </h2>
             <div class="row">
-              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingType(1)}>Alphabetical order</button>
-              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingType(2)}>Reversed alphabetical order</button>
+              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeType==2 ? "gray" : "black" }} onClick={()=>handleClickType(2)}>Alphabetical order</button>
+              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeType==1 ? "gray" : "black" }} onClick={()=>handleClickType(1)}>Reversed alphabetical order</button>
             </div>
           </section>
           <div class="row" style={{marginBottom:"100px"}}>
@@ -73,7 +85,6 @@ const Search = (props) => {
                   {videosData.map(video => (
                       <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
                               padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>
-                          <div class="row">
                             <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
                               <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
                                   <table style={{backgroundColor: "transparent"}}>
@@ -85,14 +96,13 @@ const Search = (props) => {
                                   </table>
                                 </div> 
                             </div>
-                            <div class="col-sm">
+                            <div>
                                 <h1 style={{marginTop:"30px"}}>{video.title}</h1>
                                 <h4 style={{marginTop:"30px"}}>{video.authorNickname}</h4>
                             </div>
-                            <div class="col-sm">
+                            <div>
                                 <h4 style={{marginTop:"30px"}}>Views: {video.viewCount}</h4>
                             </div>
-                          </div>
                       </li>
                   )).reverse()}
               </ul>
@@ -103,7 +113,6 @@ const Search = (props) => {
                   {usersData.map(user => (
                       <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
                               padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => goToProfile(user.id)}>
-                          <div class="row">
                             <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
                               <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${user.avatarImage})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
                                   <table style={{backgroundColor: "transparent"}}>
@@ -115,13 +124,12 @@ const Search = (props) => {
                                   </table>
                                 </div> 
                             </div>
-                            <div class="col-sm">
+                            <div>
                                 <h1 style={{marginTop:"30px"}}>{user.nickname}</h1>
                             </div>
-                            <div class="col-sm">
+                            <div>
                                 <h4 style={{marginTop:"30px"}}>{user.userType}</h4>
                             </div>
-                          </div>
                       </li>
                   )).reverse()}
               </ul>

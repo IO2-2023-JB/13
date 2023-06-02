@@ -87,11 +87,12 @@ namespace MyWideIO.API
                 options.AddPolicy("AllowLocalhost3000",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:3000")
-                        //builder.AllowAnyOrigin()
+                        //builder.WithOrigins("http://localhost:3000")
+                        builder.AllowAnyOrigin()
                                .AllowAnyHeader()
                                .AllowAnyMethod()
-                               .AllowCredentials();
+                               .SetIsOriginAllowedToAllowWildcardSubdomains();
+                        //       .AllowCredentials();
                     });
             });
 

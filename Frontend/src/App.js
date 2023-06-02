@@ -113,15 +113,15 @@ function App() {
 
           {isLoggedIn()?
             <>
-            <li className='nav-item m-0 mr-auto'>
-               <button className="btn btn-outline-light m-1" onClick={logout} style={{ verticalAlign: 'middle' }}>
-                Logout
-              </button> 
-            </li>
             <li className='nav-item m-1'>
               <NavLink className="btn btn-outline-light" to='/reports'>
                 Reports
               </NavLink>
+            </li>
+            <li className='nav-item m-0 mr-auto'>
+               <button className="btn btn-outline-light m-1" onClick={logout} style={{ verticalAlign: 'middle' }}>
+                Logout
+              </button> 
             </li>
             </>
             :

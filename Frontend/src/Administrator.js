@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from './api/axios';
 import AuthContext from "./context/AuthProvider";
 import { useContext } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TICKET_LIST = "/ticket/list";
 const METADATA_URL = '/video-metadata';
@@ -16,6 +16,7 @@ const Administrator = () => {
 
     const { auth } = useContext(AuthContext);
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [ticketsData, setTicketsData] = useState([]);
     const [videosData, setVideosData] = useState({});
@@ -61,8 +62,13 @@ const Administrator = () => {
     };
 
     useEffect(() => {
-        localStorage.setItem("lastVisitedPage", location.pathname);
+        if(auth.roles === "Administrator"){
+          localStorage.setItem("lastVisitedPage", location.pathname);
+        }else{
+          navigate('/home');
+        }
     });
+
 
     useEffect(() => {
         axios.get(TICKET_LIST, {

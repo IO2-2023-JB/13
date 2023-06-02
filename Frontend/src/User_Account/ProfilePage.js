@@ -445,11 +445,14 @@ const handelPlaylistClick = (id) => {
 const handleWithdrawClick = () => {
   setWithdrawAmount(1);
   setIsWithdrawing(!isWithdrawing);
+  if(userData.accountBalance === 0){
+    setWithdrawAmount(0);
+  }
 }
 
 const handleWithdrawAmountChange = (event) => {
   const newAmount = parseInt(event.target.value);
-  if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+  if (newAmount >= 1 && newAmount <= userData.accountBalance) {
     setWithdrawAmount(newAmount);
   }
 };

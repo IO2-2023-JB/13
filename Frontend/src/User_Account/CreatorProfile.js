@@ -243,6 +243,9 @@ const CreatorProfile = () => {
   const handleDonateClick = () => {
     setDonateAmount(1);
     setIsDonating(!isDonating);
+    if(currnetUserData.accountBalance === 0){
+      setDonateAmount(0);
+    }
   }
 
   const handleDonateAmountChange = (event) => {

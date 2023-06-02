@@ -1,11 +1,14 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import axios from './api/axios';
 import { useNavigate } from 'react-router-dom';
+import AuthContext from "./context/AuthProvider";
 
 const SEARCH_URL = '/search';
 
 const Search = (props) => {
+
+    const { auth } = useContext(AuthContext);
 
     const [activeCriterion, setActiveCriterion] = useState(1);
     const handleClickCriterion = (num) => {
@@ -83,6 +86,7 @@ const Search = (props) => {
               <h2 class="display-5"> Videos: </h2>
               <ul style={{padding:"0px", display:"inline"}}>
                   {videosData.map(video => (
+                      (video.processingProgress === 'Ready' || video.authorId === auth.id) && (
                       <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
                               padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>
                             <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
@@ -104,7 +108,7 @@ const Search = (props) => {
                                 <h4 style={{marginTop:"30px"}}>Views: {video.viewCount}</h4>
                             </div>
                       </li>
-                  )).reverse()}
+                  ))).reverse()}
               </ul>
             </div>
             <div class="col-sm">

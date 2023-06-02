@@ -243,14 +243,11 @@ const CreatorProfile = () => {
   const handleDonateClick = () => {
     setDonateAmount(1);
     setIsDonating(!isDonating);
-    if(currnetUserData.accountBalance === 0){
-      setDonateAmount(0);
-    }
   }
 
   const handleDonateAmountChange = (event) => {
     const newAmount = parseInt(event.target.value);
-    if (newAmount >= 1 && newAmount <= currnetUserData.accountBalance) {
+    if (newAmount >= 1) {
       setDonateAmount(newAmount);
     }
   };
@@ -393,10 +390,6 @@ return (
             )}
             {isDonating && (
               <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p style={{ color: 'white' }}>Your current balance: {currnetUserData.accountBalance}</p>
-                  <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
-                </div>
                 <TextField
                   label={<span style={{ color: 'white' }}>Amount</span>}
                   type="number"

@@ -3,7 +3,7 @@ import AuthContext from "../context/AuthProvider";
 import { useContext } from "react";
 import axios from '../api/axios';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const TICKET_LIST = "/ticket/list";
 const METADATA_URL = '/video-metadata';
@@ -15,6 +15,7 @@ const RESPONSE_URL = '/comment/response'
 const Reports = () => {
     const { auth } = useContext(AuthContext);
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [ticketsData, setTicketsData] = useState([]);
     const [videosData, setVideosData] = useState({});
@@ -22,6 +23,10 @@ const Reports = () => {
     const [playlistsData, setPlaylistsData] = useState({});
     const [commentsData, setCommentsData] = useState({});
     const [commentsResponseData, setCommentsResponseData] = useState({});
+
+    const handleVideoClick = (id) => {
+      navigate(`/videoplayer/${id}`);
+    }
 
     const addVideoData = (ticketId, video) => {
         setVideosData(prevData => ({
@@ -155,8 +160,14 @@ const Reports = () => {
   }, [ticketsData])
 
     return(
-        <div style={{marginTop: "200px"}}>
-            <h2 class="display-5" style={{textAlign: "center"}}> Your Reports: </h2>
+        <div class="container" style={{marginTop: "200px"}}>
+            <h2 class="display-5" style={{textAlign: "center", marginBottom:"50px"}}> Your Reports: </h2>
+            <div class="display-5">Videos:</div>
+            {ticketsData.map(ticket => (
+                  <div>
+                    ticket
+                  </div>
+            ))}
         </div>
     );
 };

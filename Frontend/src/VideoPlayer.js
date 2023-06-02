@@ -61,6 +61,20 @@ const VideoPlayer = () => {
     id: '',
   });
 
+  const incrementSubscriptionsCount = () => {
+    setUserData(prevData => ({
+      ...prevData,
+      subscriptionsCount: prevData.subscriptionsCount + 1
+    }));
+  };
+  
+  const decrementSubscriptionsCount = () => {
+    setUserData(prevData => ({
+      ...prevData,
+      subscriptionsCount: prevData.subscriptionsCount - 1
+    }));
+  };
+
   useEffect(() => {
     if (data) {
       setUserData({
@@ -190,6 +204,8 @@ const VideoPlayer = () => {
 
   const [commentsData, setCommentsData] = useState([]);
   const [responsesData, setResponsesData] = useState({});
+
+  const [currentData, setCurrnetData] = useState(null);
   
   useEffect(() => {
     if (!auth?.accessToken) {
@@ -200,6 +216,30 @@ const VideoPlayer = () => {
   useEffect(() => {
     setIsLoading(false);
   }, [reactionsData]);
+
+  const [currnetUserData, setCurrentUserData] = useState({
+    firstName: "Loading...",
+    lastName: "Loading...",
+    nickname: "Loading...",
+    email: "Loading...",
+    accountBalance: 0,
+    avatarImage: '',
+    userType: '',
+  });
+
+  useEffect(() => {
+    if (currentData) {
+      setCurrentUserData({
+        firstName: currentData?.name,
+        lastName: currentData?.surname,
+        nickname: currentData?.nickname,
+        email: currentData?.email,
+        accountBalance: currentData?.accountBalance,
+        avatarImage: currentData?.avatarImage,
+        userType: currentData?.userType,
+      });
+    }
+  }, [currentData]);
 
   useEffect(() => {
     setTags(videoData.tags);
@@ -375,6 +415,21 @@ const VideoPlayer = () => {
         .catch(error => {
           console.log("error: ", error);
         });
+
+        axios.get(PROFILE_URL, {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+          setCurrnetData(response?.data);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
+
     }, [auth?.accessToken, auth?.id]);
 
   const handleEditClick = () => {
@@ -708,6 +763,7 @@ const VideoPlayer = () => {
       withCredentials: true 
     })
     .then(() => {
+      incrementSubscriptionsCount();
       axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
         headers: { 
           'Content-Type': 'application/json',
@@ -736,6 +792,7 @@ const VideoPlayer = () => {
       withCredentials: true 
     })
     .then(() => {
+      decrementSubscriptionsCount();
       const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== videoData.authorId);
       setSubscriptionsData(updatedSubscriptionsData);
     })
@@ -757,7 +814,7 @@ const VideoPlayer = () => {
 
   const handleDonateAmountChange = (event) => {
     const newAmount = parseInt(event.target.value);
-    if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+    if (newAmount >= 1 && newAmount <= currnetUserData.accountBalance) {
       setDonateAmount(newAmount);
     }
   };
@@ -783,6 +840,19 @@ const VideoPlayer = () => {
       ).then(() => {
         setDonateAmount(1);
         setIsDonating(false);
+        axios.get(PROFILE_URL, {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+          setCurrnetData(response?.data);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
@@ -922,7 +992,7 @@ const VideoPlayer = () => {
           {isDonating && (
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p>Your current balance: {userData.accountBalance}</p>
+              <p>Your current balance: {currnetUserData.accountBalance}</p>
               <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
             </div>
             <TextField

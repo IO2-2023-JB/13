@@ -88,11 +88,11 @@ namespace MyWideIO.API
                     builder =>
                     {
                         //builder.WithOrigins("http://localhost:3000")
-                        builder.AllowAnyOrigin()
+                        builder//.AllowAnyOrigin()
                                .AllowAnyHeader()
                                .AllowAnyMethod()
-                               .SetIsOriginAllowedToAllowWildcardSubdomains();
-                        //       .AllowCredentials();
+                               .SetIsOriginAllowed(o => true)
+                               .AllowCredentials();
                     });
             });
 

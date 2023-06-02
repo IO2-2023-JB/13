@@ -30,7 +30,8 @@ namespace MyWideIO.API.Middleware
                 Console.WriteLine(exception.Message);
             var statusCode = exception switch
             {
-                OperationCanceledException => StatusCodes.Status400BadRequest,
+                OperationCanceledException or
+                BadRequestException => StatusCodes.Status400BadRequest,
                 UserNotFoundException or
                 VideoNotFoundException or
                 PlaylistNotFoundException or

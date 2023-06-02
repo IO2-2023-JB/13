@@ -4,9 +4,9 @@ namespace MyWideIO.API.Services.Interfaces
 {
     public interface ISubscriptionService
     {
-        public Task Subscribe(Guid vieverId, Guid subId);
-        public Task UnSubscribe(Guid vieverId, Guid subId);
-        public Task<UserSubscriptionListDto> Subscriptions(Guid id);
+        public Task SubscribeAsync(Guid vieverId, Guid subId);
+        public Task UnsubscribeAsync(Guid vieverId, Guid subId);
+        public Task<UserSubscriptionListDto> GetSubscriptionsAsync(Guid id);
 
     }
 }

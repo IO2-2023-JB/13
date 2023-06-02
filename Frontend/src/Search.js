@@ -10,14 +10,16 @@ const Search = (props) => {
     const [videosData, setVideosData] = useState([]);
     const [usersData, setUsersData] = useState([]);
     const [playlistsData, setPlaylistsData] = useState([]);
+    const [sortingCriterion, setSortingCriterion] = useState(1);
+    const [sortingType, setSortingType] = useState(1);
     const navigate = useNavigate();
 
     useEffect(() => {
       axios.get(SEARCH_URL, {
         params:{
           query: props.query,
-          sortingCriterion: 1,
-          sortingType: 1
+          sortingCriterion: sortingCriterion,
+          sortingType: sortingType
         },
         headers: { 
           'Content-Type': 'application/json',
@@ -31,7 +33,7 @@ const Search = (props) => {
       .catch(error => {
         console.log("error: ", error);
       });
-    });
+    }, [sortingCriterion, sortingType, props.query]);
 
     const handleVideoClick = (id) => {
       navigate(`/videoplayer/${id}`);
@@ -50,6 +52,20 @@ const Search = (props) => {
   // Component logic
   return (
     <div style={{marginTop:"200px"}} class="container">
+          <section class="container" style={{ marginBottom:"50px",
+              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+            <h2 class="display-6"> Sorting criterion: </h2>
+            <div class="row" style={{marginBottom:"50px"}}>
+              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingCriterion(1)}>Views descending</button>
+              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingCriterion(2)}>Alphabetical order</button>
+              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingCriterion(3)}>Views ascending</button>
+            </div>
+            <h2 class="display-6"> Sorting type: </h2>
+            <div class="row">
+              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingType(1)}>Alphabetical order</button>
+              <button class="col-sm btn btn-dark mx-2" onClick={()=>setSortingType(2)}>Reversed alphabetical order</button>
+            </div>
+          </section>
           <div class="row" style={{marginBottom:"100px"}}>
             <div class="col-sm">
               <h2 class="display-5"> Videos: </h2>

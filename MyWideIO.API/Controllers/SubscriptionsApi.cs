@@ -50,7 +50,7 @@ namespace MyWideIO.API.Controllers
 
             try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
             {
-                await _subscriptionService.Subscribe(viewerId, subId);
+                await _subscriptionService.SubscribeAsync(viewerId, subId);
             }
             catch (DataException exception)
             {
@@ -85,7 +85,7 @@ namespace MyWideIO.API.Controllers
 
             try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
             {
-                await _subscriptionService.UnSubscribe(viewerId, subId);
+                await _subscriptionService.UnsubscribeAsync(viewerId, subId);
             }
             catch (DataException exception)
             {
@@ -117,7 +117,7 @@ namespace MyWideIO.API.Controllers
             UserSubscriptionListDto subs;
             try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
             {
-                subs = await _subscriptionService.Subscriptions(id);
+                subs = await _subscriptionService.GetSubscriptionsAsync(id);
             }
             catch (DataException exception)
             {

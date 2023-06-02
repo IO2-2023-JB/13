@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using System.Threading;
 using WideIO.API.Attributes;
 
 namespace MyWideIO.API.Controllers
@@ -11,8 +15,15 @@ namespace MyWideIO.API.Controllers
     /// </summary>
     [ApiController]
     [Route("donate")]
+    [Authorize]
     public class DonateApiController : ControllerBase
     {
+        private readonly IDonateService _donateService;
+        public DonateApiController(IDonateService donateService)
+        {
+            _donateService = donateService;
+        }
+
         /// <summary>
         /// Send a donation
         /// </summary>
@@ -23,9 +34,11 @@ namespace MyWideIO.API.Controllers
         [HttpPost("send")]
         [ValidateModelState]
         [SwaggerOperation("SendDonation")]
-        public virtual IActionResult SendDonation([FromQuery(Name = "id")][Required()] Guid id, [FromQuery(Name = "amount")][Required()] decimal amount)
+        public async virtual Task<IActionResult> SendDonation([FromQuery(Name = "id")][Required()] Guid id, [FromQuery(Name = "amount")][Required()] decimal amount)
         {
-            throw new NotImplementedException();
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _donateService.SendDonation(id, userId, amount);
+            return Ok();
         }
 
         /// <summary>
@@ -37,9 +50,11 @@ namespace MyWideIO.API.Controllers
         [HttpPost("withdraw")]
         [ValidateModelState]
         [SwaggerOperation("WithdrawFunds")]
-        public virtual IActionResult WithdrawFunds([FromQuery(Name = "amount")][Required()] decimal amount)
+        public async virtual Task<IActionResult> WithdrawFunds([FromQuery(Name = "amount")][Required()] decimal amount)
         {
-            throw new NotImplementedException();
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _donateService.Withdraw(userId, amount);
+            return Ok();
         }
     }
 }

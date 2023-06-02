@@ -23,6 +23,7 @@ const CreatorProfile = () => {
   const [creator_id, setCreator_id] = useState(params.creatorid);
 
   const [data, setData] = useState(null);
+  const [currentData, setCurrnetData] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
   const [reason, setReason] = useState('');
@@ -121,9 +122,34 @@ const CreatorProfile = () => {
     .catch(error => {
       console.log("error: ", error);
     });
+
+    axios.get(PROFILE_URL, {
+      headers: { 
+        'Content-Type': 'application/json',
+        "Authorization" : `Bearer ${auth?.accessToken}`
+      },
+      withCredentials: true 
+    })
+    .then(response => {
+      setCurrnetData(response?.data);
+    })
+    .catch(error => {
+      console.log("error: ", error);
+    });
+
   }, [auth?.accessToken, creator_id]);
 
   const [userData, setUserData] = useState({
+    firstName: "Loading...",
+    lastName: "Loading...",
+    nickname: "Loading...",
+    email: "Loading...",
+    accountBalance: 0,
+    avatarImage: '',
+    userType: '',
+  });
+
+  const [currnetUserData, setCurrentUserData] = useState({
     firstName: "Loading...",
     lastName: "Loading...",
     nickname: "Loading...",
@@ -146,6 +172,20 @@ const CreatorProfile = () => {
       });
     }
   }, [data]);
+
+  useEffect(() => {
+    if (currentData) {
+      setCurrentUserData({
+        firstName: currentData?.name,
+        lastName: currentData?.surname,
+        nickname: currentData?.nickname,
+        email: currentData?.email,
+        accountBalance: currentData?.accountBalance,
+        avatarImage: currentData?.avatarImage,
+        userType: currentData?.userType,
+      });
+    }
+  }, [currentData]);
 
   const handleVideoClick = (id) => {
     navigate(`/videoplayer/${id}`);
@@ -207,7 +247,7 @@ const CreatorProfile = () => {
 
   const handleDonateAmountChange = (event) => {
     const newAmount = parseInt(event.target.value);
-    if (newAmount >= 1) { // TODO dodać sprawdzenie górne jak będzie normalne accountBalance dodane
+    if (newAmount >= 1 && newAmount <= currnetUserData.accountBalance) {
       setDonateAmount(newAmount);
     }
   };
@@ -233,6 +273,19 @@ const CreatorProfile = () => {
       ).then(() => {
         setDonateAmount(1);
         setIsDonating(false);
+        axios.get(PROFILE_URL, {
+          headers: { 
+            'Content-Type': 'application/json',
+            "Authorization" : `Bearer ${auth?.accessToken}`
+          },
+          withCredentials: true 
+        })
+        .then(response => {
+          setCurrnetData(response?.data);
+        })
+        .catch(error => {
+          console.log("error: ", error);
+        });
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
@@ -338,7 +391,7 @@ return (
             {isDonating && (
               <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p style={{ color: 'white' }}>Your current balance: {userData.accountBalance}</p>
+                  <p style={{ color: 'white' }}>Your current balance: {currnetUserData.accountBalance}</p>
                   <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
                 </div>
                 <TextField

@@ -61,6 +61,20 @@ const VideoPlayer = () => {
     id: '',
   });
 
+  const incrementSubscriptionsCount = () => {
+    setUserData(prevData => ({
+      ...prevData,
+      subscriptionsCount: prevData.subscriptionsCount + 1
+    }));
+  };
+  
+  const decrementSubscriptionsCount = () => {
+    setUserData(prevData => ({
+      ...prevData,
+      subscriptionsCount: prevData.subscriptionsCount - 1
+    }));
+  };
+
   useEffect(() => {
     if (data) {
       setUserData({
@@ -749,6 +763,7 @@ const VideoPlayer = () => {
       withCredentials: true 
     })
     .then(() => {
+      incrementSubscriptionsCount();
       axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
         headers: { 
           'Content-Type': 'application/json',
@@ -777,6 +792,7 @@ const VideoPlayer = () => {
       withCredentials: true 
     })
     .then(() => {
+      decrementSubscriptionsCount();
       const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== videoData.authorId);
       setSubscriptionsData(updatedSubscriptionsData);
     })

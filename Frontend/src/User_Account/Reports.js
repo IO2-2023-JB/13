@@ -9,8 +9,8 @@ const TICKET_LIST = "/ticket/list";
 const METADATA_URL = '/video-metadata';
 const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
-const COMMENT_URL = '/comment/commentById';
-const RESPONSE_URL = '/comment/responseById'
+const COMMENT_URL = '/comment'; //add /commentById
+const RESPONSE_URL = '/comment/response'; //add ById
 
 const Reports = () => {
     const { auth } = useContext(AuthContext);
@@ -23,6 +23,12 @@ const Reports = () => {
     const [playlistsData, setPlaylistsData] = useState({});
     const [commentsData, setCommentsData] = useState({});
     const [commentsResponseData, setCommentsResponseData] = useState({});
+
+    useEffect(() => {
+      if(auth.roles === "Administrator"){
+        navigate('/administrator');
+      }
+    });
 
     const goToProfile = (user_id) => {
       if(user_id){
@@ -203,6 +209,14 @@ const Reports = () => {
                           </div> 
                         </div>
                         </div>
+                        <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                         </div>
                     )}
                   </div>
@@ -240,6 +254,14 @@ const Reports = () => {
                             </div>
                       </div>
                       </div>
+                      <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -268,6 +290,14 @@ const Reports = () => {
                             </div>
                             </li>
                           </div>
+                          <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                         </div>
                     )}
                   </div>
@@ -286,6 +316,14 @@ const Reports = () => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
                         {commentsData[ticket.ticketId].nickname}: {commentsData[ticket.ticketId].content}
                       </div>
+                      <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -305,6 +343,14 @@ const Reports = () => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
                         {commentsResponseData[ticket.ticketId].nickname}: {commentsResponseData[ticket.ticketId].content}
                       </div>
+                      <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

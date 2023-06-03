@@ -5,6 +5,7 @@ import {useRef, useState } from "react"
 import AuthContext from "./context/AuthProvider"
 import { useContext } from "react";
 import { useNavigate} from 'react-router-dom';
+import { BounceLoader } from "react-spinners";
 
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
@@ -30,6 +31,8 @@ const AddVideo = () => {
     const [thumbnail_picture, setThumbnail_picture] = useState(null);
     const [thumbnail_picture_name, setThumbnail_picture_name] = useState('');
     const [validthumbnail_picture, setValidthumbnail_picture] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const onChangeHandler = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -59,6 +62,9 @@ const AddVideo = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+          setIsLoading(true);
+          console.log("isloading:")
+          console.log(isLoading);
           let response;
           if(validthumbnail_picture)
           {
@@ -98,6 +104,7 @@ const AddVideo = () => {
                 }
               );
             handleCancelClick();
+            setIsLoading(false);
           }, 100);
           }
           else
@@ -133,6 +140,7 @@ const AddVideo = () => {
                 }
               );
               handleCancelClick();
+              setIsLoading(false);
             }, 100);
           }
         } catch (err) {
@@ -143,6 +151,9 @@ const AddVideo = () => {
             } else {
                 setErrMsg('Data Change Failed');
             }
+            setIsLoading(false);
+            console.log(errRef);
+            console.log(errMsg);
             errRef.current.focus();
         }
       };
@@ -231,10 +242,19 @@ const AddVideo = () => {
           />
 
 
-          <button class="btn btn-dark" disabled={!tags || !title || !description || (selectedFile ===null) ? true : false}>Submit</button>
+          <button class="btn btn-dark" disabled={isLoading || !tags || !title || !description || (selectedFile ===null) ? true : false}>Submit</button>
       </form>
       <button class="btn btn-dark" onClick={handleCancelClick}>Cancel</button>
     </section>
+    {isLoading && (
+      <div className="loading-container">
+        <h4>Your video is beeing uploaded...</h4>
+        <BounceLoader color="#ff0000" />
+      </div>
+    )}
+    {errMsg !== '' && (
+        <div style={{ color: "red", marginTop: "10px" }}>{errMsg}</div>
+    )}
   </div>
 )}
 export default AddVideo

@@ -550,11 +550,13 @@ return (
                   <button class="btn btn-danger mb-4" onClick={handleDeleteClick}>Delete account</button>
                 </div>
               </div>
+              { userType !== 'Administrator' && (
               <div className="row">
                 <div className="col">
                 <button onClick={handleWithdrawClick} class="btn btn-success mb-4">Withdraw money</button>
                 </div>
               </div>
+              )}
             </div>
             {isWithdrawing && (
               <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
@@ -658,6 +660,7 @@ return (
             </section>
             </div>
             )}
+          { userType !== 'Administrator' && (
           <div class="col-sm">
           <h2>Your Playlists</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
@@ -696,7 +699,8 @@ return (
               </ul>
             </section>
           </div>
-          {userType!=='Creator' && (
+          )}
+          { userType!=='Creator' && userType!=='Administrator' && (
             <div class="col-sm">
               <button onClick={handleCreatorClick}>Become Creator</button>
             </div>

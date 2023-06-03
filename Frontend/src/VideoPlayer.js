@@ -1,13 +1,13 @@
 import React from "react";
 import axios from './api/axios';
-import {useRef, useState, useEffect } from "react"
-import AuthContext from "./context/AuthProvider"
+import {useRef, useState, useEffect } from "react";
+import AuthContext from "./context/AuthProvider";
 import { useContext } from "react";
 import {useLocation, useNavigate} from 'react-router-dom';
 import { useParams } from "react-router-dom";
 import 'video-react/dist/video-react.css';
-import { faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import { faInfoCircle  } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
@@ -17,7 +17,7 @@ const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
-const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
+const SUBSCRIPTIONS_URL = '/subscribtions';
 const PROFILE_URL = '/user';
 const DONATE_SEND_URL = '/donate/send';
 const REPORT_URL = '/ticket';
@@ -207,11 +207,11 @@ const VideoPlayer = () => {
 
   const [currentData, setCurrnetData] = useState(null);
   
-  useEffect(() => {
-    if (!auth?.accessToken) {
-      navigate('/login', { state: { from: location } });
-    }
-  }, [auth]);
+  // useEffect(() => {
+  //   if (!auth?.accessToken) {
+  //     navigate('/login', { state: { from: location } });
+  //   }
+  // }, [auth]);
 
   useEffect(() => {
     setIsLoading(false);
@@ -948,7 +948,7 @@ const VideoPlayer = () => {
     <div>
     {!isLoading && (
     <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
-      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px", marginBottom: "50px", borderBottomRightRadius: "25px", borderBottomLeftRadius: "25px"}}>
       {videoData.processingProgress === 'Ready' && (
         <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
           <ReactPlayer
@@ -964,7 +964,7 @@ const VideoPlayer = () => {
       )}
       {!editMode?(
         videoData.processingProgress === 'Ready' ? (
-      <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+      <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px", marginBottom: "30px", borderBottomRightRadius: "25px", borderBottomLeftRadius: "25px"}}>
           <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>
               {videoData.title}
@@ -1045,12 +1045,6 @@ const VideoPlayer = () => {
                 <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
               </svg>
             </button>
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-              </svg>
-            </button>
             {(videoData.authorId !== auth.id) && (
             <button class="btn btn-danger" style={{marginRight:"20px", position: "absolute", right: "10px"}} onClick={() => reportVideo(videoData.id)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-flag" viewBox="0 0 16 16">
@@ -1094,6 +1088,9 @@ const VideoPlayer = () => {
             <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
           </form>
           <h4 class="container-fluid justify-content-center">Comments:</h4>
+          { commentsData.length === 0 && (
+            <p style={{marginLeft: "40px"}}>There are no comments for this video yet.</p>
+          )}
           {commentsData.map((comment, index) => (
             <div style={{marginBottom:"20px", marginTop:"20px", 
                             color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", backgroundColor:"#222222"}}>
@@ -1169,17 +1166,24 @@ const VideoPlayer = () => {
           
       </div>
         ):(
-          <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+          <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", marginBottom: "15px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px", borderBottomRightRadius: "25px", borderBottomLeftRadius: "25px"}}>
           <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
-            <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
-                This video is currently in processing proggress state: {videoData.processingProgress}
-            </div>
             {
               (videoData.authorId === auth.id) ?(
-              (videoData.processingProgress === 'MetadataRecordCreated' || videoData.processingProgress === 'FailedToUpload')? (
+              (videoData.processingProgress === 'MetadataRecordCreated' || videoData.processingProgress === 'FailedToUpload' || videoData.processingProgress === 'FailedToProcess')? (
                 <div>
+                  { videoData.processingProgress === 'FailedToProcess' ? (
                   <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
-                    Please upload your video.
+                    Video failed to process.
+                  </div>
+                  ):(
+                    <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
+                      Video failed to upload.
+                    </div>
+                  )
+                  }
+                  <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
+                    You can try to upload your video file again.
                   </div>
                   <form onSubmit={handleVideoUpload}>
                      <label htmlFor="video">
@@ -1195,14 +1199,19 @@ const VideoPlayer = () => {
                       <button class="btn btn-dark" disabled={!validVideoFile ? true : false}>Submit</button>
                   </form>
                 </div>
-              ):(
+              ):( videoData.processingProgress === 'Uploading' ? (
                 <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
                   Video is being uploaded. Please wait until your video is uploaded.
                 </div>
+              ):(
+                <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
+                  Video is being processed. Please wait until your video is ready.
+                </div>
+              )
               )
               ):(
                 <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
-                  It is currently unavailable to watch. Please try again later.
+                  This video is currently unavailable to watch. Please try again later.
                 </div>
               )
             }
@@ -1212,24 +1221,6 @@ const VideoPlayer = () => {
             <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0px", paddingTop:"12px", height:"60px"}}>
               Author: {videoData.authorNickname}
             </div>
-          </div>
-          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
-                <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
-              </svg>
-            </button>
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-              </svg>
-            </button>
-            <button class="btn btn-dark" style={{marginRight:"20px", position: "absolute", right: "10px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-              </svg>
-            </button>
           </div>
           <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>

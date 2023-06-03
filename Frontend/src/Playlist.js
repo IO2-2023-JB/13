@@ -155,7 +155,7 @@ const Playlist = () => {
             },
             withCredentials: true
           }
-        ).then(response => {
+        ).then(() => {
           navigate('/profile');
         }).catch(err => {
           if(!err?.response) {

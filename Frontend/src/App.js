@@ -28,6 +28,8 @@ import Subscriptions from './User_Account/Subscriptions';
 import CreatorProfile from './User_Account/CreatorProfile';
 import SubscriptionsVideos from './User_Account/SubscriptionsVideos';
 import Reports from './User_Account/Reports';
+import axios from './api/axios';
+import { ConstrainsContext } from './api/ApiConstrains';
 
 export const cookies = new Cookies();
 
@@ -41,6 +43,8 @@ function App() {
   const { setAuth } = useAuth();
   const { auth } = useContext(AuthContext);
   const [inputValue, setInputValue] = useState('');
+
+  const { baseURL, setApiUrl } = useContext(ConstrainsContext);
 
   const from = location.state?.from?.pathname || "/home";
 
@@ -87,6 +91,12 @@ function App() {
       auth?.accessToken
     )
   }
+
+  const handleApiChange = (apiUrl) => {
+    axios.defaults.baseURL = apiUrl;
+    setApiUrl(apiUrl);
+    logout();
+  };
 
   return (
     <div class="container-fluid">
@@ -149,25 +159,28 @@ function App() {
           </svg>
         </button>
       </nav>
-      <nav style={{marginTop: "80px"}} className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-        <ul style={{paddingLeft:"0px"}} className='nav-menu-items' onClick={showSidebar}>
-          <li className='navbar-toggle'>
-            <Link to='#' className='menu-bars'>
-              <AiIcons.AiFillCloseCircle />
-            </Link>
-          </li>
-          {SidebarData.map((item, index) => {
-            return (
-              <li key={index} className={item.cName}>
-                <Link to={item.path}>
-                  {item.icon}
-                  <span style={{marginRight:"10px"}}>{item.title}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      <nav style={{ marginTop: "80px", width: "350px" }} className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+  <ul style={{ paddingLeft: "0px" }} className='nav-menu-items' onClick={showSidebar}>
+    <li className='navbar-toggle'>
+      <Link to='#' className='menu-bars'>
+        <AiIcons.AiFillCloseCircle />
+      </Link>
+    </li>
+    {SidebarData.map((item, index) => (
+      <li key={index} className="sidebar-menu-item" onClick={() => handleApiChange(item.apiUrl)}>
+        <div className="sidebar-menu-content">
+          <div className="sidebar-menu-icon">{item.icon}</div>
+          <div>
+            <span className="sidebar-menu-title">{item.title}</span>
+            <span className="sidebar-menu-subtitle">{item.text}</span>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+
 
       <Routes>
         <Route element={<RequireAuth />}>

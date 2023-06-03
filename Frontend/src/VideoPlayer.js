@@ -11,6 +11,7 @@ import { FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
+import { ConstrainsContext } from "./api/ApiConstrains";
 
 const VIDEO_URL = '/video';
 const METADATA_URL = '/video-metadata';
@@ -28,7 +29,8 @@ const VideoPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let video_id = params.videoid;
-  const baseURL = 'https://io2.azurewebsites.net/api/';
+  const { baseURL, setApiUrl } = useContext(ConstrainsContext);
+  //const baseURL = 'https://io2.azurewebsites.net/api/';
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');

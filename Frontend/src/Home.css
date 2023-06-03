@@ -105,13 +105,84 @@
     background-color: rgba(80, 73, 73, 0.8);
     border-radius: 10px;
     padding: 20px;
-  }
+}
   
-  .loading-container h4 {
+.loading-container h4 {
     color: #ff0000;
     text-align: center;
-  }
+}
+  
+.sidebar {
+    background: #f0f0f0;
+    width: 500px;
+}
+  
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+  
+.sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+  
+.sidebar-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
   
   
+.sidebar-menu-icon {
+    margin-right: 10px;
+}
   
+.sidebar-menu-title {
+    opacity: 1;
+}
+
+.sidebar-menu-title,
+.sidebar-menu-icon {
+  opacity: 1;
+}
+  
+.sidebar .sidebar-menu-title,
+.sidebar .sidebar-menu-icon {
+  opacity: 1 !important;
+}
+  
+.sidebar-menu-title {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+}
+  
+.sidebar-menu-subtitle {
+    display: block;
+    font-size: 14px;
+    color: #888;
+}
+  
+.sidebar-menu-content {
+    display: flex;
+    align-items: center;
+}
+  
+.sidebar-menu-icon {
+    margin-right: 8px;
+    color: white;
+}
+  
+.sidebar-menu-title {
+    font-weight: bold;
+    color: white;
+}
+  
+.sidebar-menu-subtitle {
+    font-size: 14px;
+    color: white;
+}
   

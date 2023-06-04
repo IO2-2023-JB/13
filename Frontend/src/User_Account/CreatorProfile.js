@@ -69,7 +69,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
         setSubscriptionsData(response?.data?.subscriptions);
@@ -85,7 +85,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setData(response?.data);
@@ -100,7 +100,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setVideosData(response?.data?.videos);
@@ -114,7 +114,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setPlaylistsData(response?.data);
@@ -128,7 +128,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setCurrnetData(response?.data);
@@ -201,7 +201,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
@@ -209,7 +209,7 @@ const CreatorProfile = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       })
       .then(response => {
           setSubscriptionsData(response?.data?.subscriptions);
@@ -229,7 +229,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== creator_id);
@@ -243,14 +243,11 @@ const CreatorProfile = () => {
   const handleDonateClick = () => {
     setDonateAmount(1);
     setIsDonating(!isDonating);
-    if(currnetUserData.accountBalance === 0){
-      setDonateAmount(0);
-    }
   }
 
   const handleDonateAmountChange = (event) => {
     const newAmount = parseInt(event.target.value);
-    if (newAmount >= 1 && newAmount <= currnetUserData.accountBalance) {
+    if (newAmount >= 1) {
       setDonateAmount(newAmount);
     }
   };
@@ -271,7 +268,7 @@ const CreatorProfile = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         setDonateAmount(1);
@@ -281,7 +278,7 @@ const CreatorProfile = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setCurrnetData(response?.data);
@@ -327,7 +324,7 @@ const CreatorProfile = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true //cred
+        withCredentials: false //cred
       }
       ).catch(err => {
         if (!err?.response) {
@@ -393,10 +390,6 @@ return (
             )}
             {isDonating && (
               <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p style={{ color: 'white' }}>Your current balance: {currnetUserData.accountBalance}</p>
-                  <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
-                </div>
                 <TextField
                   label={<span style={{ color: 'white' }}>Amount</span>}
                   type="number"

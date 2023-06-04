@@ -1,5 +1,5 @@
 import './App.css';
-import {Home} from './Home';
+import Home from './Home';
 import Administrator from './Administrator'
 import { Route, Routes, NavLink } from 'react-router-dom';
 import Register from './User_Account/Register'
@@ -28,6 +28,8 @@ import Subscriptions from './User_Account/Subscriptions';
 import CreatorProfile from './User_Account/CreatorProfile';
 import SubscriptionsVideos from './User_Account/SubscriptionsVideos';
 import Reports from './User_Account/Reports';
+import axios from './api/axios';
+import { ConstrainsContext } from './api/ApiConstrains';
 
 export const cookies = new Cookies();
 
@@ -42,7 +44,11 @@ function App() {
   const { auth } = useContext(AuthContext);
   const [inputValue, setInputValue] = useState('');
 
+  const { baseURL, setApiUrl } = useContext(ConstrainsContext);
+
   const from = location.state?.from?.pathname || "/home";
+
+  const PROFILE_URL = '/user';
 
   useEffect(() => {
     const accessToken = cookies.get('accessToken');
@@ -50,8 +56,27 @@ function App() {
       const payload = jwt_decode(accessToken);
       const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       const email = "";
-      const id = payload["sub"];
-      setAuth({user: email, pwd: "", roles, accessToken, id});
+      let id = payload["sub"];
+      setAuth({user: email, roles, accessToken, id});
+      if(id === undefined){
+        const savedApiUrl = localStorage.getItem('apiUrl');
+        if (savedApiUrl) {
+          setApiUrl(savedApiUrl);
+          axios.defaults.baseURL = savedApiUrl;
+        }
+        axios.get(PROFILE_URL, {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${accessToken}`
+            },
+            withCredentials: false 
+        }).then((response)=> {
+          id = response?.data?.id;
+          setAuth({user: email, roles, accessToken, id});
+        }).catch((err) => {
+          console.log('error' + err);
+        });
+      }
       const lastVisitedPage = localStorage.getItem("lastVisitedPage");
       if(from !== "/home"){
         navigate(from, {replace: true});
@@ -63,7 +88,7 @@ function App() {
         navigate(from, {replace: true});
       }
     }
-  }, [setAuth]);
+  }, []);
 
   const [sidebar, setSidebar] = useState(false);
 
@@ -87,6 +112,12 @@ function App() {
       auth?.accessToken
     )
   }
+
+  const handleApiChange = (apiUrl) => {
+    axios.defaults.baseURL = apiUrl;
+    setApiUrl(apiUrl);
+    logout();
+  };
 
   return (
     <div class="container-fluid">
@@ -141,12 +172,6 @@ function App() {
         </ul>
 
         <div class = "nav-item m-auto">
-          {/* <button class="btn btn-dark" style={{width:"50", height:"50"}}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" class="bi bi-search" viewBox="0 0 16 16" className="buttons">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-            </svg>
-          </button> */}
-
           <input type="text" placeholder="what are you looking for? ..." onKeyDown={showSearchResults} width="500px" className="search-bars"/>
         </div>
         <button className='btn btn-outline-light navbar-toggle ms-auto my-0 mx-3' onClick={showSidebar}>
@@ -155,25 +180,28 @@ function App() {
           </svg>
         </button>
       </nav>
-      <nav style={{marginTop: "80px"}} className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-        <ul style={{paddingLeft:"0px"}} className='nav-menu-items' onClick={showSidebar}>
-          <li className='navbar-toggle'>
-            <Link to='#' className='menu-bars'>
-              <AiIcons.AiFillCloseCircle />
-            </Link>
-          </li>
-          {SidebarData.map((item, index) => {
-            return (
-              <li key={index} className={item.cName}>
-                <Link to={item.path}>
-                  {item.icon}
-                  <span style={{marginRight:"10px"}}>{item.title}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      <nav style={{ marginTop: "80px", width: "350px" }} className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+  <ul style={{ paddingLeft: "0px" }} className='nav-menu-items' onClick={showSidebar}>
+    <li className='navbar-toggle'>
+      <Link to='#' className='menu-bars'>
+        <AiIcons.AiFillCloseCircle />
+      </Link>
+    </li>
+    {SidebarData.map((item, index) => (
+      <li key={index} className="sidebar-menu-item" onClick={() => handleApiChange(item.apiUrl)}>
+        <div className="sidebar-menu-content">
+          <div className="sidebar-menu-icon">{item.icon}</div>
+          <div>
+            <span className="sidebar-menu-title">{item.title}</span>
+            <span className="sidebar-menu-subtitle">{item.text}</span>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+
 
       <Routes>
         <Route element={<RequireAuth />}>

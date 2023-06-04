@@ -1,7 +1,7 @@
 import {useRef, useState, useEffect } from "react"
 import AuthContext from "./context/AuthProvider"
 import { useContext } from "react";
-import axios from './api/axios';
+import axios from './api/axios';  
 import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -71,7 +71,7 @@ const Playlist = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setVideosData(response?.data?.videos);
@@ -93,7 +93,7 @@ const Playlist = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setPlaylistsData(response?.data);
@@ -111,7 +111,7 @@ const Playlist = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setAllUserVideosData(response?.data?.videos);
@@ -153,9 +153,9 @@ const Playlist = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
-        ).then(response => {
+        ).then(() => {
           navigate('/profile');
         }).catch(err => {
           if(!err?.response) {
@@ -194,7 +194,7 @@ const Playlist = () => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true //cred
+              withCredentials: false //cred
             }
           );
           setName(response?.data?.name);
@@ -209,7 +209,7 @@ const Playlist = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true //cred
+                  withCredentials: false //cred
                 }
                 ).catch(err => {
                   if (!err?.response) {
@@ -237,7 +237,7 @@ const Playlist = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true //cred
+                  withCredentials: false //cred
                 }
                 ).catch(err => {
                   if (!err?.response) {
@@ -265,7 +265,7 @@ const Playlist = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true 
+            withCredentials: false 
           })
           .then(response => {
             setVideosData(response?.data?.videos);
@@ -326,7 +326,7 @@ const Playlist = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true //cred
+          withCredentials: false //cred
         }
         ).catch(err => {
           if (!err?.response) {

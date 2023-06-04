@@ -1,3 +1,4 @@
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyWideIO.API.Exceptions;
@@ -110,13 +111,6 @@ namespace MyWideIO.API.Controllers
         {
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty;
-            //Guid rybak = Guid.Parse("");
-            //Guid moist = Guid.Parse("");
-            //double d = Random.Shared.NextDouble();
-            //if (d <= 0.2)
-            //    videoId = rybak;
-            //else if (d <= 0.4)
-            //    videoId = moist;
             var stream = await _videoService.GetVideoAsync(videoId, viewerId, cancellationToken);
             return File(stream, "video/mp4", true);
         }
@@ -159,16 +153,19 @@ namespace MyWideIO.API.Controllers
         public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile, CancellationToken cancellationToken)
         {
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            string ext = Path.GetExtension(videoFile.FileName) ?? throw new VideoException("File name error");
+            string ext = videoFile.ContentType.ToLower();
 
             if (!allowedExtensions.Contains(ext))
                 throw new VideoException("File extension error");
-            Stream vidStream = videoFile.OpenReadStream();
-            await _videoService.UploadVideoAsync(videoId, creatorId, vidStream, ext, cancellationToken);
+            using (Stream vidStream = videoFile.OpenReadStream())
+            {
+                await _videoService.UploadVideoAsync(videoId, creatorId, vidStream, ext, cancellationToken);
+            }
+
             return Ok();
 
         }
-        private readonly HashSet<string> allowedExtensions = new() { ".mp4", ".webm", ".avi", ".mkv" };
+        private /*static*/ readonly HashSet<string> allowedExtensions = new() { "video/mp4", "video/webm", "video/avi", "video/mkv" };
         /// <summary>
         /// Video metadata retreival
         /// </summary>

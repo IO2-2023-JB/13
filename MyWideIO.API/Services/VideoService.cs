@@ -22,7 +22,7 @@ namespace MyWideIO.API.Services
         private readonly IBackgroundTaskQueue<VideoProcessWorkItem> _backgroundTaskQueue;
         private readonly ISubscriptionService _subscriptionService;
 
-        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService, 
+        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService,
             IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ISubscriptionService subscriptionService)
         {
             _videoRepository = videoRepository;
@@ -117,14 +117,14 @@ namespace MyWideIO.API.Services
             var ffmpeg = new FFMpegConverter();
             var outputThumbnailStream = new MemoryStream();
 
-            const int byteLimit = 5 * 1024 * 1024; // 5MB
+            const int byteLimit = 1024 * 1024; // 1MB
 
             byte[] buffer = new byte[byteLimit];
 
             int bytesRead = await video.ReadAsync(buffer.AsMemory(0, byteLimit));
 
             if (bytesRead == 0)
-                throw new VideoException("The video is empty or could not be read.");
+                throw new VideoException("While trying to extract thumbnail, the video was empty or could not be read.");
 
             string tempFilePath = Path.GetTempFileName();
             await File.WriteAllBytesAsync(tempFilePath, buffer);
@@ -155,22 +155,23 @@ namespace MyWideIO.API.Services
                 video.ProcessingProgress = video.ProcessingProgress switch
                 {
                     // ProcessingProgressEnum.Ready or
-                    ProcessingProgressEnum.FailedToUpload or 
-                        ProcessingProgressEnum.MetadataRecordCreated => ProcessingProgressEnum.Uploading,
+                    ProcessingProgressEnum.FailedToUpload or
+                    ProcessingProgressEnum.FailedToProcess or
+                    ProcessingProgressEnum.MetadataRecordCreated => ProcessingProgressEnum.Uploading,
                     ProcessingProgressEnum.Uploading => throw new VideoException("Already Uploading"),
                     ProcessingProgressEnum.Uploaded => throw new VideoException("Video is waiting to be processed"),
                     ProcessingProgressEnum.Processing => throw new VideoException("Video is being processed"),
                     _ => throw new Exception("unknown error")
                 };
                 await _videoRepository.UpdateVideoAsync(video);
-                var workItem = new VideoProcessWorkItem(videoId, new MemoryStream(), extension);
-                await videoFile.CopyToAsync(workItem.VideoFile, cancellationToken);
-                workItem.VideoFile.Position = 0;
+                var workItem = new VideoProcessWorkItem(videoId, Path.GetTempFileName());
+                using (var filestream = File.OpenWrite(workItem.fileName))
+                {
+                    await videoFile.CopyToAsync(filestream, cancellationToken);
+                }
                 video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
                 await _videoRepository.UpdateVideoAsync(video);
                 await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(workItem);
-                // dodajemy do kolejki (Channel), z ktorej czyta background processing service i pokolei przetwarza
-                // background service ma ta sama instacje kolejki co ta tutaj (singleton)
             }
             catch
             {
@@ -310,13 +311,13 @@ namespace MyWideIO.API.Services
         public async Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriber)
         {
             VideoListDto videos = new VideoListDto()
-            { 
-                Videos = new List<VideoMetadataDto>() 
+            {
+                Videos = new List<VideoMetadataDto>()
             };
             UserSubscriptionListDto subs = await _subscriptionService.GetSubscriptionsAsync(subscriber);
-            foreach(var s in subs.Subscriptions)
+            foreach (var s in subs.Subscriptions)
             {
-                IEnumerable<VideoModel> list = 
+                IEnumerable<VideoModel> list =
                     await _videoRepository.GetUserVideosAsync(s.Id, default);
                 videos.Videos.AddRange(list.Select(VideoMapper.VideoModelToVideoMetadataDto));
             }

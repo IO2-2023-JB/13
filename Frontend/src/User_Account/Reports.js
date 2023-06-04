@@ -9,8 +9,8 @@ const TICKET_LIST = "/ticket/list";
 const METADATA_URL = '/video-metadata';
 const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
-const COMMENT_URL = '/comment'; //add /commentById
-const RESPONSE_URL = '/comment/response'; //add ById
+const COMMENT_URL = '/comment/commentById'; //add /commentById
+const RESPONSE_URL = '/comment/responseById'; //add ById
 
 const Reports = () => {
     const { auth } = useContext(AuthContext);

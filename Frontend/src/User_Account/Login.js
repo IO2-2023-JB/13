@@ -4,6 +4,7 @@ import axios from '../api/axios';
 import useAuth from '../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom'
 import {cookies} from '../App'
+import { BounceLoader } from "react-spinners";
 
 const LOGIN_URL = '/login';
 const PROFILE_URL = '/user';
@@ -22,6 +23,8 @@ const Login = () => {
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         localStorage.setItem("lastVisitedPage", location.pathname);
     })
@@ -37,6 +40,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try{
+            setIsLoading(true);
             const response = await axios.post(LOGIN_URL, 
                 JSON.stringify({email: email, password: pwd}),
                 {
@@ -60,14 +64,12 @@ const Login = () => {
                     },
                     withCredentials: false 
                 });
-                console.log(response2.data);
                 id = response2?.data?.id;
-                console.log(response2?.data?.id);
-                console.log(id);
             }
             setAuth({user: email, pwd, roles, accessToken, id});
             setUser('');
             setPwd('');
+            setIsLoading(false);
             navigate(from, {replace: true});
 
         }catch(err){
@@ -82,11 +84,13 @@ const Login = () => {
             } else {
                 setErrMsg('Login Failed');
             }
+            setIsLoading(false);
             errRef.current.focus();
         }
     }
 
     return (
+    <div>
         <section class="container-fluid justify-content-center" style={{marginTop:"200px", color: "white"}}>
             <p ref={errRef} className={errMsg ? "errmsg" : 
             "offscreen"} aria-live="assertive">{errMsg}</p>
@@ -121,6 +125,13 @@ const Login = () => {
                 </span>
             </p>
         </section>
+        {isLoading && (
+            <div className="loading-container">
+              <h4>Loging in, please wait...</h4>
+              <BounceLoader color="#ff0000" />
+            </div>
+        )}
+    </div>
     )
 }
 

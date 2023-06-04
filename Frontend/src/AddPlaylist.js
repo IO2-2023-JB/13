@@ -51,7 +51,7 @@ const AddPlaylist = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true 
+            withCredentials: false 
           })
           .then(response => {
             setVideosData(response?.data?.videos);
@@ -87,7 +87,7 @@ const AddPlaylist = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
           }
         );
         const requests = videosList.map( (video_id) => {
@@ -97,7 +97,7 @@ const AddPlaylist = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
           }
           ).catch(err => {
             if (!err?.response) {

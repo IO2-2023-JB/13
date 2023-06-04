@@ -13,7 +13,7 @@ import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
 import { ConstrainsContext } from "./api/ApiConstrains";
 
-const VIDEO_URL = '/video';
+const VIDEO_URL = 'video';
 const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
@@ -30,6 +30,7 @@ const VideoPlayer = () => {
   const navigate = useNavigate();
   let video_id = params.videoid;
   const { baseURL, setApiUrl } = useContext(ConstrainsContext);
+  console.log(baseURL);
   //const baseURL = 'https://io2.azurewebsites.net/api/';
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
@@ -112,7 +113,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         getComments();
@@ -140,7 +141,7 @@ const VideoPlayer = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       }
     ).then(() => {
       const newTexts = [...responseTexts];
@@ -270,7 +271,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
         setForbiddenErr(false);
@@ -280,7 +281,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setData(response?.data);
@@ -313,7 +314,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
         setReactionsData({
@@ -333,70 +334,70 @@ const VideoPlayer = () => {
         }
       });
       //get comments
-      axios.get(COMMENT_URL + "?id=" + video_id,
-          {
-            headers: { 
-              'Content-Type': 'application/json',
-              "Authorization" : `Bearer ${auth?.accessToken}`
-            },
-            withCredentials: true
-          }
-      ).then(response => {
-        setCommentsData(response?.data.comments);
-        const promises = response?.data.comments.map(comment => {
-          if(comment.hasResponses){
-            axios.get(RESPONSE_URL + "?id=" + comment.id,
-            {
-              headers: { 
-                'Content-Type': 'application/json',
-                "Authorization" : `Bearer ${auth?.accessToken}`
-              },
-              withCredentials: true
-            }
-            ).then(response => {
-              setResponsesData((prevState) => ({
-                ...prevState,
-                [comment.id]: response?.data?.comments,
-              }));
-            }).catch(err => {
-              if(!err?.response) {
-                  setErrMsg('No Server Response')
-              } else if(err.response?.status === 400) {
-                  setErrMsg('Bad request');
-              } else if(err.response?.status === 401){
-                setErrMsg('Unauthorized');
-              } else if(err.response?.status === 404){
-                setErrMsg('Not found');
-              } else {
-                setErrMsg('Getting coments failed');
-              }
-              return Promise.resolve([]);
-            });
-          }
-          return Promise.resolve([]);
-        });
-        Promise.all(promises)
-        .then(() => {
-          setIsLoading(false);
-        });
-        if(commentsData.length === 0){
-          setIsLoading(false);
-        }
-      }).catch(err => {
-        if(!err?.response) {
-            setErrMsg('No Server Response')
-        } else if(err.response?.status === 400) {
-            setErrMsg('Bad request');
-        } else if(err.response?.status === 401){
-          setErrMsg('Unauthorized');
-        } else if(err.response?.status === 403){
-          setErrMsg('Forbidden');
-        } else if(err.response?.status === 404){
-          setErrMsg('Not found');
-        } else {
-            setErrMsg('Getting coments failed');
-        }
-      });
+      // axios.get(COMMENT_URL + "?id=" + video_id,
+      //     {
+      //       headers: { 
+      //         'Content-Type': 'application/json',
+      //         "Authorization" : `Bearer ${auth?.accessToken}`
+      //       },
+      //       withCredentials: false
+      //     }
+      // ).then(response => {
+      //   setCommentsData(response?.data?.comments);
+      //   const promises = response?.data.comments.map(comment => {
+      //     if(comment.hasResponses){
+      //       axios.get(RESPONSE_URL + "?id=" + comment.id,
+      //       {
+      //         headers: { 
+      //           'Content-Type': 'application/json',
+      //           "Authorization" : `Bearer ${auth?.accessToken}`
+      //         },
+      //         withCredentials: false
+      //       }
+      //       ).then(response => {
+      //         setResponsesData((prevState) => ({
+      //           ...prevState,
+      //           [comment.id]: response?.data?.comments,
+      //         }));
+      //       }).catch(err => {
+      //         if(!err?.response) {
+      //             setErrMsg('No Server Response')
+      //         } else if(err.response?.status === 400) {
+      //             setErrMsg('Bad request');
+      //         } else if(err.response?.status === 401){
+      //           setErrMsg('Unauthorized');
+      //         } else if(err.response?.status === 404){
+      //           setErrMsg('Not found');
+      //         } else {
+      //           setErrMsg('Getting coments failed');
+      //         }
+      //         return Promise.resolve([]);
+      //       });
+      //     }
+      //     return Promise.resolve([]);
+      //   });
+      //   Promise.all(promises)
+      //   .then(() => {
+      //     setIsLoading(false);
+      //   });
+      //   if(commentsData.length === 0){
+      //     setIsLoading(false);
+      //   }
+      // }).catch(err => {
+      //   if(!err?.response) {
+      //       setErrMsg('No Server Response')
+      //   } else if(err.response?.status === 400) {
+      //       setErrMsg('Bad request');
+      //   } else if(err.response?.status === 401){
+      //     setErrMsg('Unauthorized');
+      //   } else if(err.response?.status === 403){
+      //     setErrMsg('Forbidden');
+      //   } else if(err.response?.status === 404){
+      //     setErrMsg('Not found');
+      //   } else {
+      //       setErrMsg('Getting coments failed');
+      //   }
+      // });
     }
     }
   }, [params.videoid, auth?.accessToken, auth?.id])
@@ -409,7 +410,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
             setSubscriptionsData(response?.data?.subscriptions);
@@ -423,7 +424,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setCurrnetData(response?.data);
@@ -445,7 +446,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(() => {
         navigate('/profile');
@@ -498,7 +499,7 @@ const VideoPlayer = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
         );
         handleCancelClick();
@@ -536,7 +537,7 @@ const VideoPlayer = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
           );
           handleCancelClick();
@@ -578,7 +579,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
         }
       );
       let positive = reactionsData.positiveCount;
@@ -649,7 +650,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
         }
       );
       navigate('/profile');
@@ -676,7 +677,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
         setCommentsData(response?.data.comments);
@@ -688,7 +689,7 @@ const VideoPlayer = () => {
                 'Content-Type': 'application/json',
                 "Authorization" : `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true
+              withCredentials: false
             }
             ).then(response => {
               setResponsesData((prevState) => ({
@@ -735,7 +736,7 @@ const VideoPlayer = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true
+      withCredentials: false
     }
     ).then(() => {
       getComments();
@@ -762,7 +763,7 @@ const VideoPlayer = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       incrementSubscriptionsCount();
@@ -771,7 +772,7 @@ const VideoPlayer = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       })
       .then(response => {
           setSubscriptionsData(response?.data?.subscriptions);
@@ -791,7 +792,7 @@ const VideoPlayer = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       decrementSubscriptionsCount();
@@ -837,7 +838,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         setDonateAmount(1);
@@ -847,7 +848,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setCurrnetData(response?.data);
@@ -922,7 +923,7 @@ const VideoPlayer = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true //cred
+        withCredentials: false //cred
       }
       ).catch(err => {
         if (!err?.response) {

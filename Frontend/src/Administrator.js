@@ -11,8 +11,8 @@ const METADATA_URL = '/video-metadata';
 const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
 const PLAYLIST_URL = '/playlist/details'
-const COMMENT_URL = '/comment';
-const RESPONSE_URL = '/comment/response'
+const COMMENT_URL = '/comment'; //add /commentById
+const RESPONSE_URL = '/comment/response'; //add ById
 const VIDEO_URL = '/video';
 const BAN_URL = '/ban';
 
@@ -160,7 +160,7 @@ const Administrator = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true 
+            withCredentials: false 
           })
           .then(response => {
             setTicketsData(response?.data);
@@ -178,7 +178,7 @@ const Administrator = () => {
                       'Content-Type': 'application/json',
                       "Authorization" : `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true 
+                    withCredentials: false 
                   })
                   .then(response => {
                     addVideoData(element.ticketId, response?.data);
@@ -192,7 +192,7 @@ const Administrator = () => {
                       'Content-Type': 'application/json',
                       "Authorization" : `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true 
+                    withCredentials: false 
                   })
                   .then(response => {
                     addUsersData(element.ticketId, response?.data);
@@ -206,7 +206,7 @@ const Administrator = () => {
                       'Content-Type': 'application/json',
                       "Authorization" : `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true 
+                    withCredentials: false 
                   })
                   .then(response => {
                     addPlaylistsData(element.ticketId, response?.data);
@@ -220,7 +220,7 @@ const Administrator = () => {
                       'Content-Type': 'application/json',
                       "Authorization" : `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true 
+                    withCredentials: false 
                   })
                   .then(response => {
                     addCommentsData(element.ticketId, response?.data);
@@ -234,7 +234,7 @@ const Administrator = () => {
                       'Content-Type': 'application/json',
                       "Authorization" : `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true 
+                    withCredentials: false 
                   })
                   .then(response => {
                     addCommentsResponseData(element.ticketId, response?.data);
@@ -267,7 +267,7 @@ const Administrator = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         ticket.status.status = "Resolved";
@@ -303,7 +303,7 @@ const Administrator = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
         ).then(() => {
           handleTicketReject(ticket, targetType, index, responseText);
@@ -329,7 +329,7 @@ const Administrator = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
         ).then(() => {
           handleTicketReject(ticket, targetType, index, responseText);
@@ -355,7 +355,7 @@ const Administrator = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
         ).then(() => {
           handleTicketReject(ticket, targetType, index, responseText);
@@ -396,7 +396,7 @@ const Administrator = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         handleTicketDelete(ticket, targetType, index, responseText);

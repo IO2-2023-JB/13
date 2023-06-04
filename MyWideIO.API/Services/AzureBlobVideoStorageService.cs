@@ -33,10 +33,10 @@ namespace MyWideIO.API.Services
             await blobClient.DeleteAsync();
         }
 
-        public async Task UploadVideoFileAsync(Guid id, Stream stream)
+        public async Task UploadVideoFileAsync(Guid id, Stream stream, CancellationToken cancellationToken)
         {
             var blobClient = _blobContainerClient.GetBlobClient(id.ToString() + ".mp4");
-            var response = (await blobClient.UploadAsync(stream, true)).GetRawResponse();
+            var response = (await blobClient.UploadAsync(stream, true, cancellationToken)).GetRawResponse();
             if (response.IsError)
             {
                 throw new UserException("Video upload error");

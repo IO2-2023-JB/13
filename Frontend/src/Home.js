@@ -7,7 +7,7 @@ import AuthContext from "./context/AuthProvider";
 import { useContext } from "react";
 import axios from './api/axios';
 
-const RECOMENDED_URL = '​/playlist​/recommended';
+const RECOMENDED_URL = '/playlist/recommended';
 
 const Home = () => {
 
@@ -27,7 +27,7 @@ const Home = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setVideosData(response?.data?.videos);
@@ -35,7 +35,7 @@ const Home = () => {
         .catch(error => {
           console.log("error: ", error);
         });
-    })
+    }, [auth?.accessToken])
 
     return(
         <div class ="d-flex mt-5 justify-content-center">

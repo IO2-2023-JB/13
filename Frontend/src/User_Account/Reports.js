@@ -89,7 +89,7 @@ const Reports = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true 
+            withCredentials: false 
           })
           .then(response => {
             setTicketsData(response?.data);
@@ -107,7 +107,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false 
                 })
                 .then(response => {
                   addVideoData(element.ticketId, response?.data);
@@ -121,7 +121,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false 
                 })
                 .then(response => {
                   addUsersData(element.ticketId, response?.data);
@@ -135,7 +135,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false 
                 })
                 .then(response => {
                   addPlaylistsData(element.ticketId, response?.data);
@@ -149,7 +149,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true
+                  withCredentials: false
                 })
                 .then(response => {
                   addCommentsData(element.ticketId, response?.data);
@@ -163,7 +163,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true
+                  withCredentials: false
                 })
                 .then(response => {
                   addCommentsResponseData(element.ticketId, response?.data);

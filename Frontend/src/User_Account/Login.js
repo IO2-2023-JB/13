@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {cookies} from '../App'
 
 const LOGIN_URL = '/login';
+const PROFILE_URL = '/user';
 
 const Login = () => {
     const { setAuth } = useAuth();
@@ -40,16 +41,31 @@ const Login = () => {
                 JSON.stringify({email: email, password: pwd}),
                 {
                     headers: { 'Content-Type': 'application/json'},
-                    withCredentials: true //cred
+                    withCredentials: false //cred
                 }
             );
             const token = response?.data?.token;
             const payload = jwt_decode(token);
             const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-            const id = payload["sub"];
+            let id = payload["sub"];
+
             const accessToken = token;
-            setAuth({user: email, pwd, roles, accessToken, id});
             cookies.set("accessToken", accessToken, { expires: new Date(payload["exp"] * 1000)});
+
+            if(!id){
+                const response2 = await axios.get(PROFILE_URL, {
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      "Authorization" : `Bearer ${accessToken}`
+                    },
+                    withCredentials: false 
+                });
+                console.log(response2.data);
+                id = response2?.data?.id;
+                console.log(response2?.data?.id);
+                console.log(id);
+            }
+            setAuth({user: email, pwd, roles, accessToken, id});
             setUser('');
             setPwd('');
             navigate(from, {replace: true});

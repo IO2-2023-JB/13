@@ -52,7 +52,7 @@ const ProfilePage = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setData(response?.data);
@@ -66,7 +66,7 @@ const ProfilePage = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setVideosData(response?.data?.videos);
@@ -80,7 +80,7 @@ const ProfilePage = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setPlaylistsData(response?.data);
@@ -221,7 +221,7 @@ const ProfilePage = () => {
                 'Content-Type': 'application/json',
                 "Authorization" : `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true
+              withCredentials: false
             }
         );
       }catch(err){
@@ -300,7 +300,7 @@ const ProfilePage = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
         }
       );
       } catch (err) {
@@ -354,7 +354,7 @@ const ProfilePage = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
         );
         setData(response?.data);
@@ -402,7 +402,7 @@ const ProfilePage = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
           );
           setData(response?.data);
@@ -472,7 +472,7 @@ const handleWithdrawConfirmClick = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       }
     ).then(() => {
       setWithdrawAmount(1);
@@ -482,7 +482,7 @@ const handleWithdrawConfirmClick = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true 
+        withCredentials: false 
       })
       .then(response => {
         setData(response?.data);

@@ -88,7 +88,7 @@ const AddVideo = () => {
                       'Content-Type': 'application/json',
                       'Authorization': `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true //cred
+                    withCredentials: false //cred
                 }
             );
             const formData = new FormData();
@@ -100,7 +100,7 @@ const AddVideo = () => {
                       'Content-Type': 'application/json',
                       'Authorization': `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true //cred
+                    withCredentials: false //cred
                 }
               );
             handleCancelClick();
@@ -124,7 +124,7 @@ const AddVideo = () => {
                       'Content-Type': 'application/json',
                       'Authorization': `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true //cred
+                    withCredentials: false //cred
                 }
               );
               const formData = new FormData();
@@ -136,7 +136,7 @@ const AddVideo = () => {
                       'Content-Type': 'application/json',
                       'Authorization': `Bearer ${auth?.accessToken}`
                     },
-                    withCredentials: true //cred
+                    withCredentials: false //cred
                 }
               );
               handleCancelClick();

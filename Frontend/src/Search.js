@@ -38,6 +38,7 @@ const Search = (props) => {
         },
         headers: { 
           'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
         }
       })
       .then(response => {

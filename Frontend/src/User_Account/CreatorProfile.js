@@ -69,7 +69,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
         setSubscriptionsData(response?.data?.subscriptions);
@@ -85,7 +85,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setData(response?.data);
@@ -100,7 +100,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setVideosData(response?.data?.videos);
@@ -114,7 +114,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setPlaylistsData(response?.data);
@@ -128,7 +128,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setCurrnetData(response?.data);
@@ -201,7 +201,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
@@ -209,7 +209,7 @@ const CreatorProfile = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       })
       .then(response => {
           setSubscriptionsData(response?.data?.subscriptions);
@@ -229,7 +229,7 @@ const CreatorProfile = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.id !== creator_id);
@@ -268,7 +268,7 @@ const CreatorProfile = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         setDonateAmount(1);
@@ -278,7 +278,7 @@ const CreatorProfile = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setCurrnetData(response?.data);
@@ -324,7 +324,7 @@ const CreatorProfile = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true //cred
+        withCredentials: false //cred
       }
       ).catch(err => {
         if (!err?.response) {

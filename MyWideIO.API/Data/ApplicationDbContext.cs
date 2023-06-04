@@ -15,7 +15,7 @@ namespace MyWideIO.API.Data
         public DbSet<ViewerSubscription> Subscriptions { get; set; }
         public DbSet<TicketModel> Tickets { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-        public ApplicationDbContext(DbContextOptions options) : base(options) { }
+        // public ApplicationDbContext(DbContextOptions options) : base(options) { } ??????????????
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

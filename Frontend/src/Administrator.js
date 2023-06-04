@@ -11,8 +11,8 @@ const METADATA_URL = '/video-metadata';
 const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
 const PLAYLIST_URL = '/playlist/details'
-const COMMENT_URL = '/comment'; //add /commentById
-const RESPONSE_URL = '/comment/response'; //add ById
+const COMMENT_URL = '/comment/commentById';
+const RESPONSE_URL = '/comment/responseById';
 const VIDEO_URL = '/video';
 const BAN_URL = '/ban';
 

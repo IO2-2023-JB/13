@@ -132,7 +132,7 @@ const Register = () => {
                         surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Simple", AvatarImage: base64String }),
                     {
                         headers: { 'Content-Type': 'application/json' },
-                        withCredentials: true //cred
+                        withCredentials: false //cred
                     }
                 );
                 }, 1000);
@@ -144,7 +144,7 @@ const Register = () => {
                         surname: surname, password: pwd, userType: isCreatorChecked?"Creator":"Simple", AvatarImage: null }), //userType: "Simple"
                     {
                         headers: { 'Content-Type': 'application/json' },
-                        withCredentials: true //cred
+                        withCredentials: false //cred
                     }
                 );
             }

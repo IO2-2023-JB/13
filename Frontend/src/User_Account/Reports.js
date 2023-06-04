@@ -9,8 +9,8 @@ const TICKET_LIST = "/ticket/list";
 const METADATA_URL = '/video-metadata';
 const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
-const COMMENT_URL = '/comment';
-const RESPONSE_URL = '/comment/response'
+const COMMENT_URL = '/comment/commentById'; //add /commentById
+const RESPONSE_URL = '/comment/responseById'; //add ById
 
 const Reports = () => {
     const { auth } = useContext(AuthContext);
@@ -23,6 +23,12 @@ const Reports = () => {
     const [playlistsData, setPlaylistsData] = useState({});
     const [commentsData, setCommentsData] = useState({});
     const [commentsResponseData, setCommentsResponseData] = useState({});
+
+    useEffect(() => {
+      if(auth.roles === "Administrator"){
+        navigate('/administrator');
+      }
+    });
 
     const goToProfile = (user_id) => {
       if(user_id){
@@ -83,7 +89,7 @@ const Reports = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true 
+            withCredentials: false 
           })
           .then(response => {
             setTicketsData(response?.data);
@@ -101,7 +107,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false 
                 })
                 .then(response => {
                   addVideoData(element.ticketId, response?.data);
@@ -115,7 +121,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false 
                 })
                 .then(response => {
                   addUsersData(element.ticketId, response?.data);
@@ -129,7 +135,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false 
                 })
                 .then(response => {
                   addPlaylistsData(element.ticketId, response?.data);
@@ -143,7 +149,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false
                 })
                 .then(response => {
                   addCommentsData(element.ticketId, response?.data);
@@ -157,7 +163,7 @@ const Reports = () => {
                     'Content-Type': 'application/json',
                     "Authorization" : `Bearer ${auth?.accessToken}`
                   },
-                  withCredentials: true 
+                  withCredentials: false
                 })
                 .then(response => {
                   addCommentsResponseData(element.ticketId, response?.data);
@@ -175,10 +181,7 @@ const Reports = () => {
             <div class="display-5">Videos:</div>
             {ticketsData.map(ticket => (
                   <div>
-                    {videosData[ticket.ticketId] === undefined ? (
-                      <div>
-                      </div>
-                    ):(
+                    {videosData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                          <div class="justify-content-center" style={{marginTop:"20px", 
@@ -206,6 +209,14 @@ const Reports = () => {
                           </div> 
                         </div>
                         </div>
+                        <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                         </div>
                     )}
                   </div>
@@ -213,10 +224,7 @@ const Reports = () => {
             <div style={{marginTop:"50px"}} class="display-5">Users:</div>
             {ticketsData.map(ticket => (
                   <div>
-                    {usersData[ticket.ticketId] === undefined ? (
-                      <div>
-                      </div>
-                    ):(
+                    {usersData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                          <div class="justify-content-center" style={{marginTop:"20px", 
@@ -246,6 +254,14 @@ const Reports = () => {
                             </div>
                       </div>
                       </div>
+                      <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -253,43 +269,43 @@ const Reports = () => {
             <div style={{marginTop:"50px"}} class="display-5">Playlists:</div>
             {ticketsData.map(ticket => (
                   <div>
-                    {playlistsData[ticket.ticketId] === undefined ? (
-                      <div>
-                      </div>
-                    ):(
+                    {playlistsData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
-                         <div class="justify-content-center" style={{marginTop:"20px", 
-              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                      <h3>Reason:</h3> {ticket.reason}
-                      </div>
-                      <div class="justify-content-center" style={{marginTop:"20px", 
-              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                  <li style={{listStyleType: "none"}}>
-                  <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`}}>
-                    <div className="box2" style={{width:"280px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlistsData[ticket.ticketId].id)}>
-                        <table style={{backgroundColor: "transparent"}}>
-                            <tr style={{backgroundColor: "transparent"}}>
-                            <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
-                              <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{playlistsData[ticket.ticketId].name}</h2>
+                         <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                            <h3>Reason:</h3> {ticket.reason}
+                          </div>
+                          <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                            <li style={{listStyleType: "none"}}>
+                            <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: '#FF4500'}}>
+                              <div className="box2" style={{width:"280px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlistsData[ticket.ticketId].id)}>
+                                <table style={{backgroundColor: "transparent"}}>
+                                  <tr style={{backgroundColor: "transparent"}}>
+                                    <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                                      <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{playlistsData[ticket.ticketId].name}</h2>
+                                    </div>
+                                  </tr>
+                                </table>
+                              </div> 
                             </div>
-                            </tr>
-                        </table>
-                        </div> 
-                    </div>
-                    </li>
-                      </div>
-                      </div>
+                            </li>
+                          </div>
+                          <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
+                        </div>
                     )}
                   </div>
             ))}
-                        <div style={{marginTop:"50px"}} class="display-5">Comments:</div>
+            <div style={{marginTop:"50px"}} class="display-5">Comments:</div>
             {ticketsData.map(ticket => (
                   <div>
-                    {commentsData[ticket.ticketId] === undefined ? (
-                      <div>
-                      </div>
-                    ):(
+                    {commentsData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                          <div class="justify-content-center" style={{marginTop:"20px", 
@@ -300,18 +316,23 @@ const Reports = () => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
                         {commentsData[ticket.ticketId].nickname}: {commentsData[ticket.ticketId].content}
                       </div>
+                      <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
             ))}
 
-<div style={{marginTop:"50px"}} class="display-5">Comments responses:</div>
+            <div style={{marginTop:"50px"}} class="display-5">Comments responses:</div>
             {ticketsData.map(ticket => (
                   <div>
-                    {commentsResponseData[ticket.ticketId] === undefined ? (
-                      <div>
-                      </div>
-                    ):(
+                    {commentsResponseData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                          <div class="justify-content-center" style={{marginTop:"20px", 
@@ -322,6 +343,14 @@ const Reports = () => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
                         {commentsResponseData[ticket.ticketId].nickname}: {commentsResponseData[ticket.ticketId].content}
                       </div>
+                      <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
+                          <h3>Status: {ticket.status.status}</h3>
+                          { ticket.status.status === "Resolved" && (
+                            <div>
+                              <h3>Response: {ticket.response}</h3>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

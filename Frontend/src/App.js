@@ -48,14 +48,35 @@ function App() {
 
   const from = location.state?.from?.pathname || "/home";
 
+  const PROFILE_URL = '/user';
+
   useEffect(() => {
     const accessToken = cookies.get('accessToken');
     if (accessToken) {
       const payload = jwt_decode(accessToken);
       const roles = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       const email = "";
-      const id = payload["sub"];
-      setAuth({user: email, pwd: "", roles, accessToken, id});
+      let id = payload["sub"];
+      setAuth({user: email, roles, accessToken, id});
+      if(id === undefined){
+        const savedApiUrl = localStorage.getItem('apiUrl');
+        if (savedApiUrl) {
+          setApiUrl(savedApiUrl);
+          axios.defaults.baseURL = savedApiUrl;
+        }
+        axios.get(PROFILE_URL, {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${accessToken}`
+            },
+            withCredentials: false 
+        }).then((response)=> {
+          id = response?.data?.id;
+          setAuth({user: email, roles, accessToken, id});
+        }).catch((err) => {
+          console.log('error' + err);
+        });
+      }
       const lastVisitedPage = localStorage.getItem("lastVisitedPage");
       if(from !== "/home"){
         navigate(from, {replace: true});
@@ -67,7 +88,7 @@ function App() {
         navigate(from, {replace: true});
       }
     }
-  }, [setAuth]);
+  }, []);
 
   const [sidebar, setSidebar] = useState(false);
 

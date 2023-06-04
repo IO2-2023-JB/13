@@ -12,6 +12,9 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
 import { ConstrainsContext } from "./api/ApiConstrains";
+import useAuth from './hooks/useAuth';
+import { cookies } from "./App";
+import jwt_decode  from 'jwt-decode';
 
 const VIDEO_URL = 'video';
 const METADATA_URL = '/video-metadata';
@@ -25,13 +28,12 @@ const REPORT_URL = '/ticket';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
+  const { setAuth } = useAuth();
   const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   let video_id = params.videoid;
   const { baseURL, setApiUrl } = useContext(ConstrainsContext);
-  console.log(baseURL);
-  //const baseURL = 'https://io2.azurewebsites.net/api/';
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
@@ -207,42 +209,16 @@ const VideoPlayer = () => {
 
   const [commentsData, setCommentsData] = useState([]);
   const [responsesData, setResponsesData] = useState({});
-
-  const [currentData, setCurrnetData] = useState(null);
   
-  // useEffect(() => {
-  //   if (!auth?.accessToken) {
-  //     navigate('/login', { state: { from: location } });
-  //   }
-  // }, [auth]);
+  useEffect(() => {
+    if (!auth?.accessToken) {
+      navigate('/login', { state: { from: location } });
+    }
+  }, [auth]);
 
   useEffect(() => {
     setIsLoading(false);
   }, [reactionsData]);
-
-  const [currnetUserData, setCurrentUserData] = useState({
-    firstName: "Loading...",
-    lastName: "Loading...",
-    nickname: "Loading...",
-    email: "Loading...",
-    accountBalance: 0,
-    avatarImage: '',
-    userType: '',
-  });
-
-  useEffect(() => {
-    if (currentData) {
-      setCurrentUserData({
-        firstName: currentData?.name,
-        lastName: currentData?.surname,
-        nickname: currentData?.nickname,
-        email: currentData?.email,
-        accountBalance: currentData?.accountBalance,
-        avatarImage: currentData?.avatarImage,
-        userType: currentData?.userType,
-      });
-    }
-  }, [currentData]);
 
   useEffect(() => {
     setTags(videoData.tags);
@@ -302,7 +278,6 @@ const VideoPlayer = () => {
             setErrMsg('Forbidden');
         } else if(err.response?.status === 404){
             setErrMsg('Not found');
-          //navigate('/home');
         } else {
             setErrMsg('Getting metadata failed');
         }
@@ -334,106 +309,97 @@ const VideoPlayer = () => {
         }
       });
       //get comments
-      // axios.get(COMMENT_URL + "?id=" + video_id,
-      //     {
-      //       headers: { 
-      //         'Content-Type': 'application/json',
-      //         "Authorization" : `Bearer ${auth?.accessToken}`
-      //       },
-      //       withCredentials: false
-      //     }
-      // ).then(response => {
-      //   setCommentsData(response?.data?.comments);
-      //   const promises = response?.data.comments.map(comment => {
-      //     if(comment.hasResponses){
-      //       axios.get(RESPONSE_URL + "?id=" + comment.id,
-      //       {
-      //         headers: { 
-      //           'Content-Type': 'application/json',
-      //           "Authorization" : `Bearer ${auth?.accessToken}`
-      //         },
-      //         withCredentials: false
-      //       }
-      //       ).then(response => {
-      //         setResponsesData((prevState) => ({
-      //           ...prevState,
-      //           [comment.id]: response?.data?.comments,
-      //         }));
-      //       }).catch(err => {
-      //         if(!err?.response) {
-      //             setErrMsg('No Server Response')
-      //         } else if(err.response?.status === 400) {
-      //             setErrMsg('Bad request');
-      //         } else if(err.response?.status === 401){
-      //           setErrMsg('Unauthorized');
-      //         } else if(err.response?.status === 404){
-      //           setErrMsg('Not found');
-      //         } else {
-      //           setErrMsg('Getting coments failed');
-      //         }
-      //         return Promise.resolve([]);
-      //       });
-      //     }
-      //     return Promise.resolve([]);
-      //   });
-      //   Promise.all(promises)
-      //   .then(() => {
-      //     setIsLoading(false);
-      //   });
-      //   if(commentsData.length === 0){
-      //     setIsLoading(false);
-      //   }
-      // }).catch(err => {
-      //   if(!err?.response) {
-      //       setErrMsg('No Server Response')
-      //   } else if(err.response?.status === 400) {
-      //       setErrMsg('Bad request');
-      //   } else if(err.response?.status === 401){
-      //     setErrMsg('Unauthorized');
-      //   } else if(err.response?.status === 403){
-      //     setErrMsg('Forbidden');
-      //   } else if(err.response?.status === 404){
-      //     setErrMsg('Not found');
-      //   } else {
-      //       setErrMsg('Getting coments failed');
-      //   }
-      // });
+      axios.get(COMMENT_URL + "?id=" + video_id,
+          {
+            headers: { 
+              'Content-Type': 'application/json',
+              "Authorization" : `Bearer ${auth?.accessToken}`
+            },
+            withCredentials: false
+          }
+      ).then(response => {
+        let comments;
+        if(response?.data?.comments){
+          comments = response?.data?.comments;
+          setCommentsData(response?.data?.comments);
+        }else{
+          comments = response?.data;
+          setCommentsData(response?.data);
+        }
+        const promises = comments.map(comment => {
+          if(comment.hasResponses){
+            axios.get(RESPONSE_URL + "?id=" + comment.id,
+            {
+              headers: { 
+                'Content-Type': 'application/json',
+                "Authorization" : `Bearer ${auth?.accessToken}`
+              },
+              withCredentials: false
+            }
+            ).then(response => {
+              setResponsesData((prevState) => ({
+                ...prevState,
+                [comment.id]: response?.data?.comments,
+              }));
+            }).catch(err => {
+              if(!err?.response) {
+                  setErrMsg('No Server Response')
+              } else if(err.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if(err.response?.status === 401){
+                setErrMsg('Unauthorized');
+              } else if(err.response?.status === 404){
+                setErrMsg('Not found');
+              } else {
+                setErrMsg('Getting coments failed');
+              }
+              return Promise.resolve([]);
+            });
+          }
+          return Promise.resolve([]);
+        });
+        Promise.all(promises)
+        .then(() => {
+          setIsLoading(false);
+        });
+        if(commentsData.length === 0){
+          setIsLoading(false);
+        }
+      }).catch(err => {
+        if(!err?.response) {
+            setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+          setErrMsg('Unauthorized');
+        } else if(err.response?.status === 403){
+          setErrMsg('Forbidden');
+        } else if(err.response?.status === 404){
+          setErrMsg('Not found');
+        } else {
+            setErrMsg('Getting coments failed');
+        }
+        
+      });
+
+      axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: false 
+      })
+      .then(response => {
+          setSubscriptionsData(response?.data?.subscriptions);
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
     }
     }
-  }, [params.videoid, auth?.accessToken, auth?.id])
+  }, [params.videoid, auth])
 
   const [subscriptionsData, setSubscriptionsData] = useState([]);
-
-    useEffect(() => {
-        axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
-          headers: { 
-            'Content-Type': 'application/json',
-            "Authorization" : `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: false 
-        })
-        .then(response => {
-            setSubscriptionsData(response?.data?.subscriptions);
-        })
-        .catch(error => {
-          console.log("error: ", error);
-        });
-
-        axios.get(PROFILE_URL, {
-          headers: { 
-            'Content-Type': 'application/json',
-            "Authorization" : `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: false 
-        })
-        .then(response => {
-          setCurrnetData(response?.data);
-        })
-        .catch(error => {
-          console.log("error: ", error);
-        });
-
-    }, [auth?.accessToken, auth?.id]);
 
   const handleEditClick = () => {
     setEditMode(true);
@@ -849,9 +815,6 @@ const VideoPlayer = () => {
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
           withCredentials: false 
-        })
-        .then(response => {
-          setCurrnetData(response?.data);
         })
         .catch(error => {
           console.log("error: ", error);

@@ -59,6 +59,8 @@ namespace MyWideIO.API.Services
             };
 
             var rawComments = await _commentRepository.GetVideoComments(videoId);
+            if (rawComments == null)
+                throw new Exception("No video of given id");
             foreach (var cmnt in rawComments) // mozna zrobic oddzielna funkcje - 'mapper', jak sie w kilku miejscach to samo robi
                                               // tylko wtedy trzeba dodac pole Author w komentarzu i go includowac w repository
             {

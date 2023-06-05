@@ -16,7 +16,7 @@ namespace MyWideIO.API.Controllers
     /// 
     /// </summary>
     [ApiController]
-    [Route("subscribtions")]
+    [Route("subscriptions")]
     [Authorize] // jak jest tutaj, to nie trzeba tego pisac przed kazda metoda
     public class SubscriptionsApiController : ControllerBase
     {

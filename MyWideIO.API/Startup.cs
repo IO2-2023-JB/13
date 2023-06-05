@@ -85,15 +85,12 @@ namespace MyWideIO.API
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowLocalhost3000",
-                    builder =>
-                    {
-                        //builder.WithOrigins("http://localhost:3000")
-                        builder//.AllowAnyOrigin()
-                               .AllowAnyHeader()
-                               .AllowAnyMethod()
-                               .SetIsOriginAllowed(o => true)
-                               .AllowCredentials();
-                    });
+                    builder => builder
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .SetIsOriginAllowed(o => true)
+                    .AllowCredentials()
+                    );
             });
 
             // JWT
@@ -201,11 +198,6 @@ namespace MyWideIO.API
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
             });
 
-            services.Configure<KestrelServerOptions>(options =>
-            {
-                options.Limits.MaxRequestBodySize = null; //:)
-                options.Limits.MaxRequestBufferSize = null;
-            });
             services.AddHostedService<VideoProcessingBackgroundService>();
             services.AddSingleton<IBackgroundTaskQueue<VideoProcessWorkItem>>(ctx =>
             {

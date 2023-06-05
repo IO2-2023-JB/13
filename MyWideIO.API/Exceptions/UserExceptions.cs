@@ -16,6 +16,10 @@
         {
 
         }
+
+        public ForbiddenException(string? message) : base(message)
+        {
+        }
     }
     public class DuplicateEmailException : UserException
     {

@@ -35,7 +35,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost]
-        [Consumes("application/json")]
+        [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddCommentToVideo")]
         public virtual async Task<IActionResult> AddCommentToVideo([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
@@ -55,7 +55,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost("response")]
-        [Consumes("application/json")]
+        [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddResponseToComment")]
         public virtual async Task<IActionResult> AddResponseToComment([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)

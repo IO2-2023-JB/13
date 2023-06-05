@@ -37,10 +37,11 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [Produces("application/json")]
         [SwaggerOperation("BanUser")]
-        [Authorize(Roles = "Admin")]
-        public IActionResult BanUser([FromRoute(Name = "id")][Required] Guid id)
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> BanUser([FromRoute(Name = "id")][Required] Guid id)
         {
-            throw new NotImplementedException();
+            await _userService.BanUserAsync(id);
+            return Ok();
         }
 
         /// <summary>   
@@ -83,6 +84,7 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(UserDto), description: "OK")]
         [SwaggerResponse(statusCode: 400, description: "Bad Request")]
         [SwaggerResponse(statusCode: 401, description: "Unauthorized")]
+        [Authorize(Roles = "Creator,Simple")]
         public async Task<IActionResult> EditUserData([FromQuery(Name = "id")] Guid? id, [FromBody] UpdateUserDto updateUserDto)
         {
             if (id is null)

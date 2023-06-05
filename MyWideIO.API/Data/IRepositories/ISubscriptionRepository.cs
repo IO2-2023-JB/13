@@ -5,7 +5,7 @@ namespace MyWideIO.API.Data.IRepositories
 {
     public interface ISubscriptionRepository
     {
-        public Task AddSubscribtionAsync(ViewerSubscription subscribtion);
+        public Task AddSubscriptionAsync(ViewerSubscription subscription);
         public Task<UserSubscriptionListDto> GetSubscriptionsAsync(Guid id);
         public Task UnsubscribeAsync(ViewerSubscription sub);
         public Task<bool> IsSubscribedAsync(Guid viewerId, Guid subId);

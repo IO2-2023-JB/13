@@ -19,7 +19,7 @@ namespace MyWideIO.API.Data.Repositories
         }
 
         // public async Task AddSubscriptionAsync(ViewerSubscription subscription)
-        public async Task AddSubscribtionAsync(ViewerSubscription subscription) // SubscribeAsync, albo AddSubscriptionAsync
+        public async Task AddSubscriptionAsync(ViewerSubscription subscription) // SubscribeAsync, albo AddSubscriptionAsync
         {
             _dbContext.Subscriptions.Add(subscription);
             await _dbContext.SaveChangesAsync();
@@ -35,7 +35,7 @@ namespace MyWideIO.API.Data.Repositories
             if (user != null)
             {
                 // nie ma logiki w repozytorium
-                List<SubscribtionDto> subscriptions = new List<SubscribtionDto>();
+                List<SubscriptionDto> subscriptions = new List<SubscriptionDto>();
                 foreach (var sub in _dbContext.Subscriptions.Where(s => s.ViewerId == id).ToList()) // najpierw ToList, a potem enumerowanie?
                 {
                     var creator = _dbContext.Users.Find(sub.CreatorId);
@@ -48,7 +48,7 @@ namespace MyWideIO.API.Data.Repositories
                         continue;
                     }
 
-                    subscriptions.Add(new SubscribtionDto() { Id = sub.CreatorId, Nickname = creator.UserName, AvatarImage = creator.ProfilePicture?.Url });
+                    subscriptions.Add(new SubscriptionDto() { Id = sub.CreatorId, Nickname = creator.UserName, AvatarImage = creator.ProfilePicture?.Url });
                     // nie ma dto w repozytorium
                 }
                 return new UserSubscriptionListDto() { Subscriptions = subscriptions }; // nie ma dto w repozytorium

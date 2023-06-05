@@ -47,12 +47,12 @@ const ProfilePage = () => {
   })
 
   useEffect(() => {
-    axios.get(PROFILE_URL + "?id=" + auth?.id, {
+    axios.get(PROFILE_URL, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setData(response?.data);
@@ -66,7 +66,7 @@ const ProfilePage = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setVideosData(response?.data?.videos);
@@ -80,7 +80,7 @@ const ProfilePage = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(response => {
       setPlaylistsData(response?.data);
@@ -221,7 +221,7 @@ const ProfilePage = () => {
                 'Content-Type': 'application/json',
                 "Authorization" : `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true
+              withCredentials: false
             }
         );
       }catch(err){
@@ -300,7 +300,7 @@ const ProfilePage = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
         }
       );
       } catch (err) {
@@ -354,7 +354,7 @@ const ProfilePage = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
         );
         setData(response?.data);
@@ -402,7 +402,7 @@ const ProfilePage = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
           );
           setData(response?.data);
@@ -472,7 +472,7 @@ const handleWithdrawConfirmClick = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       }
     ).then(() => {
       setWithdrawAmount(1);
@@ -482,7 +482,7 @@ const handleWithdrawConfirmClick = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true 
+        withCredentials: false 
       })
       .then(response => {
         setData(response?.data);
@@ -550,11 +550,13 @@ return (
                   <button class="btn btn-danger mb-4" onClick={handleDeleteClick}>Delete account</button>
                 </div>
               </div>
+              { userType !== 'Administrator' && (
               <div className="row">
                 <div className="col">
                 <button onClick={handleWithdrawClick} class="btn btn-success mb-4">Withdraw money</button>
                 </div>
               </div>
+              )}
             </div>
             {isWithdrawing && (
               <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
@@ -658,6 +660,7 @@ return (
             </section>
             </div>
             )}
+          { userType !== 'Administrator' && (
           <div class="col-sm">
           <h2>Your Playlists</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
@@ -696,7 +699,8 @@ return (
               </ul>
             </section>
           </div>
-          {userType!=='Creator' && (
+          )}
+          { userType!=='Creator' && userType!=='Administrator' && (
             <div class="col-sm">
               <button onClick={handleCreatorClick}>Become Creator</button>
             </div>

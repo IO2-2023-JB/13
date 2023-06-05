@@ -85,13 +85,12 @@ namespace MyWideIO.API
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowLocalhost3000",
-                    builder =>
-                    {
-                        builder.AllowAnyHeader()
-                               .AllowAnyMethod()
-                               .SetIsOriginAllowed(o => true)
-                               .AllowCredentials();
-                    });
+                    builder => builder
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .SetIsOriginAllowed(o => true)
+                    .AllowCredentials()
+                    );
             });
 
             // JWT

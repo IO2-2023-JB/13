@@ -51,7 +51,7 @@ const AddPlaylist = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true 
+            withCredentials: false 
           })
           .then(response => {
             setVideosData(response?.data?.videos);
@@ -87,7 +87,7 @@ const AddPlaylist = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
           }
         );
         const requests = videosList.map( (video_id) => {
@@ -97,7 +97,7 @@ const AddPlaylist = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
           }
           ).catch(err => {
             if (!err?.response) {
@@ -174,7 +174,7 @@ const AddPlaylist = () => {
                             <div>
                             <li style={{listStyleType: "none"}}>
                             <div className="box" style={{width:"300px", height:"170px"}}>
-                              <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                              <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center", cursor: "pointer"}}>
                                   <table style={{backgroundColor: "transparent"}}>
                                       <tr style={{backgroundColor: "transparent"}}>
                                         <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
@@ -193,7 +193,7 @@ const AddPlaylist = () => {
                             <div>
                             <li style={{listStyleType: "none"}}>
                             <div className="box" style={{width:"300px", height:"170px", backgroundColor: "rgba(0, 255, 0, 0.3)"}}>
-                              <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                              <div className="box2" style={{width:"280px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center", cursor: "pointer"}}>
                                   <table style={{backgroundColor: "rgba(0, 255, 0, 0.2)"}}>
                                       <tr style={{backgroundColor: "transparent"}}>
                                         <div className="movie_title" style={{width:"280px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>

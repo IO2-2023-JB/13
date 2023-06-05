@@ -24,7 +24,7 @@ const SubscriptionsVideos = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
             setVideosData(response?.data?.videos);

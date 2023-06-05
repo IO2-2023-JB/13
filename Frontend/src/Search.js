@@ -98,8 +98,8 @@ const Search = (props) => {
                         (video.processingProgress === 'Ready' || video.authorId === auth.id) && (
                         <div style={{marginTop:"20px", color:"white", borderRadius:"15px",
                                 padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>
-                              <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
-                                <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                              <div className="box3" style={{width:"320px", height:"170px", cursor: "pointer"}}>
+                                <div className="box4" style={{width:"300px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
                                     <table style={{backgroundColor: "transparent"}}>
                                         <tr style={{backgroundColor: "transparent"}}>
                                         <div className="movie_thumbnail" style={{width:"180px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoClick(video.id)}>

@@ -128,7 +128,7 @@ const Search = (props) => {
                                 padding:"10px", backgroundColor:"#222222"}}> Users </div>
                 <div>
                     {usersData.map(user => (
-                        <div className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                        <div className="search_list_item" style={{marginTop:"20px", color:"white", borderRadius:"15px",
                                 padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => goToProfile(user.id)}>
                               <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
                                 <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${user.avatarImage})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>

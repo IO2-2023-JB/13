@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from 'react';
 import axios from './api/axios';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from "./context/AuthProvider";
+import './Search.css';
 
 const SEARCH_URL = '/search';
 
@@ -67,21 +68,25 @@ const Search = (props) => {
 
   // Component logic
   return (
-    <div style={{marginTop:"200px"}} class="container">
-          <section class="container" style={{ marginBottom:"50px",
+    <div style={{marginTop:"150px"}} class="container">
+          <div style={{ marginBottom:"50px",
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-            <h2 class="display-6"> Sorting criterion: </h2>
-            <div class="row" style={{marginBottom:"50px"}}>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==1 ? "gray" : "black" }} onClick={()=>handleClickCriterion(1)}>Publish date</button>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==2 ? "gray" : "black" }} onClick={()=>handleClickCriterion(2)}>Alphabetical</button>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==3 ? "gray" : "black" }} onClick={()=>handleClickCriterion(3)}>Popularity</button>
+            <div class="ib" style={{marginBottom:"15px"}}>
+              <div class="ib"> Sorting criterion: </div>
+              <div class="ib">
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeCriterion==1 ? "gray" : "black" }} onClick={()=>handleClickCriterion(1)}>Publish date</button>
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeCriterion==2 ? "gray" : "black" }} onClick={()=>handleClickCriterion(2)}>Alphabetical</button>
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeCriterion==3 ? "gray" : "black" }} onClick={()=>handleClickCriterion(3)}>Popularity</button>
+              </div>
             </div>
-            <h2 class="display-6"> Sorting type: </h2>
-            <div class="row">
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeType==1 ? "gray" : "black" }} onClick={()=>handleClickType(1)}>Ascending</button>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeType==2 ? "gray" : "black" }} onClick={()=>handleClickType(2)}>Descending</button>
+            <div class="ib">
+              <div class="ib"> Sorting type: </div>
+              <div class="ib">
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeType==1 ? "gray" : "black" }} onClick={()=>handleClickType(1)}>Ascending</button>
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeType==2 ? "gray" : "black" }} onClick={()=>handleClickType(2)}>Descending</button>
+              </div>
             </div>
-          </section>
+          </div>
           <div class="row" style={{marginBottom:"100px"}}>
             <div class="col-sm">
               <h2 class="display-5"> Videos: </h2>

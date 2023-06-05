@@ -50,7 +50,7 @@ namespace MyWideIO.API.Services
 
                 creator.SubscribersAmount++;
                 await _userManager.UpdateAsync(creator);
-                await _subscriptionRepository.AddSubscribtionAsync(subscription);
+                await _subscriptionRepository.AddSubscriptionAsync(subscription);
             }
             else
             {

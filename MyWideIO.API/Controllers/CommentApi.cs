@@ -35,12 +35,13 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost]
-        [Consumes("application/json")]
+        [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddCommentToVideo")]
         public virtual async Task<IActionResult> AddCommentToVideo([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
         {
-            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            string claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Guid userId = Guid.Parse(claim);
             await _commentService.AddNewComment(id, body, userId);
             return Ok();
         }
@@ -54,7 +55,7 @@ namespace MyWideIO.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
         [HttpPost("response")]
-        [Consumes("application/json")]
+        [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddResponseToComment")]
         public virtual async Task<IActionResult> AddResponseToComment([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
@@ -93,7 +94,7 @@ namespace MyWideIO.API.Controllers
         [SwaggerOperation("GetComments")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
         [SwaggerResponse(statusCode: 404, description: "Not Found")]
-        public virtual async Task<IActionResult> GetComments([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<ActionResult<CommentListDto>> GetComments([FromQuery(Name = "id")][Required()] Guid id)
         {
             return Ok(await _commentService.GetVideoComments(id));
         }
@@ -110,7 +111,7 @@ namespace MyWideIO.API.Controllers
         [SwaggerOperation("GetResponseData")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentListDto), description: "OK")]
         [SwaggerResponse(statusCode: 404, description: "Not Found")]
-        public virtual async Task<IActionResult> GetResponseData([FromQuery(Name = "id")][Required()] Guid id)
+        public virtual async Task<ActionResult<CommentListDto>> GetResponseData([FromQuery(Name = "id")][Required()] Guid id)
         {
             return Ok(await _commentService.GetCommentResponses(id));
         }
@@ -120,7 +121,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetCommentById")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentDto), description: "OK")]
-        public async Task<IActionResult> GetCommentById([FromQuery(Name = "id")][Required()] Guid id)
+        public async Task<ActionResult<CommentDto>> GetCommentById([FromQuery(Name = "id")][Required()] Guid id)
         {
             return Ok(await _commentService.GetCommentById(id));
         }
@@ -130,7 +131,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("getCommentResponseById")]
         [SwaggerResponse(statusCode: 200, type: typeof(CommentDto), description: "OK")]
-        public async Task<IActionResult> GetCommentResponseById([FromQuery(Name = "id")][Required()] Guid id)
+        public async Task<ActionResult<CommentDto>> GetCommentResponseById([FromQuery(Name = "id")][Required()] Guid id)
         {
             return Ok(await _commentService.GetCommentResponseById(id));
         }

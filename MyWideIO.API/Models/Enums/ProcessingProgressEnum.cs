@@ -44,16 +44,19 @@ namespace MyWideIO.API.Models.Enums
         [EnumMember(Value = "FailedToUpload")]
         FailedToUpload = 4,
 
+        [EnumMember(Value = "FailedToProcess")]
+        FailedToProcess = 5,
+
         /// <summary>
         /// Enum Processing for Processing
         /// </summary>
         [EnumMember(Value = "Processing")]
-        Processing = 5,
+        Processing = 6,
 
         /// <summary>
         /// Enum Ready for Ready
         /// </summary>
         [EnumMember(Value = "Ready")]
-        Ready = 6
+        Ready = 7
     }
 }

@@ -59,6 +59,8 @@ namespace MyWideIO.API.Services
             };
 
             var rawComments = await _commentRepository.GetVideoComments(videoId);
+            if (rawComments == null)
+                throw new Exception("No video of given id");
             foreach (var cmnt in rawComments) // mozna zrobic oddzielna funkcje - 'mapper', jak sie w kilku miejscach to samo robi
                                               // tylko wtedy trzeba dodac pole Author w komentarzu i go includowac w repository
             {
@@ -102,11 +104,35 @@ namespace MyWideIO.API.Services
         }
         public async Task<CommentDto> GetCommentById(Guid id)
         {
-            throw new NotImplementedException();
+            var model = await _commentRepository.GetComment(id);
+            if (model.VideoId == null || model.ParentCommentId != null)
+                throw new Exception("Comment of given id is not a video comment (probably a response)");
+            UserDto user = await _userService.GetUserAsync(model.AuthorId);
+            return new CommentDto()
+            {
+                Id = model.Id,
+                AuthorId = model.AuthorId,
+                Content = model.Content,
+                AvatarImage = user.AvatarImage,
+                Nickname = user.Nickname,
+                HasResponses = model.hasResponses
+            };
         }
         public async Task<CommentDto> GetCommentResponseById(Guid id)
         {
-            throw new NotImplementedException();
+            var model = await _commentRepository.GetComment(id);
+            if (model.VideoId != null || model.ParentCommentId == null)
+                throw new Exception("Comment of given id is not a response (probably a video comment)");
+            UserDto user = await _userService.GetUserAsync(model.AuthorId);
+            return new CommentDto()
+            {
+                Id = model.Id,
+                AuthorId = model.AuthorId,
+                Content = model.Content,
+                AvatarImage = user.AvatarImage,
+                Nickname = user.Nickname,
+                HasResponses = model.hasResponses
+            };
         }
     }
 }

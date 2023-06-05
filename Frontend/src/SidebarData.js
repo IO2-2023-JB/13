@@ -17,8 +17,8 @@ export const SidebarData = [
   },
   {
     title: 'API 3 - gr. 11',
-    text: 'https://wetubeback.azurewebsites.net/api',
-    apiUrl: 'https://wetubeback.azurewebsites.net/api',
+    text: 'https://wetubeback.azurewebsites.net/api/',
+    apiUrl: 'https://wetubeback.azurewebsites.net/api/',
     icon: <AiIcons.AiFillHome />,
   },
   {

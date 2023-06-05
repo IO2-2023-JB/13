@@ -24,7 +24,7 @@ namespace MyWideIO.API.Models.Dto_Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class SubscribtionDto : IEquatable<SubscribtionDto>
+    public partial class SubscriptionDto : IEquatable<SubscriptionDto>
     {
         /// <summary>
         /// Gets or Sets Id
@@ -54,7 +54,7 @@ namespace MyWideIO.API.Models.Dto_Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class SubscribtionDto {\n");
+            sb.Append("class SubscriptionDto {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  AvatarImage: ").Append(AvatarImage).Append("\n");
             sb.Append("  Nickname: ").Append(Nickname).Append("\n");
@@ -80,15 +80,15 @@ namespace MyWideIO.API.Models.Dto_Models
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((SubscribtionDto)obj);
+            return obj.GetType() == GetType() && Equals((SubscriptionDto)obj);
         }
 
         /// <summary>
-        /// Returns true if SubscribtionDto instances are equal
+        /// Returns true if SubscriptionDto instances are equal
         /// </summary>
-        /// <param name="other">Instance of SubscribtionDto to be compared</param>
+        /// <param name="other">Instance of SubscriptionDto to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SubscribtionDto other)
+        public bool Equals(SubscriptionDto other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -134,12 +134,12 @@ namespace MyWideIO.API.Models.Dto_Models
         #region Operators
 #pragma warning disable 1591
 
-        public static bool operator ==(SubscribtionDto left, SubscribtionDto right)
+        public static bool operator ==(SubscriptionDto left, SubscriptionDto right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(SubscribtionDto left, SubscribtionDto right)
+        public static bool operator !=(SubscriptionDto left, SubscriptionDto right)
         {
             return !Equals(left, right);
         }

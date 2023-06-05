@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from 'react';
 import axios from './api/axios';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from "./context/AuthProvider";
+import './Search.css';
 
 const SEARCH_URL = '/search';
 
@@ -67,98 +68,114 @@ const Search = (props) => {
 
   // Component logic
   return (
-    <div style={{marginTop:"200px"}} class="container">
-          <section class="container" style={{ marginBottom:"50px",
+    <div style={{marginTop:"150px"}} class="container">
+          <div style={{ marginBottom:"20px",
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-            <h2 class="display-6"> Sorting criterion: </h2>
-            <div class="row" style={{marginBottom:"50px"}}>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==1 ? "gray" : "black" }} onClick={()=>handleClickCriterion(1)}>Publish date</button>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==2 ? "gray" : "black" }} onClick={()=>handleClickCriterion(2)}>Alphabetical</button>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeCriterion==3 ? "gray" : "black" }} onClick={()=>handleClickCriterion(3)}>Popularity</button>
+            <div class="ib" style={{marginBottom:"15px"}}>
+              <div class="ib2"> Sorting criterion: </div>
+              <div class="ib2">
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeCriterion==1 ? "gray" : "black" }} onClick={()=>handleClickCriterion(1)}>Publish date</button>
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeCriterion==2 ? "gray" : "black" }} onClick={()=>handleClickCriterion(2)}>Alphabetical</button>
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeCriterion==3 ? "gray" : "black" }} onClick={()=>handleClickCriterion(3)}>Popularity</button>
+              </div>
             </div>
-            <h2 class="display-6"> Sorting type: </h2>
-            <div class="row">
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeType==1 ? "gray" : "black" }} onClick={()=>handleClickType(1)}>Ascending</button>
-              <button class="col-sm btn btn-dark mx-2" style={{ backgroundColor: activeType==2 ? "gray" : "black" }} onClick={()=>handleClickType(2)}>Descending</button>
+            <div class="ib">
+              <div class="ib2"> Sorting type: </div>
+              <div class="ib2">
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeType==1 ? "gray" : "black" }} onClick={()=>handleClickType(1)}>Ascending</button>
+                <button style={{ fontSize:"0.8em", color:"white", marginRight:"10px", backgroundColor: activeType==2 ? "gray" : "black" }} onClick={()=>handleClickType(2)}>Descending</button>
+              </div>
             </div>
-          </section>
-          <div class="row" style={{marginBottom:"100px"}}>
-            <div class="col-sm">
-              <h2 class="display-5"> Videos: </h2>
-              <ul style={{padding:"0px", display:"inline"}}>
-                  {videosData.map(video => (
-                      (video.processingProgress === 'Ready' || video.authorId === auth.id) && (
-                      <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
-                              padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>
-                            <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
-                              <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
-                                  <table style={{backgroundColor: "transparent"}}>
-                                      <tr style={{backgroundColor: "transparent"}}>
-                                      <div className="movie_thumbnail" style={{width:"180px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoClick(video.id)}>
+          </div>
+          <div class="center-div" style={{marginBottom:"100px"}}>
+            {videosData.length > 0 && (
+              <div class="ib" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"10px", backgroundColor:"#333333"}}>
+                <div class="center-div" style={{fontWeight: "bold", marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"10px", backgroundColor:"#222222"}}> Videos </div>
+                <div>
+                    {videosData.map(video => (
+                        (video.processingProgress === 'Ready' || video.authorId === auth.id) && (
+                        <div style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => handleVideoClick(video.id)}>
+                              <div className="box3" style={{width:"320px", height:"170px", cursor: "pointer"}}>
+                                <div className="box4" style={{width:"300px", height:"150px", backgroundImage: `url(${video.thumbnail})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                                    <table style={{backgroundColor: "transparent"}}>
+                                        <tr style={{backgroundColor: "transparent"}}>
+                                        <div className="movie_thumbnail" style={{width:"180px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } } onClick={() => handleVideoClick(video.id)}>
 
-                                      </div>
-                                      </tr>
-                                  </table>
-                                </div> 
-                            </div>
-                            <div>
-                                <h1 style={{marginTop:"30px"}}>{video.title}</h1>
-                                <h4 style={{marginTop:"30px"}}>{video.authorNickname}</h4>
-                            </div>
-                            <div>
-                                <h4 style={{marginTop:"30px"}}>Views: {video.viewCount}</h4>
-                            </div>
-                      </li>
-                  ))).reverse()}
-              </ul>
-            </div>
-            <div class="col-sm">
-              <h2 class="display-5"> Users: </h2>
-              <ul style={{padding:"0px", display:"inline"}}>
-                  {usersData.map(user => (
-                      <li className="search_list_item" class="mx-5" style={{marginTop:"20px", color:"white", borderRadius:"15px",
-                              padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => goToProfile(user.id)}>
-                            <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
-                              <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${user.avatarImage})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
-                                  <table style={{backgroundColor: "transparent"}}>
-                                      <tr style={{backgroundColor: "transparent"}}>
-                                      <div className="movie_thumbnail" style={{width:"180px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } }>
-
-                                      </div>
-                                      </tr>
-                                  </table>
-                                </div> 
-                            </div>
-                            <div>
-                                <h1 style={{marginTop:"30px"}}>{user.nickname}</h1>
-                            </div>
-                            <div>
-                                <h4 style={{marginTop:"30px"}}>{user.userType}</h4>
-                            </div>
-                      </li>
-                  )).reverse()}
-              </ul>
-            </div>
-            <div class="col-sm">
-              <h2 class="display-5"> Playlists: </h2>
-              <ul style={{padding:"0px", display:"inline"}}>
-                  {playlistsData.map(playlist => (
-                      <li style={{listStyleType: "none"}}>
-                      <div className="box" style={{width:"300px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: '#FF4500'}}>
-                        <div className="box2" style={{width:"280px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
-                            <table style={{backgroundColor: "transparent"}}>
-                                <tr style={{backgroundColor: "transparent"}}>
-                                <div className="movie_title" style={{width:"180px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
-                                  <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{playlist.name}</h2>
-                                </div>
-                                </tr>
-                            </table>
-                            </div> 
+                                        </div>
+                                        </tr>
+                                    </table>
+                                  </div> 
+                              </div>
+                              <div>
+                                  <div style={{marginTop:"30px"}}>{video.title}</div>
+                                  <div style={{marginTop:"30px"}}>{video.authorNickname}</div>
+                              </div>
+                              <div>
+                                  <div style={{marginTop:"30px"}}>Views: {video.viewCount}</div>
+                              </div>
                         </div>
-                      </li>
-                  )).reverse()}
-              </ul>
-            </div>
+                    ))).reverse()}
+                </div>
+              </div>
+            )}
+            {usersData.length > 0 && (
+              <div class="ib" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"10px", backgroundColor:"#333333"}}>
+                <div class="center-div" style={{fontWeight: "bold", marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"10px", backgroundColor:"#222222"}}> Users </div>
+                <div>
+                    {usersData.map(user => (
+                        <div className="search_list_item" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"20px", backgroundColor:"#222222", cursor: "pointer"}} onClick={() => goToProfile(user.id)}>
+                              <div className="box3" style={{width:"200px", height:"170px", cursor: "pointer"}}>
+                                <div className="box4" style={{width:"180px", height:"150px", backgroundImage: `url(${user.avatarImage})`, backgroundRepeat:"no-repeat", backgroundSize:"cover", backgroundPosition:"center"}}>
+                                    <table style={{backgroundColor: "transparent"}}>
+                                        <tr style={{backgroundColor: "transparent"}}>
+                                        <div className="movie_thumbnail" style={{width:"180px", height:"60px", backgroundSize:"cover", backgroundColor: "transparent" } }>
+
+                                        </div>
+                                        </tr>
+                                    </table>
+                                  </div> 
+                              </div>
+                              <div>
+                                  <div style={{marginTop:"30px"}}>{user.nickname}</div>
+                              </div>
+                              <div>
+                                  <div style={{marginTop:"30px"}}>{user.userType}</div>
+                              </div>
+                        </div>
+                    )).reverse()}
+                </div>
+              </div>
+            )}
+            {playlistsData.length > 0 && (
+              <div class="ib" style={{marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"10px", backgroundColor:"#333333"}}>
+                <div class="center-div" style={{fontWeight: "bold", marginTop:"20px", color:"white", borderRadius:"15px",
+                                padding:"10px", backgroundColor:"#222222"}}> Playlists </div>
+                <div>
+                    {playlistsData.map(playlist => (
+                        <div style={{listStyleType: "none"}}>
+                        <div className="box" style={{width:"200px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: '#FF4500'}}>
+                          <div className="box2" style={{width:"180px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
+                              <table style={{backgroundColor: "transparent"}}>
+                                  <tr style={{backgroundColor: "transparent"}}>
+                                  <div className="movie_title" style={{width:"180px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                                    <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{playlist.name}</h2>
+                                  </div>
+                                  </tr>
+                              </table>
+                              </div> 
+                          </div>
+                        </div>
+                    )).reverse()}
+                </div>
+              </div>
+            )}
           </div>
     </div>
   );

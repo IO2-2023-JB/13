@@ -13,15 +13,13 @@ import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
 import { ConstrainsContext } from "./api/ApiConstrains";
 import useAuth from './hooks/useAuth';
-import { cookies } from "./App";
-import jwt_decode  from 'jwt-decode';
 
 const VIDEO_URL = 'video';
 const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
-const SUBSCRIPTIONS_URL = '/subscribtions';
+const SUBSCRIPTIONS_URL = '/subscriptions';
 const PROFILE_URL = '/user';
 const DONATE_SEND_URL = '/donate/send';
 const REPORT_URL = '/ticket';
@@ -112,7 +110,7 @@ const VideoPlayer = () => {
       axios.post(COMMENT_URL + "?id=" + video_id, commentText,
         {
           headers: { 
-            'Content-Type': 'application/json',
+            'Content-Type': 'text/plain',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
           withCredentials: false
@@ -140,7 +138,7 @@ const VideoPlayer = () => {
     axios.post(RESPONSE_URL + "?id=" + event.target.elements.commentId.value, responseText,
       {
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
         withCredentials: false

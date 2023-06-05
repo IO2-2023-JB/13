@@ -50,7 +50,7 @@ const AddVideoToPlaylist = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true 
+        withCredentials: false 
       })
       .then(response => {
         setPlaylistsData(response?.data);
@@ -61,7 +61,7 @@ const AddVideoToPlaylist = () => {
                 'Content-Type': 'application/json',
                 "Authorization" : `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true 
+              withCredentials: false 
             })
           .then(response1 => {
             if (response1 && response1?.data?.videos) {
@@ -97,7 +97,7 @@ const AddVideoToPlaylist = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
               }
               ).catch(err => {
                 if (!err?.response) {
@@ -145,7 +145,7 @@ const AddVideoToPlaylist = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
               }
             );
             console.log(video_id);
@@ -155,7 +155,7 @@ const AddVideoToPlaylist = () => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true //cred
+              withCredentials: false //cred
             }
             ).catch(err => {
               if (!err?.response) {

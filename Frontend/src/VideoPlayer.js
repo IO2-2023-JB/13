@@ -1,34 +1,39 @@
 import React from "react";
 import axios from './api/axios';
-import {useRef, useState, useEffect } from "react"
-import AuthContext from "./context/AuthProvider"
+import {useRef, useState, useEffect } from "react";
+import AuthContext from "./context/AuthProvider";
 import { useContext } from "react";
 import {useLocation, useNavigate} from 'react-router-dom';
 import { useParams } from "react-router-dom";
 import 'video-react/dist/video-react.css';
-import { faInfoCircle  } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import { faInfoCircle  } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
+import { ConstrainsContext } from "./api/ApiConstrains";
+import useAuth from './hooks/useAuth';
+import { cookies } from "./App";
+import jwt_decode  from 'jwt-decode';
 
-const VIDEO_URL = '/video';
+const VIDEO_URL = 'video';
 const METADATA_URL = '/video-metadata';
 const REACTION_URL = '/video-reaction';
 const COMMENT_URL = '/comment';
 const RESPONSE_URL = '/comment/response'
-const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
+const SUBSCRIPTIONS_URL = '/subscribtions';
 const PROFILE_URL = '/user';
 const DONATE_SEND_URL = '/donate/send';
 const REPORT_URL = '/ticket';
 
 const VideoPlayer = () => {
   const { auth } = useContext(AuthContext);
+  const { setAuth } = useAuth();
   const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   let video_id = params.videoid;
-  const baseURL = 'https://io2.azurewebsites.net/api/';
+  const { baseURL, setApiUrl } = useContext(ConstrainsContext);
   let videoUrl = baseURL + VIDEO_URL + "/" + video_id + "?access_token=" + auth.accessToken;
   const videoRef = useRef(null);
   const [errMsg, setErrMsg] = useState('');
@@ -110,7 +115,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         getComments();
@@ -138,7 +143,7 @@ const VideoPlayer = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       }
     ).then(() => {
       const newTexts = [...responseTexts];
@@ -204,8 +209,6 @@ const VideoPlayer = () => {
 
   const [commentsData, setCommentsData] = useState([]);
   const [responsesData, setResponsesData] = useState({});
-
-  const [currentData, setCurrnetData] = useState(null);
   
   useEffect(() => {
     if (!auth?.accessToken) {
@@ -216,30 +219,6 @@ const VideoPlayer = () => {
   useEffect(() => {
     setIsLoading(false);
   }, [reactionsData]);
-
-  const [currnetUserData, setCurrentUserData] = useState({
-    firstName: "Loading...",
-    lastName: "Loading...",
-    nickname: "Loading...",
-    email: "Loading...",
-    accountBalance: 0,
-    avatarImage: '',
-    userType: '',
-  });
-
-  useEffect(() => {
-    if (currentData) {
-      setCurrentUserData({
-        firstName: currentData?.name,
-        lastName: currentData?.surname,
-        nickname: currentData?.nickname,
-        email: currentData?.email,
-        accountBalance: currentData?.accountBalance,
-        avatarImage: currentData?.avatarImage,
-        userType: currentData?.userType,
-      });
-    }
-  }, [currentData]);
 
   useEffect(() => {
     setTags(videoData.tags);
@@ -268,7 +247,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
         setForbiddenErr(false);
@@ -278,7 +257,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
+          withCredentials: false 
         })
         .then(response => {
           setData(response?.data);
@@ -299,7 +278,6 @@ const VideoPlayer = () => {
             setErrMsg('Forbidden');
         } else if(err.response?.status === 404){
             setErrMsg('Not found');
-          //navigate('/home');
         } else {
             setErrMsg('Getting metadata failed');
         }
@@ -311,7 +289,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
         setReactionsData({
@@ -337,11 +315,18 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
-        setCommentsData(response?.data.comments);
-        const promises = response?.data.comments.map(comment => {
+        let comments;
+        if(response?.data?.comments){
+          comments = response?.data?.comments;
+          setCommentsData(response?.data?.comments);
+        }else{
+          comments = response?.data;
+          setCommentsData(response?.data);
+        }
+        const promises = comments.map(comment => {
           if(comment.hasResponses){
             axios.get(RESPONSE_URL + "?id=" + comment.id,
             {
@@ -349,7 +334,7 @@ const VideoPlayer = () => {
                 'Content-Type': 'application/json',
                 "Authorization" : `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true
+              withCredentials: false
             }
             ).then(response => {
               setResponsesData((prevState) => ({
@@ -394,43 +379,27 @@ const VideoPlayer = () => {
         } else {
             setErrMsg('Getting coments failed');
         }
+        
+      });
+
+      axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization" : `Bearer ${auth?.accessToken}`
+        },
+        withCredentials: false 
+      })
+      .then(response => {
+          setSubscriptionsData(response?.data?.subscriptions);
+      })
+      .catch(error => {
+        console.log("error: ", error);
       });
     }
     }
-  }, [params.videoid, auth?.accessToken, auth?.id])
+  }, [params.videoid, auth])
 
   const [subscriptionsData, setSubscriptionsData] = useState([]);
-
-    useEffect(() => {
-        axios.get(SUBSCRIPTIONS_URL + "?id=" + auth?.id, {
-          headers: { 
-            'Content-Type': 'application/json',
-            "Authorization" : `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true 
-        })
-        .then(response => {
-            setSubscriptionsData(response?.data?.subscriptions);
-        })
-        .catch(error => {
-          console.log("error: ", error);
-        });
-
-        axios.get(PROFILE_URL, {
-          headers: { 
-            'Content-Type': 'application/json',
-            "Authorization" : `Bearer ${auth?.accessToken}`
-          },
-          withCredentials: true 
-        })
-        .then(response => {
-          setCurrnetData(response?.data);
-        })
-        .catch(error => {
-          console.log("error: ", error);
-        });
-
-    }, [auth?.accessToken, auth?.id]);
 
   const handleEditClick = () => {
     setEditMode(true);
@@ -443,7 +412,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(() => {
         navigate('/profile');
@@ -496,7 +465,7 @@ const VideoPlayer = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
         );
         handleCancelClick();
@@ -534,7 +503,7 @@ const VideoPlayer = () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${auth?.accessToken}`
                 },
-                withCredentials: true //cred
+                withCredentials: false //cred
             }
           );
           handleCancelClick();
@@ -576,7 +545,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
         }
       );
       let positive = reactionsData.positiveCount;
@@ -647,7 +616,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true //cred
+            withCredentials: false //cred
         }
       );
       navigate('/profile');
@@ -674,7 +643,7 @@ const VideoPlayer = () => {
               'Content-Type': 'application/json',
               "Authorization" : `Bearer ${auth?.accessToken}`
             },
-            withCredentials: true
+            withCredentials: false
           }
       ).then(response => {
         setCommentsData(response?.data.comments);
@@ -686,7 +655,7 @@ const VideoPlayer = () => {
                 'Content-Type': 'application/json',
                 "Authorization" : `Bearer ${auth?.accessToken}`
               },
-              withCredentials: true
+              withCredentials: false
             }
             ).then(response => {
               setResponsesData((prevState) => ({
@@ -733,7 +702,7 @@ const VideoPlayer = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true
+      withCredentials: false
     }
     ).then(() => {
       getComments();
@@ -760,7 +729,7 @@ const VideoPlayer = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       incrementSubscriptionsCount();
@@ -769,7 +738,7 @@ const VideoPlayer = () => {
           'Content-Type': 'application/json',
           "Authorization" : `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true
+        withCredentials: false
       })
       .then(response => {
           setSubscriptionsData(response?.data?.subscriptions);
@@ -789,7 +758,7 @@ const VideoPlayer = () => {
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
       },
-      withCredentials: true 
+      withCredentials: false 
     })
     .then(() => {
       decrementSubscriptionsCount();
@@ -814,7 +783,7 @@ const VideoPlayer = () => {
 
   const handleDonateAmountChange = (event) => {
     const newAmount = parseInt(event.target.value);
-    if (newAmount >= 1 && newAmount <= currnetUserData.accountBalance) {
+    if (newAmount >= 1) {
       setDonateAmount(newAmount);
     }
   };
@@ -835,7 +804,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true
+          withCredentials: false
         }
       ).then(() => {
         setDonateAmount(1);
@@ -845,10 +814,7 @@ const VideoPlayer = () => {
             'Content-Type': 'application/json',
             "Authorization" : `Bearer ${auth?.accessToken}`
           },
-          withCredentials: true 
-        })
-        .then(response => {
-          setCurrnetData(response?.data);
+          withCredentials: false 
         })
         .catch(error => {
           console.log("error: ", error);
@@ -920,7 +886,7 @@ const VideoPlayer = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth?.accessToken}`
         },
-        withCredentials: true //cred
+        withCredentials: false //cred
       }
       ).catch(err => {
         if (!err?.response) {
@@ -948,7 +914,7 @@ const VideoPlayer = () => {
     <div>
     {!isLoading && (
     <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
-      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px", marginBottom: "50px", borderBottomRightRadius: "25px", borderBottomLeftRadius: "25px"}}>
       {videoData.processingProgress === 'Ready' && (
         <div class="container-fluid justify-content-center" style={{marginTop: "50px", width: "900px",}}>
           <ReactPlayer
@@ -964,7 +930,7 @@ const VideoPlayer = () => {
       )}
       {!editMode?(
         videoData.processingProgress === 'Ready' ? (
-      <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+      <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px", marginBottom: "30px", borderBottomRightRadius: "25px", borderBottomLeftRadius: "25px"}}>
           <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"50px", marginTop:"20px", padding: "20px"}}>
               {videoData.title}
@@ -990,15 +956,11 @@ const VideoPlayer = () => {
             </div>
           </div>
           {isDonating && (
-          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p>Your current balance: {currnetUserData.accountBalance}</p>
-              <button onClick={handleDonateCancelClick} class="btn btn-dark" style={{marginLeft: "20px", marginBottom: "30px"}}>charge your balance</button>
-            </div>
+          <div class="container-fluid justify-content-center" style={{marginTop:"10px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
             <TextField
               label={<span style={{ color: 'white' }}>Amount</span>}
               type="number"
-              style={{color: "white", width: "160px"}}
+              style={{color: "white", width: "160px", alignContent: "center", marginTop:"20px"}}
               value={donateAmount}
               onChange={(event) => handleDonateAmountChange(event)}
               InputProps={{
@@ -1049,12 +1011,6 @@ const VideoPlayer = () => {
                 <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
               </svg>
             </button>
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-              </svg>
-            </button>
             {(videoData.authorId !== auth.id) && (
             <button class="btn btn-danger" style={{marginRight:"20px", position: "absolute", right: "10px"}} onClick={() => reportVideo(videoData.id)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-flag" viewBox="0 0 16 16">
@@ -1098,6 +1054,9 @@ const VideoPlayer = () => {
             <button type="submit" class="btn btn-dark" style={{marginBottom:"20px"}}>Submit</button> 
           </form>
           <h4 class="container-fluid justify-content-center">Comments:</h4>
+          { commentsData.length === 0 && (
+            <p style={{marginLeft: "40px"}}>There are no comments for this video yet.</p>
+          )}
           {commentsData.map((comment, index) => (
             <div style={{marginBottom:"20px", marginTop:"20px", 
                             color:"white", borderRadius:"15px", paddingBottom:"10px", paddingTop:"10px", backgroundColor:"#222222"}}>
@@ -1173,17 +1132,24 @@ const VideoPlayer = () => {
           
       </div>
         ):(
-          <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+          <div class="container-fluid" style={{position:"relative", backgroundColor: "black", marginTop:"60px", marginBottom: "15px", color: "white", borderTopRightRadius: "25px", borderTopLeftRadius: "25px", borderBottomRightRadius: "25px", borderBottomLeftRadius: "25px"}}>
           <div style={{borderRadius:"15px", backgroundColor:"#282828"}}>
-            <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
-                This video is currently in processing proggress state: {videoData.processingProgress}
-            </div>
             {
               (videoData.authorId === auth.id) ?(
-              (videoData.processingProgress === 'MetadataRecordCreated' || videoData.processingProgress === 'FailedToUpload')? (
+              (videoData.processingProgress === 'MetadataRecordCreated' || videoData.processingProgress === 'FailedToUpload' || videoData.processingProgress === 'FailedToProcess')? (
                 <div>
+                  { videoData.processingProgress === 'FailedToProcess' ? (
                   <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
-                    Please upload your video.
+                    Video failed to process.
+                  </div>
+                  ):(
+                    <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
+                      Video failed to upload.
+                    </div>
+                  )
+                  }
+                  <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
+                    You can try to upload your video file again.
                   </div>
                   <form onSubmit={handleVideoUpload}>
                      <label htmlFor="video">
@@ -1199,14 +1165,19 @@ const VideoPlayer = () => {
                       <button class="btn btn-dark" disabled={!validVideoFile ? true : false}>Submit</button>
                   </form>
                 </div>
-              ):(
+              ):( videoData.processingProgress === 'Uploading' ? (
                 <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
                   Video is being uploaded. Please wait until your video is uploaded.
                 </div>
+              ):(
+                <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
+                  Video is being processed. Please wait until your video is ready.
+                </div>
+              )
               )
               ):(
                 <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
-                  It is currently unavailable to watch. Please try again later.
+                  This video is currently unavailable to watch. Please try again later.
                 </div>
               )
             }
@@ -1216,24 +1187,6 @@ const VideoPlayer = () => {
             <div class="container-fluid justify-content-center" style={{fontSize:"20px", marginTop:"0px", paddingTop:"12px", height:"60px"}}>
               Author: {videoData.authorNickname}
             </div>
-          </div>
-          <div class="container-fluid justify-content-center" style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#282828"}}>
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
-                <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
-              </svg>
-            </button>
-            <button class="btn btn-dark" style={{marginRight:"20px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-              </svg>
-            </button>
-            <button class="btn btn-dark" style={{marginRight:"20px", position: "absolute", right: "10px"}}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-              </svg>
-            </button>
           </div>
           <div style={{marginTop:"20px", borderRadius:"15px", paddingBottom:"50px", paddingTop:"20px", backgroundColor:"#282828"}}>
             <div class="container-fluid justify-content-center" style={{fontSize:"18px", marginTop:"0"}}>

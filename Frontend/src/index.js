@@ -5,17 +5,20 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './context/AuthProvider';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ConstrainsProvider } from './api/ApiConstrains';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
+    <ConstrainsProvider>
     <AuthProvider>
       <Routes>
       <Route path="/*" element={<App />} />
       </Routes>
     </AuthProvider>
+    </ConstrainsProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

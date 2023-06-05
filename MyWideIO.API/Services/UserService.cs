@@ -183,12 +183,14 @@ namespace MyWideIO.API.Services
                 : UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
         }
 
-       
+
 
         public async Task<string> LoginUserAsync(LoginDto loginDto)
         {
             AppUserModel user = (await _userManager.FindByEmailAsync(loginDto.Email)) ??
                 throw new UserNotFoundException();
+            if (user.EndOfBan > DateTime.Now)
+                throw new ForbiddenException("User is banned"); // 
 
             if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
@@ -222,6 +224,22 @@ namespace MyWideIO.API.Services
                 throw;
             }
             await _transactionService.CommitAsync();
+        }
+
+        public async Task BanUserAsync(Guid id)
+        {
+            AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");
+            string role = (await _userManager.GetRolesAsync(user)).First();
+            if (role == UserTypeEnum.Administrator.ToString())
+            {
+                throw new UserException("Admin can't be banned");
+            }
+            user.EndOfBan = DateTime.Now.AddMinutes(30);
+            IdentityResult result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new UserException(result.Errors.First()?.Code);
+            }
         }
     }
 }

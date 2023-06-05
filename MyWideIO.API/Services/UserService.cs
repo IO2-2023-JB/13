@@ -5,6 +5,7 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
+using System.Text;
 
 namespace MyWideIO.API.Services
 {
@@ -189,8 +190,35 @@ namespace MyWideIO.API.Services
         {
             AppUserModel user = (await _userManager.FindByEmailAsync(loginDto.Email)) ??
                 throw new UserNotFoundException();
-            if (user.EndOfBan > DateTime.Now)
-                throw new ForbiddenException("User is banned"); // 
+            var now = DateTime.Now;
+            if (user.EndOfBan > now)
+            {
+                var time = user.EndOfBan - now;
+                var sb = new StringBuilder();
+                // use string builder to format massage
+                if (time.Days > 0)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(" ,");
+                    sb.Append(time.Days);
+                    sb.Append(" days");
+                }
+                if (time.Hours > 0)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(" ,");
+                    sb.Append(time.Hours);
+                    sb.Append(" hours");
+                }
+                if (time.Minutes > 0)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(" ,");
+                    sb.Append(time.Minutes);
+                    sb.Append(" minutes");
+                }
+                throw new ForbiddenException($"User is banned for {sb}"); // 
+            }
 
             if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {

@@ -37,7 +37,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [Produces("application/json")]
         [SwaggerOperation("BanUser")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> BanUser([FromRoute(Name = "id")][Required] Guid id)
         {
             await _userService.BanUserAsync(id);

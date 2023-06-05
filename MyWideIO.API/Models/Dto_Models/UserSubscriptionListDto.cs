@@ -30,7 +30,7 @@ namespace MyWideIO.API.Models.Dto_Models
         /// Gets or Sets Subscriptions
         /// </summary>
         [DataMember(Name = "subscriptions", EmitDefaultValue = false)]
-        public List<SubscribtionDto> Subscriptions { get; set; }
+        public List<SubscriptionDto> Subscriptions { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

@@ -12,7 +12,7 @@ config.autoAddCss = false;
 const PROFILE_URL = '/user';
 const USER_VIDEOS_URL = '/user/videos';
 const USER_PLAYLISTS_URL = '/playlist/user';
-const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
+const SUBSCRIPTIONS_URL = '/subscriptions';
 const DONATE_SEND_URL = '/donate/send';
 const REPORT_URL = '/ticket';
 
@@ -196,7 +196,7 @@ const CreatorProfile = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?id=" + creator_id, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?creatorId=" + creator_id, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -224,7 +224,7 @@ const CreatorProfile = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?id=" + creator_id, {
+    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + creator_id, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`

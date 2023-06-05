@@ -63,8 +63,6 @@ const AddVideo = () => {
         e.preventDefault();
         try {
           setIsLoading(true);
-          console.log("isloading:")
-          console.log(isLoading);
           let response;
           if(validthumbnail_picture)
           {
@@ -72,7 +70,7 @@ const AddVideo = () => {
             await reader.readAsDataURL(thumbnail_picture);
             let base64String;
             reader.onload = () => {
-              base64String = reader.result.split(",")[1];
+              base64String = reader.result; //.split(",")[1];
             };
             setTimeout(async () => {
             response = await axios.post(METADATA_URL,

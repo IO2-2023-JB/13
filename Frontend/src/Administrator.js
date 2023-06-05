@@ -399,7 +399,7 @@ const Administrator = () => {
           withCredentials: false
         }
       ).then(() => {
-        handleTicketDelete(ticket, targetType, index, responseText);
+        handleTicketReject(ticket, targetType, index, responseText);
       }).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')

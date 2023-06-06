@@ -21,9 +21,12 @@ namespace MyWideIO.API.Services
         private readonly ITransactionService _transactionService;
         private readonly IBackgroundTaskQueue<VideoProcessWorkItem> _backgroundTaskQueue;
         private readonly ISubscriptionService _subscriptionService;
+        private readonly ICommentRepository _commentRepository;
+        private readonly IPlaylistRepository _playlistRepository;
+        private readonly ITicketRepository _ticketRepository;
 
         public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService,
-            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ISubscriptionService subscriptionService)
+            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ISubscriptionService subscriptionService, ICommentRepository commentRepository, IPlaylistRepository playlistRepository, ITicketRepository ticketRepository)
         {
             _videoRepository = videoRepository;
             _imageStorageService = imageService;
@@ -33,11 +36,14 @@ namespace MyWideIO.API.Services
             _transactionService = transactionService;
             _backgroundTaskQueue = backgroundTaskQueue;
             _subscriptionService = subscriptionService;
+            _commentRepository = commentRepository;
+            _playlistRepository = playlistRepository;
+            _ticketRepository = ticketRepository;
         }
 
         public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
 
@@ -46,14 +52,14 @@ namespace MyWideIO.API.Services
 
 
             video.ViewCount++;
-            await _videoRepository.UpdateVideoAsync(video);
+            await _videoRepository.UpdateAsync(video);
 
             return await _videoStorageService.GetVideoFileAsync(video.Id, cancellationToken);
         }
 
         public async Task RemoveVideoAsync(Guid videoId, Guid creatorId)
         {
-            var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetAsync(videoId) ?? throw new VideoNotFoundException();
             if (video.CreatorId != creatorId)
                 throw new ForbiddenException();
 
@@ -66,7 +72,37 @@ namespace MyWideIO.API.Services
                 case ProcessingProgressEnum.Processing:
                     throw new VideoException("can't delete while processing");
             }
-            await _videoRepository.RemoveVideoAsync(video);
+
+            // delete likes
+            var likes = await _likeRepository.GetVideoLikesAsync(videoId);
+            await _likeRepository.DeleteAsync(likes);
+
+            // delete comments and responses
+            var comments = await _commentRepository.GetVideoComments(videoId);
+            await _commentRepository.DeleteComments(comments);
+
+            // remove video from playlists
+            var playlists = await _playlistRepository.GetPlaylistsContainingVideo(videoId);
+            foreach(var playlist in playlists)
+            {
+                var videoplaylist = playlist.VideoPlaylists.First(vp => vp.VideoId == videoId);
+                playlist.VideoPlaylists.Remove(videoplaylist);
+                await _playlistRepository.UpdateAsync(playlist);
+            }
+
+            // remove tickets?
+            if (await _ticketRepository.TargetHasTickets(videoId))
+                throw new TicketException("Can't remove video while there are tickets for it");
+
+            // var tickets = await _ticketRepository.GetTargetsTickets(videoId);
+            // await _ticketRepository.RemoveAsync(tickets);
+
+
+            // remove video
+            await _videoRepository.RemoveAsync(video);
+
+
+
 
             if (video.ProcessingProgress == ProcessingProgressEnum.Ready)
                 await _videoStorageService.RemoveVideoFileAsync(video.Id);
@@ -77,7 +113,7 @@ namespace MyWideIO.API.Services
         }
         public async Task UpdateVideoAsync(Guid videoId, Guid creatorId, VideoUploadDto dto)
         {
-            var video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetAsync(videoId) ?? throw new VideoNotFoundException();
             if (video.CreatorId != creatorId)
                 throw new ForbiddenException();
 
@@ -109,7 +145,7 @@ namespace MyWideIO.API.Services
                     video.Thumbnail = null;
                 }
             }
-            await _videoRepository.UpdateVideoAsync(video);
+            await _videoRepository.UpdateAsync(video);
         }
         private async Task<Stream> GetThumbnailFromUploadedVideo(Guid videoId)
         {
@@ -138,7 +174,7 @@ namespace MyWideIO.API.Services
 
         public async Task<VideoMetadataDto> GetVideoMetadataAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
-            var video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
+            var video = await _videoRepository.GetAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
 
@@ -147,7 +183,7 @@ namespace MyWideIO.API.Services
 
         public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile, string extension, CancellationToken cancellationToken)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (video.CreatorId != creatorId)
                 throw new ForbiddenException();
             try
@@ -163,20 +199,20 @@ namespace MyWideIO.API.Services
                     ProcessingProgressEnum.Processing => throw new VideoException("Video is being processed"),
                     _ => throw new Exception("unknown error")
                 };
-                await _videoRepository.UpdateVideoAsync(video);
+                await _videoRepository.UpdateAsync(video);
                 var workItem = new VideoProcessWorkItem(videoId, Path.GetTempFileName());
                 using (var filestream = File.OpenWrite(workItem.fileName))
                 {
                     await videoFile.CopyToAsync(filestream, cancellationToken);
                 }
                 video.ProcessingProgress = ProcessingProgressEnum.Uploaded;
-                await _videoRepository.UpdateVideoAsync(video);
+                await _videoRepository.UpdateAsync(video);
                 await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(workItem);
             }
             catch
             {
                 video.ProcessingProgress = ProcessingProgressEnum.FailedToUpload;
-                await _videoRepository.UpdateVideoAsync(video);
+                await _videoRepository.UpdateAsync(video);
                 throw;
             }
 
@@ -205,7 +241,7 @@ namespace MyWideIO.API.Services
                     Creator = creator,
                     IsVisible = dto.Visibility == VisibilityEnum.Public
                 };
-                await _videoRepository.AddVideoAsync(video); // id potrzebne do zdjecia
+                await _videoRepository.AddAsync(video); // id potrzebne do zdjecia
                 creator.OwnedVideos.Add(video);
                 await _userManager.UpdateAsync(creator);
                 if (dto.Thumbnail is not null)
@@ -214,7 +250,7 @@ namespace MyWideIO.API.Services
                     if (dto.Thumbnail.Contains(imagePrefix))
                         dto.Thumbnail = dto.Thumbnail.Split(imagePrefix)[1];
                     video.Thumbnail = await _imageStorageService.UploadImageAsync(dto.Thumbnail, video.Id.ToString());
-                    await _videoRepository.UpdateVideoAsync(video);
+                    await _videoRepository.UpdateAsync(video);
                 }
             }
             catch
@@ -232,7 +268,7 @@ namespace MyWideIO.API.Services
 
         public async Task UpdateVideoReactionAsync(Guid videoId, Guid viewerId, VideoReactionUpdateDto videoReactionUpdateDto)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetAsync(videoId) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
             AppUserModel user = await _userManager.FindByIdAsync(viewerId.ToString());
@@ -278,13 +314,13 @@ namespace MyWideIO.API.Services
                     throw new VideoException("Unknown reaction");
             }
             video.LikedBy.Add(like); // None usuwamy czy zostaje
-            await _videoRepository.UpdateVideoAsync(video);
+            await _videoRepository.UpdateAsync(video);
             await _likeRepository.UpdateAsync(like);
         }
 
         public async Task<VideoReactionDto> GetVideoReactionAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
         {
-            VideoModel video = await _videoRepository.GetVideoAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetAsync(videoId, cancellationToken) ?? throw new VideoNotFoundException();
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
             ViewerLike? like = await _likeRepository.GetUserLikeOfVideoAsync(viewerId, videoId, cancellationToken);

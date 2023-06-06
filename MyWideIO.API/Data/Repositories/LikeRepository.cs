@@ -26,6 +26,12 @@ namespace MyWideIO.API.Data.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task DeleteAsync(IEnumerable<ViewerLike> likes)
+        {
+            _dbContext.Likes.RemoveRange(likes);
+            await _dbContext.SaveChangesAsync();
+        }
+
         public async Task<ViewerLike?> GetUserLikeOfVideoAsync(Guid userId, Guid videoId, CancellationToken cancellationToken)
         {
             return await _dbContext.Likes

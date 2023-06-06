@@ -35,7 +35,6 @@ namespace MyWideIO.API.Models.DB_Models
         public virtual ICollection<VideoPlaylist> Playlists { get; set; } = new Collection<VideoPlaylist>();
         public virtual ICollection<ViewerLike> LikedBy { get; set; } = new Collection<ViewerLike>();
 
-        // public string fileName { get; set; }
         public virtual ImageModel? Thumbnail { get; set; }
         public bool IsVisible { get; set; }
         public ProcessingProgressEnum ProcessingProgress { get; set; }

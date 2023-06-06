@@ -158,21 +158,21 @@ const Search = (props) => {
                 <div class="center-div" style={{fontWeight: "bold", marginTop:"20px", color:"white", borderRadius:"15px",
                                 padding:"10px", backgroundColor:"#222222"}}> Playlists </div>
                 <div>
-                    {playlistsData.map(playlist => (
-                        <div style={{listStyleType: "none"}}>
-                        <div className="box" style={{width:"200px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: '#FF4500'}}>
-                          <div className="box2" style={{width:"180px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
-                              <table style={{backgroundColor: "transparent"}}>
-                                  <tr style={{backgroundColor: "transparent"}}>
-                                  <div className="movie_title" style={{width:"180px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
-                                    <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{playlist.name}</h2>
-                                  </div>
-                                  </tr>
-                              </table>
-                              </div> 
-                          </div>
+                  {playlistsData.map(playlist => (
+                      <div style={{listStyleType: "none"}}>
+                      <div className="box" style={{width:"200px", height:"100px", backgroundSize:"cover", cursor: "pointer", backgroundRepeat:"no-repeat", backgroundPosition:"center", backgroundColor: '#FF4500'}}>
+                        <div className="box2" style={{width:"180px", height:"60px", backgroundColor: "transparent"}} onClick={() => handelPlaylistClick(playlist.id)}>
+                            <table style={{backgroundColor: "transparent"}}>
+                                <tr style={{backgroundColor: "transparent"}}>
+                                <div className="movie_title" style={{width:"180px", height:"60px", fontSize:"10px", marginTop:"0", whiteSpace: 'nowrap', overflow: 'hidden', position:"center", color:"black", backgroundColor:"transparent" }}>
+                                  <h2 class="text-with-stroke" style={{backgroundColor: "transparent"}}>{playlist.name}</h2>
+                                </div>
+                                </tr>
+                            </table>
+                            </div> 
                         </div>
-                    )).reverse()}
+                      </div>
+                  )).reverse()}
                 </div>
               </div>
             )}

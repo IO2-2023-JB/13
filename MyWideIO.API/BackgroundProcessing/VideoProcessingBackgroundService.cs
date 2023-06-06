@@ -51,14 +51,14 @@ namespace MyWideIO.API.BackgroundProcessing
         {
             using var scope = _serviceProvider.CreateScope();
             IVideoRepository _videoRepository = scope.ServiceProvider.GetRequiredService<IVideoRepository>();
-            VideoModel video = await _videoRepository.GetVideoAsync(workItem.VideoId) ?? throw new VideoNotFoundException();
+            VideoModel video = await _videoRepository.GetAsync(workItem.VideoId) ?? throw new VideoNotFoundException();
             try
             {
 
                 if (video.ProcessingProgress != ProcessingProgressEnum.Uploaded)
                     throw new VideoException("processing progress wasn't 'uploaded'");
                 video.ProcessingProgress = ProcessingProgressEnum.Processing;
-                await _videoRepository.UpdateVideoAsync(video);
+                await _videoRepository.UpdateAsync(video);
                 using var convertedVideoStream = ConvertVideoStreamToMp4(workItem); // nie trzeba recznie dispose
                 var uploadVideoTask = _videoStorageService.UploadVideoFileAsync(workItem.VideoId, convertedVideoStream, stoppingToken); // 
                 if (video.Thumbnail is null)
@@ -81,7 +81,7 @@ namespace MyWideIO.API.BackgroundProcessing
             {
                 File.Delete(workItem.fileName);
                 Console.WriteLine("Finished work item");
-                await _videoRepository.UpdateVideoAsync(video);
+                await _videoRepository.UpdateAsync(video);
             }
         }
         private Stream GetThumbnail(VideoProcessWorkItem workItem)

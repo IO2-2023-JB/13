@@ -6,7 +6,14 @@ namespace MyWideIO.API.Data.IRepositories
     public interface ISubscriptionRepository
     {
         public Task AddSubscriptionAsync(ViewerSubscription subscription);
-        public Task<UserSubscriptionListDto> GetSubscriptionsAsync(Guid id);
+        public Task<UserSubscriptionListDto> GetSubscriptionsAsync(Guid id); // wtf
+        public Task<List<ViewerSubscription>> GetViewersSubscriptionsAsync(Guid viewerId);
+        public readonly struct SubscribtionGrouping
+        {
+            public Guid CreatorId { get; init; }
+            public int Count { get; init; }
+        }
+        public Task<List<SubscribtionGrouping>> GetViewerSubscriptionsGroupedAsync(Guid viewerId);
         public Task<List<ViewerSubscription>> GetSubscriptionsToCreator(Guid creatorId);
         public Task UnsubscribeAsync(ViewerSubscription sub);
         public Task RemoveAsync(IEnumerable<ViewerSubscription> subscriptions);

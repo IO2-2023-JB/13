@@ -82,7 +82,7 @@ namespace MyWideIO.API.Services
                                                                                     // i wtedy select zamiast foreach, bardziej czytelne
             {
                 // UserDto user = await _userService.GetUserAsync(cmnt.AuthorId); // wtf
-                AppUserModel user = await _userManager.FindByIdAsync(cmnt.Id.ToString());
+                AppUserModel user = await _userManager.FindByIdAsync(cmnt.AuthorId.ToString());
                 comments.Comments.Add(new CommentDto()
                 {
                     Id = cmnt.Id,
@@ -106,7 +106,7 @@ namespace MyWideIO.API.Services
             List<CommentModel> rawComments = await _commentRepository.GetCommentResponses(commentId);
             foreach (var cmnt in rawComments)
             {
-                AppUserModel user = await _userManager.FindByIdAsync(cmnt.Id.ToString());
+                AppUserModel user = await _userManager.FindByIdAsync(cmnt.AuthorId.ToString());
                 comments.Comments.Add(new CommentDto()
                 {
                     Id = cmnt.Id,

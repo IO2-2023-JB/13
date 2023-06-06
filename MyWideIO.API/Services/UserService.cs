@@ -249,7 +249,7 @@ namespace MyWideIO.API.Services
             {
                 AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserNotFoundException();
 
-                // if user has any videos throw exception
+                // if creator has any videos throw exception
                 var role = (await _userManager.GetRolesAsync(user)).First();
                 if (role == UserTypeEnum.Creator.ToString())
                 {
@@ -257,13 +257,33 @@ namespace MyWideIO.API.Services
                         throw new UserException("Can't remove creator with videos");
 
                     // remove subscriptions
-                    var subscriptions = await _subscriptionRepository.GetSubscriptionsToCreator(id);
-                    await _subscriptionRepository.RemoveAsync(subscriptions);
+                    var subscriptionsToCreator = await _subscriptionRepository.GetSubscriptionsToCreator(id);
+                    await _subscriptionRepository.RemoveAsync(subscriptionsToCreator);
                 }
 
                 // remove all likes
+                var likeGroups = await _likeRepository.GetUserLikesGroupedByVideoAsync(id);
+                foreach (var group in likeGroups)
+                {
+                    VideoModel video;
+                    video = await _videoRepository.GetAsync(group.VideoId) ?? throw new VideoException("video was removed, while trying to remove its likes");
+
+                    switch (group.Reaction)
+                    {
+                        case ReactionEnum.Positive:
+                            video.PositiveReactions -= group.Count; // wolne, mozna groupby z select .count(wtedy nie bedzie samej listy)  i dodatkowy call po wszystki lajki do usuniecia
+                            break;
+                        case ReactionEnum.Negative:
+                            video.NegativeReactions -= group.Count;
+                            break;
+                        default:
+                            break;
+                    }
+                    await _videoRepository.UpdateAsync(video);
+                }
                 var likes = await _likeRepository.GetUserLikesAsync(id);
                 await _likeRepository.DeleteAsync(likes);
+
 
                 // remove all comments
                 var comments = await _commentRepository.GetUserCommentsAsync(id);
@@ -273,6 +293,15 @@ namespace MyWideIO.API.Services
                 var playlists = await _playlistRepository.GetUserPlaylistsAsync(id);
                 await _playlistRepository.RemoveAsync(playlists);
 
+                // remove user's subscriptions
+                var subscriptionGroups = await _subscriptionRepository.GetViewerSubscriptionsGroupedAsync(id);
+                foreach (var group in subscriptionGroups)
+                {
+                    var creator = await _userManager.FindByIdAsync(group.Key.ToString());
+                    creator.SubscribersAmount -= group.Count();
+                    await _userManager.UpdateAsync(creator);
+                    await _subscriptionRepository.RemoveAsync(group);
+                }
 
 
                 IdentityResult result = await _userManager.DeleteAsync(user);

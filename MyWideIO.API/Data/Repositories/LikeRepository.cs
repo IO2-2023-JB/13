@@ -2,6 +2,7 @@
 using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Data.Repositories
 {
@@ -44,6 +45,15 @@ namespace MyWideIO.API.Data.Repositories
             return await _dbContext.Likes
                 .Where(l => l.ViewerId == userId)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<ILikeRepository.LikeGrouping>> GetUserLikesGroupedByVideoAsync(Guid userId)
+        {
+            return await _dbContext.Likes
+                .Where(l => l.ViewerId == userId)
+                .GroupBy(l => new { l.VideoId, l.Reaction })
+                .Select(g => new ILikeRepository.LikeGrouping { VideoId = g.Key.VideoId, Reaction = g.Key.Reaction, Count = g.Count() })
+                .ToListAsync();
         }
 
         public async Task<ICollection<ViewerLike>> GetVideoLikesAsync(Guid videoId, CancellationToken cancellationToken)

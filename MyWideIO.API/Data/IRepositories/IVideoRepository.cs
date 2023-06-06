@@ -13,6 +13,7 @@ namespace MyWideIO.API.Data.IRepositories
         public Task RemoveAsync(IEnumerable<VideoModel> video);
         public Task AddAsync(VideoModel video);
         public Task UpdateAsync(VideoModel video);
+        public Task UpdateAsync(IEnumerable<VideoModel> videos);
         public Task<ICollection<VideoModel>> GetUserVideosAsync(Guid id, CancellationToken cancellationToken = default);
         public Task<bool> UserHasVideosAsync(Guid userId, CancellationToken cancellationToken = default);
         public IQueryable<VideoModel> GetIQuerableVideos();

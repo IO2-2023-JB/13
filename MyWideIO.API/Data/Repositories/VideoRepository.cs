@@ -72,6 +72,12 @@ namespace MyWideIO.API.Data.Repositories
         {
             return await _dbContext.Videos.AnyAsync(v => v.CreatorId == userId, cancellationToken);
         }
+
+        public async Task UpdateAsync(IEnumerable<VideoModel> videos)
+        {
+            _dbContext.UpdateRange(videos);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 
 }

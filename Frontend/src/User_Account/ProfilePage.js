@@ -506,11 +506,11 @@ const handleWithdrawConfirmClick = () => {
 return (
   <div style={{marginTop: "200px"}} class="container">
     {!editMode ? (
-      <div class="row">
-        <h1 class="display-1">{userData.nickname}</h1>
+      <div class="row mx-5">
+        <h1 class="display-3">{userData.nickname}</h1>
         <div class ="mt-2 row">
           <div class="col-sm">
-            <h2>Data</h2>
+            <h3>Data</h3>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <label>Name:</label>
@@ -527,14 +527,14 @@ return (
             </section>
           </div>
           <div class="col-sm">
-            <h2>Avatar Image</h2>
+            <h3>Avatar Image</h3>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
               <img key={userData.avatarImage} src = {userData.avatarImage+"?time="+new Date()} alt="No avatar image"/>
             </section>
           </div>
           <div class="col-sm">
-          <h2>Account management</h2>
+          <h3>Account</h3>
           <div class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", marginBottom:"100px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <div className="row">
@@ -584,7 +584,7 @@ return (
             <div class="row" style={{marginTop:"30px"}}>
             {userType==='Creator' && (
           <div class="col-sm">
-            <h2>Your Videos</h2>
+            <h3>Your Videos</h3>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>
@@ -662,7 +662,7 @@ return (
             )}
           { userType !== 'Administrator' && (
           <div class="col-sm">
-          <h2>Your Playlists</h2>
+          <h3>Your Playlists</h3>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>

@@ -36,20 +36,18 @@ namespace MyWideIO.API.Data
             //    .HasForeignKey(vw => vw.VideoId)
             //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ViewerSubscription>() 
+            modelBuilder.Entity<ViewerSubscription>()
                 .HasKey(vs => new { vs.ViewerId, vs.CreatorId });
 
             modelBuilder.Entity<ViewerSubscription>()
                 .HasOne(vs => vs.Viewer)
                 .WithMany(v => v.Subscriptions)
-                .HasForeignKey(vs => vs.ViewerId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(vs => vs.ViewerId);
 
             modelBuilder.Entity<ViewerSubscription>()
                 .HasOne(vs => vs.Creator)
                 .WithMany(c => c.Subscribers)
-                .HasForeignKey(vs => vs.CreatorId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(vs => vs.CreatorId);
 
             modelBuilder.Entity<ViewerLike>()
                 .HasKey(vl => new { vl.ViewerId, vl.VideoId });
@@ -57,14 +55,12 @@ namespace MyWideIO.API.Data
             modelBuilder.Entity<ViewerLike>()
                 .HasOne(vl => vl.Viewer)
                 .WithMany(v => v.Likes)
-                .HasForeignKey(vl => vl.ViewerId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(vl => vl.ViewerId);
 
             modelBuilder.Entity<ViewerLike>()
                 .HasOne(vl => vl.Video)
                 .WithMany(v => v.LikedBy)
-                .HasForeignKey(vl => vl.VideoId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(vl => vl.VideoId);
 
             modelBuilder.Entity<VideoPlaylist>()
                 .HasKey(vp => new { vp.VideoId, vp.PlaylistId });
@@ -73,14 +69,12 @@ namespace MyWideIO.API.Data
             modelBuilder.Entity<VideoPlaylist>()
                 .HasOne(vp => vp.Video)
                 .WithMany(v => v.Playlists)
-                .HasForeignKey(vp => vp.VideoId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(vp => vp.VideoId);
 
             modelBuilder.Entity<VideoPlaylist>()
                 .HasOne(vp => vp.Playlist)
                 .WithMany(p => p.VideoPlaylists)
-                .HasForeignKey(vp => vp.PlaylistId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(vp => vp.PlaylistId);
 
             //modelBuilder.Entity<CommentModel>()
             //    .HasOne(c => c.Author)
@@ -103,14 +97,12 @@ namespace MyWideIO.API.Data
             modelBuilder.Entity<AppUserModel>()
                 .HasMany(c => c.OwnedVideos)
                 .WithOne(c => c.Creator)
-                .HasForeignKey(c => c.CreatorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(c => c.CreatorId);
 
             modelBuilder.Entity<VideoModel>()
                 .HasOne(c => c.Creator)
                 .WithMany(c => c.OwnedVideos)
-                .HasForeignKey(c => c.CreatorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(c => c.CreatorId);
 
 
             modelBuilder.Entity<VideoModel>()

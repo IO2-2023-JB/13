@@ -13,19 +13,19 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddPlaylistAsync(PlaylistModel playlist)
+        public async Task AddAsync(PlaylistModel playlist)
         {
             _dbContext.Playlists.Add(playlist);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdatePlaylistAsync(PlaylistModel playlist)
+        public async Task UpdateAsync(PlaylistModel playlist)
         {
             _dbContext.Playlists.Update(playlist);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<PlaylistModel?> GetPlaylistAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<PlaylistModel?> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Playlists
                 .Include(p => p.VideoPlaylists.OrderBy(vp=>vp.Order))
@@ -36,7 +36,8 @@ namespace MyWideIO.API.Data.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<ICollection<PlaylistModel>> GetUserPlaylists(Guid userId, CancellationToken cancellationToken)
+
+        public async Task<ICollection<PlaylistModel>> GetUserPlaylistsAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _dbContext.Playlists
                 .Where(p => p.ViewerId == userId)
@@ -45,7 +46,7 @@ namespace MyWideIO.API.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task RemovePlaylistAsync(PlaylistModel playlist)
+        public async Task RemoveAsync(PlaylistModel playlist)
         {
             _dbContext.Playlists.Remove(playlist);
             await _dbContext.SaveChangesAsync();
@@ -56,6 +57,20 @@ namespace MyWideIO.API.Data.Repositories
             return _dbContext.Playlists
                 .Include(p=>p.Viewer)
                 .AsNoTracking();
+        }
+
+        public async Task RemoveAsync(IEnumerable<PlaylistModel> playlists)
+        {
+            _dbContext.Playlists.RemoveRange(playlists);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<PlaylistModel>> GetPlaylistsContainingVideo(Guid videoId, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Playlists.Where(p => p.VideoPlaylists.Any(vp => vp.VideoId == videoId))
+                .Include(p => p.VideoPlaylists)
+                .ThenInclude(vp => vp.Video)
+                .ToListAsync(cancellationToken);
         }
     }
 }

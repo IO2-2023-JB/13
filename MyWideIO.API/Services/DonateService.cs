@@ -22,13 +22,13 @@ namespace MyWideIO.API.Services
             AppUserModel reciever, sender;
             if ((reciever = await _userManager.FindByIdAsync(reciverId.ToString())) is null)
                 throw new UserNotFoundException();
-            sender = await _userManager.FindByIdAsync(senderId.ToString());
+            //sender = await _userManager.FindByIdAsync(senderId.ToString());
 
-            if(sender.AccountBalance - amount < 0)
-                throw new NotEnoughMoneyException();
-            sender.AccountBalance -= amount;
+            //if(sender.AccountBalance - amount < 0)
+            //    throw new NotEnoughMoneyException();
+            //sender.AccountBalance -= amount;
             reciever.AccountBalance += amount;
-            await _userManager.UpdateAsync(sender);
+            //await _userManager.UpdateAsync(sender);
             await _userManager.UpdateAsync(reciever);
         }
 
@@ -36,10 +36,10 @@ namespace MyWideIO.API.Services
         {
             AppUserModel user = await _userManager.FindByIdAsync(UserId.ToString());
 
-            //if(amount < 0)
-                //throw new NotEnoughMoneyException(); //jakoś pieniążki trzeba zarabiać
+            if(amount < 0)
+                throw new NotEnoughMoneyException(); 
 
-            if (user.AccountBalance - amount < 0)
+            if (user.AccountBalance < amount)
                 throw new NotEnoughMoneyException();
 
             user.AccountBalance -= amount;

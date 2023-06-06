@@ -294,15 +294,14 @@ namespace MyWideIO.API.Services
                 await _playlistRepository.RemoveAsync(playlists);
 
                 // remove user's subscriptions
-                var subscriptionGroups = await _subscriptionRepository.GetViewerSubscriptionsGroupedAsync(id);
-                foreach (var group in subscriptionGroups)
+                var subscriptions = await _subscriptionRepository.GetViewersSubscriptionsAsync(id);
+                foreach (var sub in subscriptions)
                 {
-                    var creator = await _userManager.FindByIdAsync(group.Key.ToString());
-                    creator.SubscribersAmount -= group.Count();
+                    var creator = await _userManager.FindByIdAsync(sub.CreatorId.ToString());
+                    creator.SubscribersAmount--;
                     await _userManager.UpdateAsync(creator);
-                    await _subscriptionRepository.RemoveAsync(group);
                 }
-
+                await _subscriptionRepository.RemoveAsync(subscriptions);
 
                 IdentityResult result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)

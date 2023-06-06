@@ -1064,7 +1064,7 @@ const VideoPlayer = () => {
                 <div style={{display: "flex", flexDirection: "column"}}>
                   <div style={{display: "flex", justifyContent: "space-between", marginTop:"20px"}}>
                     <img src={comment.avatarImage} alt="Avatar" style={{marginTop:"2px", width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)} />
-                    <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
+                    <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer", inlineSize: "150px", overflowWrap: "break-word"}} onClick={() => goToProfile(comment.authorId)}>{comment.nickname}</h4>
                     <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
                       <h6> {comment.content} </h6>
                     </div>
@@ -1103,7 +1103,7 @@ const VideoPlayer = () => {
                           <img src={response.avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)} />
                           <div style={{display: "flex", flexDirection: "column"}}>
                             <div style={{display: "flex", justifyContent: "space-between"}}>
-                              <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
+                              <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer", inlineSize: "150px", overflowWrap: "break-word"}} onClick={() => goToProfile(response.authorId)}>{response.nickname}</h4>
                               <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
                                 <h6> {response.content} </h6>
                               </div>

@@ -30,7 +30,6 @@ namespace MyWideIO.API.Controllers
         /// Add comment to video
         /// </summary>
         /// <param name="id">Video ID to which you add comment</param>
-        /// <param name="body"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
@@ -38,11 +37,16 @@ namespace MyWideIO.API.Controllers
         [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddCommentToVideo")]
-        public virtual async Task<IActionResult> AddCommentToVideo([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
+        public virtual async Task<IActionResult> AddCommentToVideo([FromQuery(Name = "id")][Required()] Guid id)
         {
             string claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Guid userId = Guid.Parse(claim);
-            await _commentService.AddNewComment(id, body, userId);
+            string content;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                content = await reader.ReadToEndAsync();
+            }
+            await _commentService.AddNewComment(id, content, userId);
             return Ok();
         }
 
@@ -50,7 +54,6 @@ namespace MyWideIO.API.Controllers
         /// Add response to comment
         /// </summary>
         /// <param name="id">Comment ID to which you add response</param>
-        /// <param name="body"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
@@ -58,10 +61,15 @@ namespace MyWideIO.API.Controllers
         [Consumes("text/plain")]
         [ValidateModelState]
         [SwaggerOperation("AddResponseToComment")]
-        public virtual async Task<IActionResult> AddResponseToComment([FromQuery(Name = "id")][Required()] Guid id, [FromBody] string body)
+        public virtual async Task<IActionResult> AddResponseToComment([FromQuery(Name = "id")][Required()] Guid id)
         {
             Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _commentService.AddResponseToComment(id, body, userId);
+            string content;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                content = await reader.ReadToEndAsync();
+            }
+            await _commentService.AddResponseToComment(id, content, userId);
             return Ok();
         }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Mappers;
 using MyWideIO.API.Models.DB_Models;
@@ -16,16 +17,26 @@ namespace MyWideIO.API.Services
         private readonly ITokenService _authenticationService;
         private readonly ITransactionService _transactionService;
         private readonly IImageStorageService _imageService;
-        private readonly IVideoService _videoService;
+        private readonly IVideoRepository _videoRepository;
+        private readonly ILikeRepository _likeRepository;
+        private readonly ICommentRepository _commentRepository;
+        private readonly IPlaylistRepository _playlistRepository;
+        private readonly ISubscriptionRepository _subscriptionRepository;
+        private readonly ITicketRepository _ticketRepository;
 
-        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService, IVideoService videoService)
+        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService, IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IPlaylistRepository playlistRepository, ISubscriptionRepository subscriptionRepository, ITicketRepository ticketRepository)
         {
             _imageService = imageService;
             _userManager = userManager;
             _signInManager = signInManager;
             _authenticationService = authenticationService;
             _transactionService = transactionService;
-            _videoService = videoService;
+            _videoRepository = videoRepository;
+            _likeRepository = likeRepository;
+            _commentRepository = commentRepository;
+            _playlistRepository = playlistRepository;
+            _subscriptionRepository = subscriptionRepository;
+            _ticketRepository = ticketRepository;
         }
         public async Task RegisterUserAsync(RegisterDto registerDto)
         {
@@ -99,31 +110,12 @@ namespace MyWideIO.API.Services
                 user.Surname = updateUserDto.Surname;
                 user.UserName = updateUserDto.Nickname;
 
-                if (updateUserDto.AvatarImage is not null)
-                {
-                    if (updateUserDto.AvatarImage.Contains(imagePrefix))
-                    {
-                        updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
-                    }
-                    user.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
-                    if (user.ProfilePicture.Url.Length == 0)
-                    {
-                        throw new UserException("Image upload error");
-                    }
-                }
-                else if (user.ProfilePicture is not null)
-                {
-                    await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
-                    user.ProfilePicture = null;
-                }
-                result = await _userManager.UpdateAsync(user); // tutaj zapisanie zmian w bazie
-                if (!result.Succeeded)
-                {
-                    throw new UserException(result.Errors.First()?.Code);
-                }
-
                 // zmiana roli
                 var role = (await _userManager.GetRolesAsync(user)).First() ?? throw new UserException("User has no role");
+                if (role == UserTypeEnum.Administrator.ToString())
+                {
+                    throw new UserException("Admin cannot be changed to other role");
+                }
                 var newRole = updateUserDto.UserType.ToString();
                 if (newRole != role)
                 {
@@ -149,15 +141,13 @@ namespace MyWideIO.API.Services
                     }
                     else if (newRole == UserTypeEnum.Simple.ToString() && role == UserTypeEnum.Creator.ToString())
                     {
-                        if (user.Money is null)
-                            throw new UserException("Creator doesn't have requered properites");
-                        foreach (var video in user.OwnedVideos) // nie wiem czy usuwac video czy co
-                            // moze oddzielna metoda w videoService do usuniecia wszystkich
-                            await _videoService.RemoveVideoAsync(video.Id, user.Id);
+                        if (await _videoRepository.UserHasVideosAsync(id))
+                            throw new UserException("Can't remove creator with videos");
 
-                        user.OwnedVideos.Clear();
-                        user.Subscribers.Clear();
-                        user.Money = null;
+                        // remove subscriptions to creator
+                        var subscriptions = await _subscriptionRepository.GetSubscriptionsToCreator(id);
+                        await _subscriptionRepository.RemoveAsync(subscriptions);
+
                         result = await _userManager.UpdateAsync(user);
                         if (!result.Succeeded)
                         {
@@ -165,6 +155,28 @@ namespace MyWideIO.API.Services
                         }
                     }
 
+                }
+                if (updateUserDto.AvatarImage is not null)
+                {
+                    if (updateUserDto.AvatarImage.Contains(imagePrefix))
+                    {
+                        updateUserDto.AvatarImage = updateUserDto.AvatarImage.Split(imagePrefix)[1];
+                    }
+                    user.ProfilePicture = await _imageService.UploadImageAsync(updateUserDto.AvatarImage, user.Id.ToString());
+                    if (user.ProfilePicture.Url.Length == 0)
+                    {
+                        throw new UserException("Image upload error");
+                    }
+                }
+                else if (user.ProfilePicture is not null)
+                {
+                    await _imageService.RemoveImageAsync(user.ProfilePicture.FileName);
+                    user.ProfilePicture = null;
+                }
+                result = await _userManager.UpdateAsync(user); // tutaj zapisanie zmian w bazie
+                if (!result.Succeeded)
+                {
+                    throw new UserException(result.Errors.First()?.Code);
                 }
             }
             catch
@@ -176,12 +188,11 @@ namespace MyWideIO.API.Services
             return UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
         }
 
-        public async Task<UserDto> GetUserAsync(Guid id)
+        public async Task<UserDto> GetUserAsync(Guid id, Guid askerId)
         {
-            AppUserModel user = await _userManager.FindByIdAsync(id.ToString());
-            return user == null
-                ? throw new UserNotFoundException()
-                : UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
+            AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserNotFoundException();
+
+            return UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()), askerId == id);
         }
 
 
@@ -236,7 +247,61 @@ namespace MyWideIO.API.Services
             await _transactionService.BeginTransactionAsync();
             try
             {
-                AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist"); // UserNotFoundException();
+                AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserNotFoundException();
+
+                // if creator has any videos throw exception
+                var role = (await _userManager.GetRolesAsync(user)).First();
+                if (role == UserTypeEnum.Creator.ToString())
+                {
+                    if (await _videoRepository.UserHasVideosAsync(id))
+                        throw new UserException("Can't remove creator with videos");
+
+                    // remove subscriptions
+                    var subscriptionsToCreator = await _subscriptionRepository.GetSubscriptionsToCreator(id);
+                    await _subscriptionRepository.RemoveAsync(subscriptionsToCreator);
+                }
+
+                // remove all likes
+                var likeGroups = await _likeRepository.GetUserLikesGroupedByVideoAsync(id);
+                foreach (var group in likeGroups)
+                {
+                    VideoModel video;
+                    video = await _videoRepository.GetAsync(group.VideoId) ?? throw new VideoException("video was removed, while trying to remove its likes");
+
+                    switch (group.Reaction)
+                    {
+                        case ReactionEnum.Positive:
+                            video.PositiveReactions -= group.Count; // wolne, mozna groupby z select .count(wtedy nie bedzie samej listy)  i dodatkowy call po wszystki lajki do usuniecia
+                            break;
+                        case ReactionEnum.Negative:
+                            video.NegativeReactions -= group.Count;
+                            break;
+                        default:
+                            break;
+                    }
+                    await _videoRepository.UpdateAsync(video);
+                }
+                var likes = await _likeRepository.GetUserLikesAsync(id);
+                await _likeRepository.DeleteAsync(likes);
+
+
+                // remove all comments
+                var comments = await _commentRepository.GetUserCommentsAsync(id);
+                await _commentRepository.DeleteComments(comments);
+
+                // remove all playlists
+                var playlists = await _playlistRepository.GetUserPlaylistsAsync(id);
+                await _playlistRepository.RemoveAsync(playlists);
+
+                // remove user's subscriptions
+                var subscriptions = await _subscriptionRepository.GetViewersSubscriptionsAsync(id);
+                foreach (var sub in subscriptions)
+                {
+                    var creator = await _userManager.FindByIdAsync(sub.CreatorId.ToString());
+                    creator.SubscribersAmount--;
+                    await _userManager.UpdateAsync(creator);
+                }
+                await _subscriptionRepository.RemoveAsync(subscriptions);
 
                 IdentityResult result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)

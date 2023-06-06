@@ -75,5 +75,21 @@ namespace MyWideIO.API.Data.Repositories
         {
             return await _dbContext.Subscriptions.FirstOrDefaultAsync(s => s.CreatorId == subId && s.ViewerId == viewerId);
         }
+
+        public async Task RemoveAsync(IEnumerable<ViewerSubscription> subscriptions)
+        {
+            _dbContext.Subscriptions.RemoveRange(subscriptions);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<ViewerSubscription>> GetSubscriptionsToCreator(Guid creatorId)
+        {
+            return await _dbContext.Subscriptions.Where(s => s.CreatorId == creatorId).ToListAsync();
+        }
+
+        public async Task<List<ViewerSubscription>> GetViewersSubscriptionsAsync(Guid viewerId)
+        {
+            return await _dbContext.Subscriptions.Where(s => s.ViewerId == viewerId).ToListAsync();
+        }
     }
 }

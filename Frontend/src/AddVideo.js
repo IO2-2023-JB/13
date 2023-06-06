@@ -73,6 +73,7 @@ const AddVideo = () => {
               base64String = reader.result; //.split(",")[1];
             };
             setTimeout(async () => {
+            try{
             response = await axios.post(METADATA_URL,
                 JSON.stringify({
                   title: title, 
@@ -89,8 +90,24 @@ const AddVideo = () => {
                     withCredentials: false //cred
                 }
             );
+          }catch(err1){
+            setIsLoading(false);
+            if(!err1?.response) {
+              setErrMsg('No Server Response')
+            } else if(err1.response?.status === 400) {
+                setErrMsg('Bad request');
+            } else if(err1.response?.status === 401){
+              setErrMsg('Unauthorized');
+            } else if(err1.response?.status === 413){
+              setErrMsg('Video file is too large');
+            } else {
+              setErrMsg('Uploading Video failed');
+            }
+            errRef.current.focus();
+          }
             const formData = new FormData();
             formData.append('videoFile', selectedFile);
+            try{
             await axios.post(VIDEO_URL + "/" + response?.data.id, 
                 formData,
                 {
@@ -103,12 +120,28 @@ const AddVideo = () => {
               );
             handleCancelClick();
             setIsLoading(false);
+            }catch(err1){
+              setIsLoading(false);
+              if(!err1?.response) {
+                setErrMsg('No Server Response')
+              } else if(err1.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if(err1.response?.status === 401){
+                setErrMsg('Unauthorized');
+              } else if(err1.response?.status === 413){
+                setErrMsg('Video file is too large');
+              } else {
+                setErrMsg('Uploading Video failed');
+              }
+              errRef.current.focus();
+            }
           }, 100);
           }
           else
           {
             let base64data = null;
             setTimeout(async () => {
+            try{
               response = await axios.post(METADATA_URL,
                 JSON.stringify({
                   title: title, 
@@ -125,8 +158,24 @@ const AddVideo = () => {
                     withCredentials: false //cred
                 }
               );
+            }catch(err1){
+              setIsLoading(false);
+              if(!err1?.response) {
+                setErrMsg('No Server Response')
+              } else if(err1.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if(err1.response?.status === 401){
+                setErrMsg('Unauthorized');
+              } else if(err1.response?.status === 413){
+                setErrMsg('Video file is too large');
+              } else {
+                setErrMsg('Uploading Video failed');
+              }
+              errRef.current.focus();
+            }
               const formData = new FormData();
               formData.append('videoFile', selectedFile);
+              try{
               await axios.post(VIDEO_URL + "/" + response?.data.id,
                 formData,
                 {
@@ -139,19 +188,37 @@ const AddVideo = () => {
               );
               handleCancelClick();
               setIsLoading(false);
+            }
+            catch(err2){
+              setIsLoading(false);
+              if(!err2?.response) {
+                setErrMsg('No Server Response')
+              } else if(err2.response?.status === 400) {
+                  setErrMsg('Bad request');
+              } else if(err2.response?.status === 401){
+                setErrMsg('Unauthorized');
+              } else if(err2.response?.status === 413){
+                setErrMsg('Video file is too large');
+              } else {
+                setErrMsg('Uploading Video failed');
+              }
+              errRef.current.focus();
+            }
             }, 100);
           }
         } catch (err) {
-            if (!err?.response) {
-                setErrMsg('No Server Response');
-            } else if (err.response?.status === 401) {
-                setErrMsg('Unauthorized');
-            } else {
-                setErrMsg('Data Change Failed');
-            }
             setIsLoading(false);
-            console.log(errRef);
-            console.log(errMsg);
+            if(!err?.response) {
+              setErrMsg('No Server Response')
+            } else if(err.response?.status === 400) {
+                setErrMsg('Bad request');
+            } else if(err.response?.status === 401){
+              setErrMsg('Unauthorized');
+            } else if(err.response?.status === 413){
+              setErrMsg('Video file is too large');
+            } else {
+              setErrMsg('Uploading Video failed');
+            }
             errRef.current.focus();
         }
       };
@@ -250,9 +317,9 @@ const AddVideo = () => {
         <BounceLoader color="#ff0000" />
       </div>
     )}
-    {errMsg !== '' && (
+    {/* {errMsg !== '' && (
         <div style={{ color: "red", marginTop: "10px" }}>{errMsg}</div>
-    )}
+    )} */}
   </div>
 )}
 export default AddVideo

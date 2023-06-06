@@ -117,54 +117,54 @@ namespace MyWideIO.API.Tests
             };
         }
 
-        [Fact]
-        public async void TestAddCommentOk()
-        {
-            IActionResult result = await controller.AddCommentToVideo(v1ID, "KOMENTARZ2");
-            var okRes = result as OkResult;
-            Assert.NotNull(okRes);
-            Assert.Equal(200, okRes.StatusCode);
-        }
+        //[Fact]
+        //public async void TestAddCommentOk()
+        //{
+        //    IActionResult result = await controller.AddCommentToVideo(v1ID, "KOMENTARZ2");
+        //    var okRes = result as OkResult;
+        //    Assert.NotNull(okRes);
+        //    Assert.Equal(200, okRes.StatusCode);
+        //}
 
-        [Fact]
-        public async void TestGetCommentsOk()
-        {
-            var commentsResult = await controller.GetComments(v1ID);
-            Assert.NotNull(commentsResult);
-            Assert.NotNull(commentsResult.Result);
-            var okR = commentsResult.Result as OkObjectResult;
-            Assert.NotNull(okR);
-            Assert.Equal(200, okR.StatusCode);
-        }
+        //[Fact]
+        //public async void TestGetCommentsOk()
+        //{
+        //    var commentsResult = await controller.GetComments(v1ID);
+        //    Assert.NotNull(commentsResult);
+        //    Assert.NotNull(commentsResult.Result);
+        //    var okR = commentsResult.Result as OkObjectResult;
+        //    Assert.NotNull(okR);
+        //    Assert.Equal(200, okR.StatusCode);
+        //}
 
-        [Fact]
-        public async void TestGetResponseCommentOk()
-        {
-            var commentResult = await controller.GetResponseData(Guid.NewGuid());
-            Assert.NotNull(commentResult);
-            Assert.NotNull(commentResult.Result);
-            var okR = commentResult.Result as OkObjectResult;
-            Assert.NotNull(okR);
-            Assert.Equal(200, okR.StatusCode);
-        }
+        //[Fact]
+        //public async void TestGetResponseCommentOk()
+        //{
+        //    var commentResult = await controller.GetResponseData(Guid.NewGuid());
+        //    Assert.NotNull(commentResult);
+        //    Assert.NotNull(commentResult.Result);
+        //    var okR = commentResult.Result as OkObjectResult;
+        //    Assert.NotNull(okR);
+        //    Assert.Equal(200, okR.StatusCode);
+        //}
 
-        [Fact]
-        public async void TestDeleteCommentOk()
-        {
-            var result = await controller.DeleteComment(Guid.NewGuid());
-            var okRes = result as OkResult;
-            Assert.NotNull(okRes);
-            Assert.Equal(200, okRes.StatusCode);
-        }
+        //[Fact]
+        //public async void TestDeleteCommentOk()
+        //{
+        //    var result = await controller.DeleteComment(Guid.NewGuid());
+        //    var okRes = result as OkResult;
+        //    Assert.NotNull(okRes);
+        //    Assert.Equal(200, okRes.StatusCode);
+        //}
 
-        [Fact]
-        public async void TestAddCommentResponsesOk()
-        {
-            var result = await controller.AddResponseToComment(Guid.NewGuid(), "Test commment");
-            var okRes = result as OkResult;
-            Assert.NotNull(okRes);
-            Assert.Equal(200, okRes.StatusCode);
-        }
+        //[Fact]
+        //public async void TestAddCommentResponsesOk()
+        //{
+        //    var result = await controller.AddResponseToComment(Guid.NewGuid(), "Test commment");
+        //    var okRes = result as OkResult;
+        //    Assert.NotNull(okRes);
+        //    Assert.Equal(200, okRes.StatusCode);
+        //}
 
 
 

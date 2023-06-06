@@ -72,7 +72,11 @@ namespace MyWideIO.API.Services
                 case ProcessingProgressEnum.Processing:
                     throw new VideoException("can't delete while processing");
             }
-
+            // TODO: usuwanie przez admina, blokada usuwania jak jest nie resolved ticket
+           // if (await _ticketRepository.TargetHasTickets(videoId))
+            //    throw new TicketException("Can't remove video while there are tickets for it");
+            var tickets = await _ticketRepository.GetTargetsTickets(videoId);
+            await _ticketRepository.RemoveAsync(tickets);
             // delete likes
             var likes = await _likeRepository.GetVideoLikesAsync(videoId);
             await _likeRepository.DeleteAsync(likes);
@@ -91,11 +95,9 @@ namespace MyWideIO.API.Services
             }
 
             // remove tickets?
-            if (await _ticketRepository.TargetHasTickets(videoId))
-                throw new TicketException("Can't remove video while there are tickets for it");
+           
 
-            // var tickets = await _ticketRepository.GetTargetsTickets(videoId);
-            // await _ticketRepository.RemoveAsync(tickets);
+           
 
 
             // remove video

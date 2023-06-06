@@ -91,14 +91,5 @@ namespace MyWideIO.API.Data.Repositories
         {
             return await _dbContext.Subscriptions.Where(s => s.ViewerId == viewerId).ToListAsync();
         }
-
-        public async Task<List<ISubscriptionRepository.SubscribtionGrouping>> GetViewerSubscriptionsGroupedAsync(Guid viewerId)
-        {
-            return await _dbContext.Subscriptions
-                .Where(s => s.ViewerId == viewerId)
-                .GroupBy(s => s.CreatorId)
-                .Select(g => new ISubscriptionRepository.SubscribtionGrouping { CreatorId = g.Key, Count = g.Count() })
-                .ToListAsync();
-        }
     }
 }

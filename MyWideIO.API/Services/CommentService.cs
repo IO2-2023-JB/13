@@ -4,51 +4,69 @@ using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using Microsoft.AspNetCore.Identity;
 using MyWideIO.API.Mappers;
+using MyWideIO.API.Exceptions;
 
 namespace MyWideIO.API.Services
 {
     public class CommentService : ICommentService
     {
-        ICommentRepository _commentRepository { get; set; }
-        IUserService _userService { get; set; }
+        //ICommentRepository _commentRepository { get; set; } // ???
+        //IUserService _userService { get; set; } // ???
 
-        public CommentService(ICommentRepository commentRepository, IUserService userService)
+        private readonly ICommentRepository _commentRepository;
+        private readonly UserManager<AppUserModel> _userManager;
+
+        public CommentService(ICommentRepository commentRepository, UserManager<AppUserModel> userManager)
         {
             _commentRepository = commentRepository;
-            _userService = userService;
+            _userManager = userManager;
         }
+
+
+        //public CommentService(ICommentRepository commentRepository, IUserService userService)
+        //{
+        //    _commentRepository = commentRepository;
+        //    _userService = userService;
+        //}
 
         public async Task AddResponseToComment(Guid commentId, string content, Guid userId)
         {
+            CommentModel parent = await _commentRepository.GetComment(commentId) ?? throw new CommentNotFoundException();
+            if (parent.ParentCommentId is not null)
+                throw new CommentException("Cant add a response to a response");
             await _commentRepository.AddComment(new CommentModel()
             {
-                Id = new Guid(),
                 Content = content,
-                VideoId = null,
+                VideoId = parent.VideoId,
                 AuthorId = userId,
                 ParentCommentId = commentId,
                 hasResponses = false
-            }, true);
+            });
+            parent.hasResponses = true;
+            await _commentRepository.Update(parent);
         }
 
         public async Task AddNewComment(Guid videoId, string content, Guid userId)
         {
             await _commentRepository.AddComment(new CommentModel()
             {
-                Id = new Guid(),
                 Content = content,
                 VideoId = videoId,
                 AuthorId = userId,
                 ParentCommentId = null,
                 hasResponses = false
-            }, false);
+            });
         }
 
         public async Task DeleteComment(Guid commentId)
         {
-            await _commentRepository.DeleteComment(
-                await _commentRepository.GetComment(commentId)
-                );
+            CommentModel comment = await _commentRepository.GetComment(commentId) ?? throw new CommentNotFoundException();
+            if (comment.hasResponses)
+            {
+                var responses = await _commentRepository.GetCommentResponses(commentId);
+                await _commentRepository.DeleteComments(responses);
+            }
+            await _commentRepository.DeleteComment(comment);
         }
 
         public async Task<CommentListDto> GetVideoComments(Guid videoId)
@@ -58,20 +76,20 @@ namespace MyWideIO.API.Services
                 Comments = new List<CommentDto>()
             };
 
-            var rawComments = await _commentRepository.GetVideoComments(videoId);
-            if (rawComments == null)
-                throw new Exception("No video of given id");
-            foreach (var cmnt in rawComments) // mozna zrobic oddzielna funkcje - 'mapper', jak sie w kilku miejscach to samo robi
-                                              // tylko wtedy trzeba dodac pole Author w komentarzu i go includowac w repository
+            List<CommentModel> rawComments = await _commentRepository.GetVideoComments(videoId);
+            foreach (var cmnt in rawComments.Where(c => c.ParentCommentId is null)) // mozna zrobic oddzielna funkcje - 'mapper', jak sie w kilku miejscach to samo robi
+                                                                                    // tylko wtedy trzeba dodac pole Author w komentarzu i go includowac w repository
+                                                                                    // i wtedy select zamiast foreach, bardziej czytelne
             {
-                UserDto user = await _userService.GetUserAsync(cmnt.AuthorId);
+                // UserDto user = await _userService.GetUserAsync(cmnt.AuthorId); // wtf
+                AppUserModel user = await _userManager.FindByIdAsync(cmnt.Id.ToString());
                 comments.Comments.Add(new CommentDto()
                 {
                     Id = cmnt.Id,
                     AuthorId = cmnt.AuthorId,
                     Content = cmnt.Content,
-                    AvatarImage = user.AvatarImage,
-                    Nickname = user.Nickname,
+                    AvatarImage = user.ProfilePicture?.Url,
+                    Nickname = user.UserName,
                     HasResponses = cmnt.hasResponses
                 });
             }
@@ -85,52 +103,51 @@ namespace MyWideIO.API.Services
                 Comments = new List<CommentDto>()
             };
 
-            var rawComments = await _commentRepository.GetCommentResponses(commentId);
+            List<CommentModel> rawComments = await _commentRepository.GetCommentResponses(commentId);
             foreach (var cmnt in rawComments)
             {
-                UserDto user = await _userService.GetUserAsync(cmnt.AuthorId);
-                comments.Comments.Add(
-                    new CommentDto()
-                    {
-                        Id = cmnt.Id,
-                        AuthorId = cmnt.AuthorId,
-                        Content = cmnt.Content,
-                        AvatarImage = user.AvatarImage,
-                        Nickname = user.Nickname,
-                        HasResponses = cmnt.hasResponses
-                    });
+                AppUserModel user = await _userManager.FindByIdAsync(cmnt.Id.ToString());
+                comments.Comments.Add(new CommentDto()
+                {
+                    Id = cmnt.Id,
+                    AuthorId = cmnt.AuthorId,
+                    Content = cmnt.Content,
+                    AvatarImage = user.ProfilePicture?.Url,
+                    Nickname = user.UserName,
+                    HasResponses = cmnt.hasResponses
+                });
             }
             return comments;
         }
         public async Task<CommentDto> GetCommentById(Guid id)
         {
-            var model = await _commentRepository.GetComment(id);
-            if (model.VideoId == null || model.ParentCommentId != null)
-                throw new Exception("Comment of given id is not a video comment (probably a response)");
-            UserDto user = await _userService.GetUserAsync(model.AuthorId);
+            var model = await _commentRepository.GetComment(id) ?? throw new CommentNotFoundException();
+            if (model.ParentCommentId != null)
+                throw new Exception("Comment of given id is not a video comment (probably a response)"); // czemu propably
+            AppUserModel user = await _userManager.FindByIdAsync(model.AuthorId.ToString());
             return new CommentDto()
             {
                 Id = model.Id,
                 AuthorId = model.AuthorId,
                 Content = model.Content,
-                AvatarImage = user.AvatarImage,
-                Nickname = user.Nickname,
+                AvatarImage = user.ProfilePicture?.Url,
+                Nickname = user.UserName,
                 HasResponses = model.hasResponses
             };
         }
         public async Task<CommentDto> GetCommentResponseById(Guid id)
         {
-            var model = await _commentRepository.GetComment(id);
-            if (model.VideoId != null || model.ParentCommentId == null)
+            var model = await _commentRepository.GetComment(id) ?? throw new CommentNotFoundException();
+            if (model.ParentCommentId == null)
                 throw new Exception("Comment of given id is not a response (probably a video comment)");
-            UserDto user = await _userService.GetUserAsync(model.AuthorId);
+            AppUserModel user = await _userManager.FindByIdAsync(model.AuthorId.ToString());
             return new CommentDto()
             {
                 Id = model.Id,
                 AuthorId = model.AuthorId,
                 Content = model.Content,
-                AvatarImage = user.AvatarImage,
-                Nickname = user.Nickname,
+                AvatarImage = user.ProfilePicture?.Url,
+                Nickname = user.UserName,
                 HasResponses = model.hasResponses
             };
         }

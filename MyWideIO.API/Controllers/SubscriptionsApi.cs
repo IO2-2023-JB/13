@@ -42,7 +42,7 @@ namespace MyWideIO.API.Controllers
         [Authorize] // nie potrzebne, jest przed calym kontrolerem
         [ValidateModelState]
         [SwaggerOperation("AddSubscription")]
-        public virtual async Task<IActionResult> AddSubscription([FromQuery(Name = "id")][Required()] Guid subId)
+        public virtual async Task<IActionResult> AddSubscription([FromQuery(Name = "creatorId")][Required()] Guid creatorId)
         {
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
                 viewerId = Guid.Empty;//  jesli jest Authorize, ale nie ma ClaimTypes.NameIdentifier, to blad jest(raczej nigdy tak nie bedzie)
@@ -50,7 +50,7 @@ namespace MyWideIO.API.Controllers
 
             try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
             {
-                await _subscriptionService.SubscribeAsync(viewerId, subId);
+                await _subscriptionService.SubscribeAsync(viewerId, creatorId);
             }
             catch (DataException exception)
             {

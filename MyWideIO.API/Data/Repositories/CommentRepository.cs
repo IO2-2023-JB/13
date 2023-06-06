@@ -1,9 +1,10 @@
-﻿using MyWideIO.API.Data.IRepositories;
+﻿using Microsoft.EntityFrameworkCore;
+using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Models.DB_Models;
 
 namespace MyWideIO.API.Data.Repositories
 {
-    public class CommentRepository: ICommentRepository
+    public class CommentRepository : ICommentRepository
     {
         private readonly ApplicationDbContext _dbContext;
 
@@ -12,38 +13,51 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddComment(CommentModel model, bool response = false)
+        public async Task AddComment(CommentModel model)
         {
-             _dbContext.Comments.Add(model);
-            if (response) // if(model.ParentCommentId is not null)
-            {
-                _dbContext.Comments.Where(c => c.Id == model.ParentCommentId).FirstOrDefault().hasResponses = true; // First zamiast FirstOrDefault
-            }
-            _dbContext.SaveChanges(); // SaveChangesAsync + await
+            _dbContext.Comments.Add(model);
+            await _dbContext.SaveChangesAsync();
         }
 
 
         public async Task<CommentModel?> GetComment(Guid commentId)
         {
-            return _dbContext.Comments.Where(c => c.Id == commentId).FirstOrDefault(); // FirstOrDefaultAsync + await
+            return await _dbContext.Comments.Where(c => c.Id == commentId).FirstOrDefaultAsync(); // FirstOrDefaultAsync + await
         }
 
         public async Task DeleteComment(CommentModel comment)
         {
-            _dbContext.Remove(comment);
-            _dbContext.SaveChanges(); // SaveChangesAsync + await
+            _dbContext.Comments.Remove(comment);
+            await _dbContext.SaveChangesAsync(); // SaveChangesAsync + await
         }
 
 
         public async Task<List<CommentModel>> GetVideoComments(Guid videoId)
         {
-            return _dbContext.Comments.Where(c => c.VideoId == videoId).ToList(); // ToListAsync + await
+            return await _dbContext.Comments.Where(c => c.VideoId == videoId).ToListAsync(); // ToListAsync + await
 
         }
 
         public async Task<List<CommentModel>> GetCommentResponses(Guid commentId)
         {
-            return _dbContext.Comments.Where(c => c.ParentCommentId == commentId).ToList(); // ToListAsync + await
+            return await _dbContext.Comments.Where(c => c.ParentCommentId == commentId).ToListAsync(); // ToListAsync + await
+        }
+
+        public async Task DeleteComments(IEnumerable<CommentModel> comments)
+        {
+            _dbContext.Comments.RemoveRange(comments);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task Update(CommentModel comment)
+        {
+            _dbContext.Comments.Update(comment);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<CommentModel>> GetUserCommentsAsync(Guid userId)
+        {
+            return await _dbContext.Comments.Where(c => c.AuthorId == userId).ToListAsync();
         }
     }
 }

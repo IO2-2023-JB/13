@@ -10,5 +10,6 @@ namespace MyWideIO.API.Data.IRepositories
         public Task<ViewerLike?> GetUserLikeOfVideoAsync(Guid userId, Guid videoId, CancellationToken cancellationToken = default); 
         public Task AddAsync(ViewerLike like);
         public Task DeleteAsync(ViewerLike like);
+        public Task DeleteAsync(IEnumerable<ViewerLike> likes);
     }
 }

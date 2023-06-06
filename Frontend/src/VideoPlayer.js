@@ -13,6 +13,7 @@ import ReactPlayer from 'react-player';
 import TextField from "@material-ui/core/TextField";
 import { ConstrainsContext } from "./api/ApiConstrains";
 import useAuth from './hooks/useAuth';
+import { BounceLoader } from "react-spinners";
 
 const VIDEO_URL = 'video';
 const METADATA_URL = '/video-metadata';
@@ -45,6 +46,8 @@ const VideoPlayer = () => {
   const [donateAmount, setDonateAmount] = useState(1);
 
   const [showMessage, setShowMessage] = useState(false);
+
+  const [isUploading, setIsUploading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [reason, setReason] = useState('');
@@ -605,6 +608,7 @@ const VideoPlayer = () => {
   const handleVideoUpload = async (e) => {
     e.preventDefault();
     try {
+      setIsUploading(true);
       const formData = new FormData();
       formData.append('videoFile', selectedFile);
       await axios.post(VIDEO_URL + "/" + videoData.id,
@@ -617,14 +621,20 @@ const VideoPlayer = () => {
             withCredentials: false //cred
         }
       );
+      setIsUploading(false);
       navigate('/profile');
     } catch (err) {
-        if (!err?.response) {
-            setErrMsg('No Server Response');
-        } else if (err.response?.status === 401) {
-            setErrMsg('Unauthorized');
+        setIsUploading(false);
+        if(!err?.response) {
+          setErrMsg('No Server Response')
+        } else if(err.response?.status === 400) {
+            setErrMsg('Bad request');
+        } else if(err.response?.status === 401){
+          setErrMsg('Unauthorized');
+        } else if(err.response?.status === 413){
+          setErrMsg('Video file is too large');
         } else {
-            setErrMsg('Data Change Failed');
+          setErrMsg('Uploading Video failed');
         }
         errRef.current.focus();
     }
@@ -722,7 +732,7 @@ const VideoPlayer = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?creatorId=" + videoData.authorId, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -751,7 +761,7 @@ const VideoPlayer = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?id=" + videoData.authorId, {
+    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + videoData.authorId, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -1160,8 +1170,14 @@ const VideoPlayer = () => {
                           id="video"
                           onChange={onChangeHandler}
                       />
-                      <button class="btn btn-dark" disabled={!validVideoFile ? true : false}>Submit</button>
+                      <button class="btn btn-dark" disabled={!validVideoFile || isUploading ? true : false}>Submit</button>
                   </form>
+                  {isUploading && (
+                    <div className="loading-container">
+                      <h4>Your video is beeing uploaded...</h4>
+                      <BounceLoader color="#ff0000" />
+                    </div>
+                  )}
                 </div>
               ):( videoData.processingProgress === 'Uploading' ? (
                 <div class="container-fluid justify-content-center" style={{fontSize:"30px", marginTop:"20px", padding: "20px", color: "red"}}>
@@ -1318,10 +1334,15 @@ const VideoPlayer = () => {
 }else{
   return(
     <div>
-    {(forbiddedErr === true && videoData.visibility === 'Private' && videoData.authorId !==auth.id) && (
+    {(forbiddedErr === true && videoData.visibility === 'Private' && videoData.authorId !==auth.id) ? (
       <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
       justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
         <h2 class="container-fluid justify-content-center" style={{color:"red", textAlign:"center"}}> This video is private. </h2>
+      </div>
+    ):(
+      <div class="container-fluid justify-content-center" style={{display: "flex", flexDirection: "column", alignItems: "flex-start", 
+      justifyContent: "flex-start", marginTop: "150px", width: "900px", backgroundColor:"#333333", borderTopRightRadius: "25px", borderTopLeftRadius: "25px"}}>
+        <h2 class="container-fluid justify-content-center" style={{color:"red", textAlign:"center"}}> Loading video... </h2>
       </div>
     )}
     </div>

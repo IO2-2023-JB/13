@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
+using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
@@ -18,7 +19,12 @@ namespace MyWideIO.API.Tests
         private readonly Mock<ITokenService> _mockTokenService;
         private readonly Mock<IImageStorageService> _mockImageService;
         private readonly Mock<ITransactionService> _mockTransactionService;
-        private readonly Mock<IVideoService> _mockVideoService;
+        private readonly Mock<ICommentRepository> _mockCommentRepository;
+        private readonly Mock<IVideoRepository> _mockVideoRepository;
+        private readonly Mock<ILikeRepository> _mockLikeRepository;
+        private readonly Mock<IPlaylistRepository> _mockPlaylistRepository;
+        private readonly Mock<ITicketRepository> _mockTicketRepository;
+        private readonly Mock<ISubscriptionRepository> _mockSubscribtionRepository;
         private readonly UserService _userService;
 
         public UserServiceTests()
@@ -32,8 +38,14 @@ namespace MyWideIO.API.Tests
             _mockTokenService = new Mock<ITokenService>();
             _mockImageService = new Mock<IImageStorageService>();
             _mockTransactionService = new Mock<ITransactionService>();
-            _mockVideoService = new Mock<IVideoService>();
-            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object,_mockTransactionService.Object,_mockVideoService.Object);
+            _mockVideoRepository = new Mock<IVideoRepository>();
+            _mockLikeRepository = new Mock<ILikeRepository>();
+            _mockCommentRepository = new Mock<ICommentRepository>();
+            _mockPlaylistRepository = new Mock<IPlaylistRepository>();
+            _mockTicketRepository = new Mock<ITicketRepository>();
+            _mockSubscribtionRepository = new Mock<ISubscriptionRepository>();
+
+            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object, _mockTransactionService.Object, _mockVideoRepository.Object, _mockLikeRepository.Object, _mockCommentRepository.Object, _mockPlaylistRepository.Object, _mockSubscribtionRepository.Object, _mockTicketRepository.Object);
         }
 
         [Fact]

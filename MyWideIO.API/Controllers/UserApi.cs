@@ -122,7 +122,9 @@ namespace MyWideIO.API.Controllers
                     BadRequest("Not logged in users must provide an id");
                 id = nId;
             }
-            UserDto userDto = await _userService.GetUserAsync(id.Value);
+            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid askerId))
+                askerId = Guid.Empty;
+            UserDto userDto = await _userService.GetUserAsync(id.Value, askerId);
             return Ok(userDto);
         }
 

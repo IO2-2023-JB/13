@@ -7,7 +7,7 @@ namespace MyWideIO.API.Mappers
 {
     public static class UserMapper
     {
-        public static  UserDto MapUserModelToUserDto(AppUserModel user, UserTypeEnum userType)
+        public static  UserDto MapUserModelToUserDto(AppUserModel user, UserTypeEnum userType, bool includeBalance = false)
         {
             var userDto = new UserDto
             {
@@ -18,13 +18,11 @@ namespace MyWideIO.API.Mappers
                 Nickname = user.UserName,
                 UserType = userType,
                 AvatarImage = Random.Shared.NextDouble() <= 0.002 ? "https://videioblob.blob.core.windows.net/blob1/burger.png" : user?.ProfilePicture?.Url,
-                AccountBalance = user?.AccountBalance
+                AccountBalance = includeBalance ? user!.AccountBalance : null
             };
             if (userDto.UserType != UserTypeEnum.Creator)
                 return userDto;
-            if (user.Money is null)
-                throw new UserException("Creator doesn't have required properties");
-            userDto.SubscriptionsCount = user.SubscribersAmount;
+            userDto.SubscriptionsCount = user!.SubscribersAmount;
             return userDto;
         }
     }

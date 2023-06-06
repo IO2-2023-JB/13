@@ -34,11 +34,11 @@ namespace MyWideIO.API.Services
                         throw new UserNotFoundException();
                     break;
                 case TicketTargetTypeEnum.Video:
-                    if (await _videoRepository.GetVideoAsync(submitTicketDto.TargetId) is null)
+                    if (await _videoRepository.GetAsync(submitTicketDto.TargetId) is null)
                         throw new VideoNotFoundException();
                     break;
                 case TicketTargetTypeEnum.Playlist:
-                    if (await _playlistRepository.GetPlaylistAsync(submitTicketDto.TargetId) is null)
+                    if (await _playlistRepository.GetAsync(submitTicketDto.TargetId) is null)
                         throw new PlaylistNotFoundException();
                     break;
                 case TicketTargetTypeEnum.CommentResponse: // moze jakies sprawdzenie czy to odpowiedz czy nie
@@ -56,7 +56,7 @@ namespace MyWideIO.API.Services
                 SubmitterId = userId,
                 Status = TicketStatusEnum.Submitted
             };
-            await _ticketRepository.AddTicketAsync(ticket);
+            await _ticketRepository.AddAsync(ticket);
             return new SubmitTicketResponseDto
             {
                 Id = ticket.Id
@@ -64,12 +64,12 @@ namespace MyWideIO.API.Services
         }
         public async Task<GetTicketDto> GetTicketAsync(Guid ticketId, CancellationToken cancellationToken)
         {
-            var ticket = await _ticketRepository.GetTicketAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
+            var ticket = await _ticketRepository.GetAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
             return TicketMapper.MapTicketModelToGetTicketDto(ticket);
         }
         public async Task<GetTicketStatusDto> GetTicketStatusAsync(Guid ticketId, CancellationToken cancellationToken)
         {
-            var ticket = await _ticketRepository.GetTicketAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
+            var ticket = await _ticketRepository.GetAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
             return new GetTicketStatusDto
             {
                 Status = ticket.Status
@@ -89,10 +89,10 @@ namespace MyWideIO.API.Services
         }
         public async Task<SubmitTicketResponseDto> AddResponseToTicketAsync(RespondToTicketDto respondToTicketDto, Guid ticketId)
         {
-            var ticket = await _ticketRepository.GetTicketAsync(ticketId) ?? throw new TicketNotFoundException();
+            var ticket = await _ticketRepository.GetAsync(ticketId) ?? throw new TicketNotFoundException();
             ticket.Response = respondToTicketDto.Response;
             ticket.Status = TicketStatusEnum.Resolved;
-            await _ticketRepository.UpdateTicketAsync(ticket);
+            await _ticketRepository.UpdateAsync(ticket);
             return new SubmitTicketResponseDto
             {
                 Id = ticket.Id

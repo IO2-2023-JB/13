@@ -13,7 +13,7 @@ namespace MyWideIO.API.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddTicketAsync(TicketModel ticket)
+        public async Task AddAsync(TicketModel ticket)
         {
             _dbContext.Tickets.Add(ticket);
             await _dbContext.SaveChangesAsync();
@@ -26,7 +26,7 @@ namespace MyWideIO.API.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<TicketModel?> GetTicketAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<TicketModel?> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Tickets
                 .FindAsync(new object?[] { id },  cancellationToken); // xd
@@ -39,16 +39,36 @@ namespace MyWideIO.API.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task RemoveTicketAsync(TicketModel ticket)
+        public async Task RemoveAsync(TicketModel ticket)
         {
             _dbContext.Remove(ticket);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdateTicketAsync(TicketModel ticket)
+        public async Task UpdateAsync(TicketModel ticket)
         {
             _dbContext.Update(ticket);
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task RemoveAsync(IEnumerable<TicketModel> tickets)
+        {
+            _dbContext.Tickets.RemoveRange(tickets);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<TicketModel>> GetTargetsTickets(Guid targetId, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Tickets
+                .Where(t => t.TargetId == targetId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> TargetHasTickets(Guid targetId, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Tickets
+                .Where(t => t.TargetId == targetId)
+                .AnyAsync(cancellationToken);
         }
     }
 }

@@ -150,7 +150,9 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
         [Authorize(Roles = "Creator")]
-        [RequestSizeLimit(1_000_000_000)]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+
         public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile, CancellationToken cancellationToken)
         {
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

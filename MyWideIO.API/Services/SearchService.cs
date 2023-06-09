@@ -68,13 +68,13 @@ namespace MyWideIO.API.Services
                 users = sortingType == SortingDirectionsEnum.Ascending ? users.OrderBy(u => u.Name) : users.OrderByDescending(u => u.Name);
 
             var userList = await users.Take(10).ToListAsync(); // paginacja by sie przydala
-            var userRoles = await userList.ToAsyncEnumerable().SelectAwait(async u=> (await _userManager.GetRolesAsync(u)).First()).ToListAsync();
+            var userRoles = await userList.ToAsyncEnumerable().SelectAwait(async u => (await _userManager.GetRolesAsync(u)).First()).ToListAsync();
 
             return new SearchResultsDto
             {
-                Playlists = playlistList.Select(PlaylistMapper.MapPlaylistModelToPlaylistBaseDto).ToList(),
-                Videos = videoList.Select(VideoMapper.VideoModelToVideoMetadataDto).ToList(),
-                Users = userList.Zip(userRoles).Select(ur => UserMapper.MapUserModelToUserDto(ur.First, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), ur.Second))).ToList()
+                Playlists = playlistList.Select(p => p.ToPlaylistBaseDto()).ToList(),
+                Videos = videoList.Select(v => v.ToVideoMetadataDto()).ToList(),
+                Users = userList.Zip(userRoles).Select(ur => ur.First.ToUserDto((UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), ur.Second))).ToList()
             };
         }
     }

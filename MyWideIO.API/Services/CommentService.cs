@@ -31,10 +31,10 @@ namespace MyWideIO.API.Services
 
         public async Task AddResponseToComment(Guid commentId, string content, Guid userId)
         {
-            CommentModel parent = await _commentRepository.GetComment(commentId) ?? throw new CommentNotFoundException();
+            CommentModel parent = await _commentRepository.GetAsync(commentId) ?? throw new CommentNotFoundException();
             if (parent.ParentCommentId is not null)
                 throw new CommentException("Cant add a response to a response");
-            await _commentRepository.AddComment(new CommentModel()
+            await _commentRepository.AddAsync(new CommentModel()
             {
                 Content = content,
                 VideoId = parent.VideoId,
@@ -43,12 +43,12 @@ namespace MyWideIO.API.Services
                 hasResponses = false
             });
             parent.hasResponses = true;
-            await _commentRepository.Update(parent);
+            await _commentRepository.UpdateAsync(parent);
         }
 
         public async Task AddNewComment(Guid videoId, string content, Guid userId)
         {
-            await _commentRepository.AddComment(new CommentModel()
+            await _commentRepository.AddAsync(new CommentModel()
             {
                 Content = content,
                 VideoId = videoId,
@@ -60,13 +60,14 @@ namespace MyWideIO.API.Services
 
         public async Task DeleteComment(Guid commentId)
         {
-            CommentModel comment = await _commentRepository.GetComment(commentId) ?? throw new CommentNotFoundException();
+            CommentModel comment = await _commentRepository.GetAsync(commentId) ?? throw new CommentNotFoundException();
             if (comment.hasResponses)
             {
                 var responses = await _commentRepository.GetCommentResponses(commentId);
-                await _commentRepository.DeleteComments(responses);
+                await _commentRepository.RemoveAsync(responses,false);
             }
-            await _commentRepository.DeleteComment(comment);
+            await _commentRepository.RemoveAsync(comment,false);
+            await _commentRepository.SaveChangesAsync();
         }
 
         public async Task<CommentListDto> GetVideoComments(Guid videoId)
@@ -121,7 +122,7 @@ namespace MyWideIO.API.Services
         }
         public async Task<CommentDto> GetCommentById(Guid id)
         {
-            var model = await _commentRepository.GetComment(id) ?? throw new CommentNotFoundException();
+            var model = await _commentRepository.GetAsync(id) ?? throw new CommentNotFoundException();
             if (model.ParentCommentId != null)
                 throw new Exception("Comment of given id is not a video comment (probably a response)"); // czemu propably
             AppUserModel user = await _userManager.FindByIdAsync(model.AuthorId.ToString());
@@ -137,7 +138,7 @@ namespace MyWideIO.API.Services
         }
         public async Task<CommentDto> GetCommentResponseById(Guid id)
         {
-            var model = await _commentRepository.GetComment(id) ?? throw new CommentNotFoundException();
+            var model = await _commentRepository.GetAsync(id) ?? throw new CommentNotFoundException();
             if (model.ParentCommentId == null)
                 throw new Exception("Comment of given id is not a response (probably a video comment)");
             AppUserModel user = await _userManager.FindByIdAsync(model.AuthorId.ToString());

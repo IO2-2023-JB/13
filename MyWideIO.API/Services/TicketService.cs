@@ -43,7 +43,7 @@ namespace MyWideIO.API.Services
                     break;
                 case TicketTargetTypeEnum.CommentResponse: // moze jakies sprawdzenie czy to odpowiedz czy nie
                 case TicketTargetTypeEnum.Comment:
-                    if (await _commentRepository.GetComment(submitTicketDto.TargetId) is null)
+                    if (await _commentRepository.GetAsync(submitTicketDto.TargetId) is null)
                         throw new CommentNotFoundException();
                     break;
             }
@@ -65,7 +65,7 @@ namespace MyWideIO.API.Services
         public async Task<GetTicketDto> GetTicketAsync(Guid ticketId, CancellationToken cancellationToken)
         {
             var ticket = await _ticketRepository.GetAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
-            return TicketMapper.MapTicketModelToGetTicketDto(ticket);
+            return ticket.ToGetTicketDto();
         }
         public async Task<GetTicketStatusDto> GetTicketStatusAsync(Guid ticketId, CancellationToken cancellationToken)
         {
@@ -85,7 +85,7 @@ namespace MyWideIO.API.Services
                 tickets = await _ticketRepository.GetSubbmitedTicketsAsync(cancellationToken);
             else
                 tickets = await _ticketRepository.GetUserTicketsAsync(userId, cancellationToken);
-            return tickets.Select(TicketMapper.MapTicketModelToGetTicketDto).ToList();
+            return tickets.Select(t => t.ToGetTicketDto()).ToList();
         }
         public async Task<SubmitTicketResponseDto> AddResponseToTicketAsync(RespondToTicketDto respondToTicketDto, Guid ticketId)
         {

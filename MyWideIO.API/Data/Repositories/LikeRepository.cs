@@ -6,31 +6,11 @@ using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Data.Repositories
 {
-    public class LikeRepository : ILikeRepository
+    public class LikeRepository : Repository<ViewerLike>, ILikeRepository
     {
-        private readonly ApplicationDbContext _dbContext;
 
-        public LikeRepository(ApplicationDbContext dbContext)
+        public LikeRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
-        }
-
-        public async Task AddAsync(ViewerLike like)
-        {
-            _dbContext.Likes.Add(like);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(ViewerLike like)
-        {
-            _dbContext.Likes.Remove(like);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(IEnumerable<ViewerLike> likes)
-        {
-            _dbContext.Likes.RemoveRange(likes);
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<ViewerLike?> GetUserLikeOfVideoAsync(Guid userId, Guid videoId, CancellationToken cancellationToken)
@@ -47,26 +27,11 @@ namespace MyWideIO.API.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<ILikeRepository.LikeGrouping>> GetUserLikesGroupedByVideoAsync(Guid userId)
-        {
-            return await _dbContext.Likes
-                .Where(l => l.ViewerId == userId)
-                .GroupBy(l => new { l.VideoId, l.Reaction })
-                .Select(g => new ILikeRepository.LikeGrouping { VideoId = g.Key.VideoId, Reaction = g.Key.Reaction, Count = g.Count() })
-                .ToListAsync();
-        }
-
         public async Task<ICollection<ViewerLike>> GetVideoLikesAsync(Guid videoId, CancellationToken cancellationToken)
         {
             return await _dbContext.Likes
                 .Where(l => l.VideoId == videoId)
                 .ToListAsync(cancellationToken);
-        }
-
-        public async Task UpdateAsync(ViewerLike like)
-        {
-            _dbContext.Likes.Update(like);
-            await _dbContext.SaveChangesAsync();
         }
     }
 }

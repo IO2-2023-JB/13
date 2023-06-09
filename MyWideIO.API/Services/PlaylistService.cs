@@ -24,7 +24,7 @@ namespace MyWideIO.API.Services
 
         public async Task AddVideoToPlaylistAsync(Guid viewerId, Guid playlistId, Guid videoId)
         {
-            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId) ?? throw new PlaylistNotFoundException();
+            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId, true) ?? throw new PlaylistNotFoundException();
             if (playlist.ViewerId != viewerId)
                 throw new ForbiddenException();
             VideoModel video = await _videoRepository.GetAsync(videoId) ?? throw new VideoNotFoundException();
@@ -55,21 +55,21 @@ namespace MyWideIO.API.Services
 
         public async Task<PlaylistDto> EditPlaylistAsync(Guid viewerId, Guid playlistId, PlaylistEditDto playlistEditDto)
         {
-            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId) ?? throw new PlaylistNotFoundException();
+            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId, true) ?? throw new PlaylistNotFoundException();
             if (playlist.ViewerId != viewerId)
                 throw new ForbiddenException();
             playlist.Name = playlistEditDto.Name;
             playlist.IsVisible = playlistEditDto.Visibility == VisibilityEnum.Public;
             await _playlistRepository.UpdateAsync(playlist);
-            return PlaylistMapper.MapPlaylistModelToPlaylistDto(playlist);
+            return playlist.ToPlaylistDto();
         }
 
         public async Task<PlaylistDto> GetPlaylistAsync(Guid viewerId, Guid playlistId)
         {
-            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId) ?? throw new PlaylistNotFoundException();
+            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId, true) ?? throw new PlaylistNotFoundException();
             if (!playlist.IsVisible && playlist.ViewerId != viewerId)
                 throw new ForbiddenException();
-            return PlaylistMapper.MapPlaylistModelToPlaylistDto(playlist);
+            return playlist.ToPlaylistDto();
         }
 
         public async Task<List<PlaylistBaseDto>> GetUserPlaylistsAsync(Guid viewerId, Guid userId)
@@ -79,7 +79,7 @@ namespace MyWideIO.API.Services
             IEnumerable<PlaylistModel> list = await _playlistRepository.GetUserPlaylistsAsync(userId);
             if (viewerId != userId)
                 list = list.Where(p => p.IsVisible);
-            return list.Select(PlaylistMapper.MapPlaylistModelToPlaylistBaseDto).ToList();
+            return list.Select(p => p.ToPlaylistBaseDto()).ToList();
         }
 
         public async Task RemovePlaylistAsync(Guid userId, Guid playlistId)
@@ -93,14 +93,12 @@ namespace MyWideIO.API.Services
 
         public async Task RemoveVideoFromPlaylistAsync(Guid viewerId, Guid playlistId, Guid videoId)
         {
-            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId) ?? throw new PlaylistNotFoundException();
+            PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId, true) ?? throw new PlaylistNotFoundException();
             if (playlist.ViewerId != viewerId)
                 throw new ForbiddenException();
             if (await _videoRepository.GetAsync(videoId) is null)
                 throw new VideoNotFoundException();
-            var a = playlist.VideoPlaylists.FirstOrDefault(p=>p.VideoId == videoId);
-            if (a is null)
-                throw new VideoNotFoundException();
+            var a = playlist.VideoPlaylists.FirstOrDefault(p => p.VideoId == videoId) ?? throw new VideoNotFoundException();
             playlist.VideoPlaylists.Remove(a);
             await _playlistRepository.UpdateAsync(playlist);
         }

@@ -5,7 +5,7 @@ namespace MyWideIO.API.Services.Interfaces
 {
     public interface IDonateService
     {
-        public Task SendDonation(Guid reciverId, Guid senderId, decimal amount);
+        public Task SendDonation(Guid reciverId, decimal amount);
         public Task Withdraw(Guid UserId, decimal amount);
     }
 }

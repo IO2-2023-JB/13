@@ -6,7 +6,7 @@ namespace MyWideIO.API.Mappers
 {
     public static class VideoMapper
     {
-        public static VideoMetadataDto VideoModelToVideoMetadataDto(VideoModel videoModel) => new()
+        public static VideoMetadataDto ToVideoMetadataDto(this VideoModel videoModel) => new()
         {
             Id = videoModel.Id,
             Title = videoModel.Title,
@@ -22,7 +22,7 @@ namespace MyWideIO.API.Mappers
             EditDate = videoModel.EditDate,
             Duration = videoModel.Duration.ToString()
         };
-        public static VideoBaseDto VideoModelToVideoBaseDto(VideoModel videoModel) => new()
+        public static VideoBaseDto ToVideoBaseDto(this VideoModel videoModel) => new()
         {
             Id = videoModel.Id,
             Title = videoModel.Title,

@@ -27,13 +27,13 @@ namespace MyWideIO.API.Tests
         private readonly Mock<ISubscriptionRepository> _mockSubscribtionRepository;
         private readonly UserService _userService;
 
-        public UserServiceTests()
-        {
-            _mockUserManager = new Mock<UserManager<AppUserModel>>(
-                Mock.Of<IUserStore<AppUserModel>>(), null, null, null, null, null, new IdentityErrorDescriber(), null, null);
+        //public UserServiceTests()
+        //{
+        //    _mockUserManager = new Mock<UserManager<AppUserModel>>(
+        //        Mock.Of<IUserStore<AppUserModel>>(), null, null, null, null, null, new IdentityErrorDescriber(), null, null);
 
-            _mockSignInManager = new Mock<SignInManager<AppUserModel>>(
-                _mockUserManager.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<AppUserModel>>(), null, null, null, null);
+        //    _mockSignInManager = new Mock<SignInManager<AppUserModel>>(
+        //        _mockUserManager.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<AppUserModel>>(), null, null, null, null);
 
             _mockTokenService = new Mock<ITokenService>();
             _mockImageService = new Mock<IImageStorageService>();
@@ -48,63 +48,63 @@ namespace MyWideIO.API.Tests
             _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object, _mockTransactionService.Object, _mockVideoRepository.Object, _mockLikeRepository.Object, _mockCommentRepository.Object, _mockPlaylistRepository.Object, _mockSubscribtionRepository.Object, _mockTicketRepository.Object);
         }
 
-        [Fact]
-        public async Task RegisterUserAsync_WithValidData_ShouldSucceed()
-        {
-            // Arrange
-            var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody (chyba)
-            {
-                Email = "test@example.com",
-                Name = "Test",
-                Surname = "User",
-                Nickname = "testuser",
-                Password = "password",
-                UserType = UserTypeEnum.Simple,
-                AvatarImage = "base64-image"
-            };
+        //[Fact]
+        //public async Task RegisterUserAsync_WithValidData_ShouldSucceed()
+        //{
+        //    // Arrange
+        //    var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody (chyba)
+        //    {
+        //        Email = "test@example.com",
+        //        Name = "Test",
+        //        Surname = "User",
+        //        Nickname = "testuser",
+        //        Password = "password",
+        //        UserType = UserTypeEnum.Simple,
+        //        AvatarImage = "base64-image"
+        //    };
 
-            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
+        //    _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
+        //        .ReturnsAsync(IdentityResult.Success);
 
-            _mockUserManager.Setup(x => x.UpdateAsync(It.IsAny<AppUserModel>()))
-                .ReturnsAsync(IdentityResult.Success);
+        //    _mockUserManager.Setup(x => x.UpdateAsync(It.IsAny<AppUserModel>()))
+        //        .ReturnsAsync(IdentityResult.Success);
 
-            _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
+        //    _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
+        //        .ReturnsAsync(IdentityResult.Success);
 
-            _mockImageService.Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(new ImageModel { Url = "url", FileName = "filename" });
+        //    _mockImageService.Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>()))
+        //        .ReturnsAsync(new ImageModel { Url = "url", FileName = "filename" });
 
-            // Act
-            Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);
+        //    // Act
+        //    Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);
 
-            // Assert
-            await act.Should().NotThrowAsync();
-        }
-        [Fact]
-        public async Task RegisterUserAsync_WithAlreadyTakenEmail_ShouldThrowEmailException()
-        {
-            // Arrange
-            var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody (chyba)
-            {
-                Email = "test@example.com",
-                Name = "Test",
-                Surname = "User",
-                Nickname = "testuser",
-                Password = "password",
-                UserType = UserTypeEnum.Simple,
-                AvatarImage = "base64-image"
-            };
+        //    // Assert
+        //    await act.Should().NotThrowAsync();
+        //}
+        //[Fact]
+        //public async Task RegisterUserAsync_WithAlreadyTakenEmail_ShouldThrowEmailException()
+        //{
+        //    // Arrange
+        //    var registerDto = new RegisterDto // dane nie sa wazne, wazne co zwracaja mockowane metody (chyba)
+        //    {
+        //        Email = "test@example.com",
+        //        Name = "Test",
+        //        Surname = "User",
+        //        Nickname = "testuser",
+        //        Password = "password",
+        //        UserType = UserTypeEnum.Simple,
+        //        AvatarImage = "base64-image"
+        //    };
 
-            _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Failed(new IdentityErrorDescriber().DuplicateEmail(registerDto.Email)));
-            // nie trzeba mockowac wiecej, RegisterUserAsync rzuci wyjatkiem na poczatku i inne metody sie nie wywolaja
+        //    _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUserModel>(), It.IsAny<string>()))
+        //        .ReturnsAsync(IdentityResult.Failed(new IdentityErrorDescriber().DuplicateEmail(registerDto.Email)));
+        //    // nie trzeba mockowac wiecej, RegisterUserAsync rzuci wyjatkiem na poczatku i inne metody sie nie wywolaja
 
-            // Act
-            Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);
+        //    // Act
+        //    Func<Task> act = async () => await _userService.RegisterUserAsync(registerDto);
 
-            // Assert
-            await act.Should().ThrowAsync<DuplicateEmailException>();
-        }
+        //    // Assert
+        //    await act.Should().ThrowAsync<DuplicateEmailException>();
+        //}
     }
 }

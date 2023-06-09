@@ -5,7 +5,7 @@ namespace MyWideIO.API.Mappers
 {
     public static class TicketMapper
     {
-        public static GetTicketDto MapTicketModelToGetTicketDto(TicketModel ticketModel)
+        public static GetTicketDto ToGetTicketDto(this TicketModel ticketModel)
         {
             return new GetTicketDto
             {

@@ -72,53 +72,20 @@ namespace MyWideIO.API.Services
 
         public async Task<CommentListDto> GetVideoComments(Guid videoId)
         {
-            CommentListDto comments = new CommentListDto()
+            List<CommentModel> comments = await _commentRepository.GetVideoComments(videoId);
+            return new CommentListDto
             {
-                Comments = new List<CommentDto>()
+                Comments = comments.Select(c => c.ToCommentDto()).ToList()
             };
-
-            List<CommentModel> rawComments = await _commentRepository.GetVideoComments(videoId);
-            foreach (var cmnt in rawComments.Where(c => c.ParentCommentId is null)) // mozna zrobic oddzielna funkcje - 'mapper', jak sie w kilku miejscach to samo robi
-                                                                                    // tylko wtedy trzeba dodac pole Author w komentarzu i go includowac w repository
-                                                                                    // i wtedy select zamiast foreach, bardziej czytelne
-            {
-                // UserDto user = await _userService.GetUserAsync(cmnt.AuthorId); // wtf
-                AppUserModel user = await _userManager.FindByIdAsync(cmnt.AuthorId.ToString());
-                comments.Comments.Add(new CommentDto()
-                {
-                    Id = cmnt.Id,
-                    AuthorId = cmnt.AuthorId,
-                    Content = cmnt.Content,
-                    AvatarImage = user.ProfilePicture?.Url,
-                    Nickname = user.UserName,
-                    HasResponses = cmnt.hasResponses
-                });
-            }
-            return comments;
         }
 
         public async Task<CommentListDto> GetCommentResponses(Guid commentId)
         {
-            CommentListDto comments = new CommentListDto()
+            List<CommentModel> comments = await _commentRepository.GetCommentResponses(commentId);
+            return new CommentListDto
             {
-                Comments = new List<CommentDto>()
+                Comments = comments.Select(c => c.ToCommentDto()).ToList()
             };
-
-            List<CommentModel> rawComments = await _commentRepository.GetCommentResponses(commentId);
-            foreach (var cmnt in rawComments)
-            {
-                AppUserModel user = await _userManager.FindByIdAsync(cmnt.AuthorId.ToString());
-                comments.Comments.Add(new CommentDto()
-                {
-                    Id = cmnt.Id,
-                    AuthorId = cmnt.AuthorId,
-                    Content = cmnt.Content,
-                    AvatarImage = user.ProfilePicture?.Url,
-                    Nickname = user.UserName,
-                    HasResponses = cmnt.hasResponses
-                });
-            }
-            return comments;
         }
         public async Task<CommentDto> GetCommentById(Guid id)
         {

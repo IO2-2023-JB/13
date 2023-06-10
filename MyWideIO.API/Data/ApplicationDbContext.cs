@@ -76,23 +76,10 @@ namespace MyWideIO.API.Data
                 .WithMany(p => p.VideoPlaylists)
                 .HasForeignKey(vp => vp.PlaylistId);
 
-            //modelBuilder.Entity<CommentModel>()
-            //    .HasOne(c => c.Author)
-            //    .WithMany()
-            //    .HasForeignKey(c => c.AuthorId)
-            //    .OnDelete(DeleteBehavior.NoAction);
-
-            //modelBuilder.Entity<CommentModel>()
-            //    .HasOne(c => c.ParentComment)
-            //    .WithMany(c => c.Replies)
-            //    .HasForeignKey(c => c.ParentCommentId)
-            //    .OnDelete(DeleteBehavior.Restrict); 
-
-            //modelBuilder.Entity<VideoModel>()
-            //    .OwnsOne(c => c.Thumbnail);
-
-            //modelBuilder.Entity<AppUserModel>()
-            //    .OwnsOne(c => c.ProfilePicture);
+            modelBuilder.Entity<CommentModel>()
+                .HasOne(c => c.Author)
+                .WithMany()
+                .HasForeignKey(c => c.AuthorId);
 
             modelBuilder.Entity<AppUserModel>()
                 .HasMany(c => c.OwnedVideos)

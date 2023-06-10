@@ -32,7 +32,7 @@ namespace MyWideIO.API.Data.Repositories
                 .Include(v => v.Creator)
                 .ToListAsync(cancellationToken);
         }
-        public override async Task<VideoModel?> GetAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<VideoModel?> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Videos
                 .Include(v => v.Creator)

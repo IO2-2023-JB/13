@@ -11,26 +11,38 @@ namespace MyWideIO.API.Data.Repositories
         {
         }
 
-        public async Task<List<CommentModel>> GetVideoComments(Guid videoId)
+        public async Task<List<CommentModel>> GetVideoComments(Guid videoId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Comments
+                .Include(c => c.Author)
                 .Where(c => c.VideoId == videoId)
-                .ToListAsync();
+                .Where(c => !c.hasResponses)
+                .ToListAsync(cancellationToken);
 
         }
 
-        public async Task<List<CommentModel>> GetCommentResponses(Guid commentId)
+        public async Task<List<CommentModel>> GetCommentResponses(Guid commentId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Comments
+                .Include(c => c.Author)
                 .Where(c => c.ParentCommentId == commentId)
-                .ToListAsync(); 
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<CommentModel>> GetUserCommentsAsync(Guid userId)
+        public async Task<List<CommentModel>> GetUserCommentsAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Comments
+                .Include(c => c.Author)
                 .Where(c => c.AuthorId == userId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<CommentModel?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Comments
+                .Include(c => c.Author)
+                .Where(c => c.Id == id)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

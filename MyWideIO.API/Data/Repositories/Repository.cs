@@ -39,12 +39,6 @@ namespace MyWideIO.API.Data.Repositories
                 await _dbContext.SaveChangesAsync();
         }
 
-
-        public virtual async Task<T?> GetAsync(Guid id, CancellationToken cancellationToken)
-        {
-            return await _dbContext.FindAsync<T>(id, cancellationToken);
-        }
-
         public virtual async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();

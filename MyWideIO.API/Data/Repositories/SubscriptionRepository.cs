@@ -18,32 +18,36 @@ namespace MyWideIO.API.Data.Repositories
 
 
 
-        public async Task<bool> IsSubscribedAsync(Guid viewerId, Guid subId)
+        public async Task<bool> IsSubscribedAsync(Guid viewerId, Guid subId, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Subscriptions.AnyAsync(vs => vs.ViewerId == viewerId && vs.CreatorId == subId);
+            return await _dbContext.Subscriptions
+                .Where(vs => vs.ViewerId == viewerId && vs.CreatorId == subId)
+                .AnyAsync(cancellationToken);
         }
 
-        public async Task<ViewerSubscription?> GetSubscriptionByIdAsync(Guid viewerId, Guid subId)
+        public async Task<ViewerSubscription?> GetSubscriptionByIdAsync(Guid viewerId, Guid subId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Subscriptions
                 .Where(s => s.CreatorId == subId && s.ViewerId == viewerId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<List<ViewerSubscription>> GetSubscriptionsToCreator(Guid creatorId)
+        public async Task<List<ViewerSubscription>> GetSubscriptionsToCreator(Guid creatorId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Subscriptions
                 .Where(s => s.CreatorId == creatorId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<ViewerSubscription>> GetViewersSubscriptionsAsync(Guid viewerId, bool includeVideos)
+        public async Task<List<ViewerSubscription>> GetViewersSubscriptionsAsync(Guid viewerId, bool includeVideos, CancellationToken cancellationToken = default)
         {
             IQueryable<ViewerSubscription> query = _dbContext.Subscriptions;
             query = includeVideos
                 ? query.Include(s => s.Creator).ThenInclude(c => c.OwnedVideos) // include i theninclude zwracaja rozne typy
                 : query.Include(s => s.Creator);
-            return await query.Where(s => s.ViewerId == viewerId).ToListAsync();
+            return await query
+                .Where(s => s.ViewerId == viewerId)
+                .ToListAsync(cancellationToken);
         }
     }
 }

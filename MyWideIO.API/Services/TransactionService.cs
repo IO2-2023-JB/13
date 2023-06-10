@@ -24,6 +24,7 @@ namespace MyWideIO.API.Services
                 throw new InvalidOperationException("Transaction has not been started");
             }
             await _transaction.CommitAsync();
+            _transaction = null;
         }
         public async Task RollbackAsync()
         {

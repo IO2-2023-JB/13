@@ -5,14 +5,12 @@ using MyWideIO.API.Models.Dto_Models;
 using Microsoft.AspNetCore.Identity;
 using MyWideIO.API.Mappers;
 using MyWideIO.API.Exceptions;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Services
 {
     public class CommentService : ICommentService
     {
-        //ICommentRepository _commentRepository { get; set; } // ???
-        //IUserService _userService { get; set; } // ???
-
         private readonly ICommentRepository _commentRepository;
         private readonly UserManager<AppUserModel> _userManager;
 
@@ -21,14 +19,6 @@ namespace MyWideIO.API.Services
             _commentRepository = commentRepository;
             _userManager = userManager;
         }
-
-
-        //public CommentService(ICommentRepository commentRepository, IUserService userService)
-        //{
-        //    _commentRepository = commentRepository;
-        //    _userService = userService;
-        //}
-
         public async Task AddResponseToComment(Guid commentId, string content, Guid userId)
         {
             CommentModel parent = await _commentRepository.GetAsync(commentId) ?? throw new CommentNotFoundException();
@@ -58,15 +48,18 @@ namespace MyWideIO.API.Services
             });
         }
 
-        public async Task DeleteComment(Guid commentId)
+        public async Task DeleteComment(Guid commentId, Guid userId)
         {
+            var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new UserNotFoundException();
+            if (!await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
+                throw new ForbiddenException();
             CommentModel comment = await _commentRepository.GetAsync(commentId) ?? throw new CommentNotFoundException();
             if (comment.hasResponses)
             {
                 var responses = await _commentRepository.GetCommentResponses(commentId);
-                await _commentRepository.RemoveAsync(responses,false);
+                await _commentRepository.RemoveAsync(responses, false);
             }
-            await _commentRepository.RemoveAsync(comment,false);
+            await _commentRepository.RemoveAsync(comment, false);
             await _commentRepository.SaveChangesAsync();
         }
 

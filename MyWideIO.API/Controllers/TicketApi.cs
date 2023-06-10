@@ -35,7 +35,8 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketDto), description: "OK")]
         public async Task<IActionResult> GetTicket([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
-            return Ok(await _ticketService.GetTicketAsync(id, cancellationToken));
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(await _ticketService.GetTicketAsync(id, userId, cancellationToken));
         }
 
         /// <summary>
@@ -65,13 +66,15 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(GetTicketStatusDto), description: "OK")]
         public async Task<IActionResult> GetTicketStatus([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
-            return Ok(await _ticketService.GetTicketStatusAsync(id, cancellationToken));
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(await _ticketService.GetTicketStatusAsync(id, userId, cancellationToken));
         }
 
         /// <summary>
         /// Submit a response for a ticket
         /// </summary>
         /// <param name="respondToTicketDto"></param>
+        /// <param name="ticketId"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
@@ -80,6 +83,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("RespondToTicket")]
         [SwaggerResponse(statusCode: 200, type: typeof(SubmitTicketResponseDto), description: "OK")]
+        [Authorize(Roles ="Administrator")]
         public async Task<IActionResult> RespondToTicket([FromBody] RespondToTicketDto respondToTicketDto, [FromQuery(Name = "id")] Guid ticketId)
         {
             return Ok(await _ticketService.AddResponseToTicketAsync(respondToTicketDto, ticketId));

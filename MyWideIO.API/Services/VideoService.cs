@@ -8,6 +8,7 @@ using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
 using NReco.VideoConverter;
+using System.Net.Sockets;
 
 namespace MyWideIO.API.Services
 {
@@ -71,7 +72,8 @@ namespace MyWideIO.API.Services
         public async Task RemoveVideoAsync(Guid videoId, Guid creatorId)
         {
             var video = await _videoRepository.GetAsync(videoId) ?? throw new VideoNotFoundException();
-            if (video.CreatorId != creatorId)
+            var user = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
+            if (video.CreatorId != creatorId && !await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
                 throw new ForbiddenException();
 
             switch (video.ProcessingProgress)
@@ -231,8 +233,6 @@ namespace MyWideIO.API.Services
         public async Task<VideoUploadResponseDto> UploadVideoMetadataAsync(VideoUploadDto dto, Guid creatorId)
         {
             var creator = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
-            if (creator.Money is null)
-                throw new UserException("Creator doesn't have required properties");
             VideoModel video;
             await _transactionService.BeginTransactionAsync();
             try
@@ -356,11 +356,11 @@ namespace MyWideIO.API.Services
 
         public async Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriberId)
         {
-            var subscriptions = await _subscriptionRepository.GetViewersSubscriptionsAsync(subscriberId,true);
+            var subscriptions = await _subscriptionRepository.GetViewersSubscriptionsAsync(subscriberId, true);
 
             return new VideoListDto
             {
-                Videos = subscriptions.SelectMany(s => s.Creator.OwnedVideos.Select(v => v.ToVideoMetadataDto())).ToList()
+                Videos = subscriptions.SelectMany(s => s.Creator.OwnedVideos.Where(v => v.IsVisible).Select(v => v.ToVideoMetadataDto())).ToList()
             };
         }
     }

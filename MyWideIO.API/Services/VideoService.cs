@@ -8,6 +8,7 @@ using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
 using MyWideIO.API.Services.Interfaces;
 using NReco.VideoConverter;
+using System.Net.Sockets;
 
 namespace MyWideIO.API.Services
 {
@@ -20,13 +21,24 @@ namespace MyWideIO.API.Services
         private readonly UserManager<AppUserModel> _userManager;
         private readonly ITransactionService _transactionService;
         private readonly IBackgroundTaskQueue<VideoProcessWorkItem> _backgroundTaskQueue;
-        private readonly ISubscriptionService _subscriptionService;
         private readonly ICommentRepository _commentRepository;
         private readonly IPlaylistRepository _playlistRepository;
         private readonly ITicketRepository _ticketRepository;
+        private readonly ISubscriptionRepository _subscriptionRepository;
 
-        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService,
-            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ISubscriptionService subscriptionService, ICommentRepository commentRepository, IPlaylistRepository playlistRepository, ITicketRepository ticketRepository)
+        public VideoService(
+            IVideoRepository videoRepository,
+            IImageStorageService imageService,
+            IVideoStorageService videoStorageService,
+            ILikeRepository likeRepository,
+            UserManager<AppUserModel> userManager,
+            ITransactionService transactionService,
+            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue,
+            ICommentRepository commentRepository,
+            IPlaylistRepository playlistRepository,
+            ITicketRepository ticketRepository,
+            ISubscriptionRepository subscriptionRepository
+            )
         {
             _videoRepository = videoRepository;
             _imageStorageService = imageService;
@@ -35,10 +47,10 @@ namespace MyWideIO.API.Services
             _userManager = userManager;
             _transactionService = transactionService;
             _backgroundTaskQueue = backgroundTaskQueue;
-            _subscriptionService = subscriptionService;
             _commentRepository = commentRepository;
             _playlistRepository = playlistRepository;
             _ticketRepository = ticketRepository;
+            _subscriptionRepository = subscriptionRepository;
         }
 
         public async Task<Stream> GetVideoAsync(Guid videoId, Guid viewerId, CancellationToken cancellationToken)
@@ -60,7 +72,8 @@ namespace MyWideIO.API.Services
         public async Task RemoveVideoAsync(Guid videoId, Guid creatorId)
         {
             var video = await _videoRepository.GetAsync(videoId) ?? throw new VideoNotFoundException();
-            if (video.CreatorId != creatorId)
+            var user = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
+            if (video.CreatorId != creatorId && !await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
                 throw new ForbiddenException();
 
             switch (video.ProcessingProgress)
@@ -72,22 +85,17 @@ namespace MyWideIO.API.Services
                 case ProcessingProgressEnum.Processing:
                     throw new VideoException("can't delete while processing");
             }
-            // TODO: usuwanie przez admina, blokada usuwania jak jest nie resolved ticket
-           // if (await _ticketRepository.TargetHasTickets(videoId))
-            //    throw new TicketException("Can't remove video while there are tickets for it");
-            var tickets = await _ticketRepository.GetTargetsTickets(videoId);
-            await _ticketRepository.RemoveAsync(tickets);
             // delete likes
             var likes = await _likeRepository.GetVideoLikesAsync(videoId);
-            await _likeRepository.DeleteAsync(likes);
+            await _likeRepository.RemoveAsync(likes);
 
             // delete comments and responses
             var comments = await _commentRepository.GetVideoComments(videoId);
-            await _commentRepository.DeleteComments(comments);
+            await _commentRepository.RemoveAsync(comments);
 
             // remove video from playlists
-            var playlists = await _playlistRepository.GetPlaylistsContainingVideo(videoId);
-            foreach(var playlist in playlists)
+            var playlists = await _playlistRepository.GetPlaylistsContainingVideo(videoId, true);
+            foreach (var playlist in playlists)
             {
                 var videoplaylist = playlist.VideoPlaylists.First(vp => vp.VideoId == videoId);
                 playlist.VideoPlaylists.Remove(videoplaylist);
@@ -95,9 +103,11 @@ namespace MyWideIO.API.Services
             }
 
             // remove tickets?
-           
+            //if (await _ticketRepository.TargetHasTickets(videoId))
+            //    throw new TicketException("Can't remove video while there are tickets for it");
 
-           
+            var tickets = await _ticketRepository.GetTargetsTickets(videoId);
+            await _ticketRepository.RemoveAsync(tickets);
 
 
             // remove video
@@ -180,7 +190,7 @@ namespace MyWideIO.API.Services
             if (!video.IsVisible && video.CreatorId != viewerId)
                 throw new VideoIsPrivateException();
 
-            return VideoMapper.VideoModelToVideoMetadataDto(video);
+            return video.ToVideoMetadataDto();
         }
 
         public async Task UploadVideoAsync(Guid videoId, Guid creatorId, Stream videoFile, string extension, CancellationToken cancellationToken)
@@ -223,8 +233,6 @@ namespace MyWideIO.API.Services
         public async Task<VideoUploadResponseDto> UploadVideoMetadataAsync(VideoUploadDto dto, Guid creatorId)
         {
             var creator = await _userManager.FindByIdAsync(creatorId.ToString()) ?? throw new UserNotFoundException();
-            if (creator.Money is null)
-                throw new UserException("Creator doesn't have required properties");
             VideoModel video;
             await _transactionService.BeginTransactionAsync();
             try
@@ -342,24 +350,18 @@ namespace MyWideIO.API.Services
                 list = list.Where(v => v.IsVisible);
             return new VideoListDto
             {
-                Videos = list.Select(VideoMapper.VideoModelToVideoMetadataDto).ToList(),
+                Videos = list.Select(v => v.ToVideoMetadataDto()).ToList(),
             };
         }
 
-        public async Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriber)
+        public async Task<VideoListDto> GetVideosSubscribedByUser(Guid subscriberId)
         {
-            VideoListDto videos = new VideoListDto()
+            var subscriptions = await _subscriptionRepository.GetViewersSubscriptionsAsync(subscriberId, true);
+
+            return new VideoListDto
             {
-                Videos = new List<VideoMetadataDto>()
+                Videos = subscriptions.SelectMany(s => s.Creator.OwnedVideos.Where(v => v.IsVisible).Select(v => v.ToVideoMetadataDto())).ToList()
             };
-            UserSubscriptionListDto subs = await _subscriptionService.GetSubscriptionsAsync(subscriber);
-            foreach (var s in subs.Subscriptions)
-            {
-                IEnumerable<VideoModel> list =
-                    await _videoRepository.GetUserVideosAsync(s.Id, default);
-                videos.Videos.AddRange(list.Select(VideoMapper.VideoModelToVideoMetadataDto));
-            }
-            return videos;
         }
     }
 }

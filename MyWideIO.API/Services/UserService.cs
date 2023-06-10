@@ -185,14 +185,14 @@ namespace MyWideIO.API.Services
                 throw;
             }
             await _transactionService.CommitAsync();
-            return UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
+            return user.ToUserDto((UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()));
         }
 
         public async Task<UserDto> GetUserAsync(Guid id, Guid askerId)
         {
             AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserNotFoundException();
 
-            return UserMapper.MapUserModelToUserDto(user, (UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()), askerId == id);
+            return user.ToUserDto((UserTypeEnum)Enum.Parse(typeof(UserTypeEnum), (await _userManager.GetRolesAsync(user)).First()), askerId == id);
         }
 
 
@@ -262,32 +262,32 @@ namespace MyWideIO.API.Services
                 }
 
                 // remove all likes
-                var likeGroups = await _likeRepository.GetUserLikesGroupedByVideoAsync(id);
-                foreach (var group in likeGroups)
+                var likes = await _likeRepository.GetUserLikesAsync(id);
+                foreach (var like in likes)
                 {
                     VideoModel video;
-                    video = await _videoRepository.GetAsync(group.VideoId) ?? throw new VideoException("video was removed, while trying to remove its likes");
+                    video = await _videoRepository.GetAsync(like.VideoId) ?? throw new VideoException("video was removed, while trying to remove its likes");
 
-                    switch (group.Reaction)
+                    switch (like.Reaction)
                     {
                         case ReactionEnum.Positive:
-                            video.PositiveReactions -= group.Count; // wolne, mozna groupby z select .count(wtedy nie bedzie samej listy)  i dodatkowy call po wszystki lajki do usuniecia
+                            video.PositiveReactions--; ; // wolne, mozna groupby z select .count(wtedy nie bedzie samej listy)  i dodatkowy call po wszystki lajki do usuniecia
                             break;
                         case ReactionEnum.Negative:
-                            video.NegativeReactions -= group.Count;
+                            video.NegativeReactions--;
                             break;
                         default:
                             break;
                     }
-                    await _videoRepository.UpdateAsync(video);
+                    await _videoRepository.UpdateAsync(video, false);
                 }
-                var likes = await _likeRepository.GetUserLikesAsync(id);
-                await _likeRepository.DeleteAsync(likes);
+                await _videoRepository.SaveChangesAsync();
+                await _likeRepository.RemoveAsync(likes);
 
 
                 // remove all comments
                 var comments = await _commentRepository.GetUserCommentsAsync(id);
-                await _commentRepository.DeleteComments(comments);
+                await _commentRepository.RemoveAsync(comments);
 
                 // remove all playlists
                 var playlists = await _playlistRepository.GetUserPlaylistsAsync(id);
@@ -295,9 +295,9 @@ namespace MyWideIO.API.Services
 
                 // remove user's subscriptions
                 var subscriptions = await _subscriptionRepository.GetViewersSubscriptionsAsync(id);
-                foreach (var sub in subscriptions)
+                foreach (var subscription in subscriptions)
                 {
-                    var creator = await _userManager.FindByIdAsync(sub.CreatorId.ToString());
+                    var creator = await _userManager.FindByIdAsync(subscription.CreatorId.ToString());
                     creator.SubscribersAmount--;
                     await _userManager.UpdateAsync(creator);
                 }
@@ -322,11 +322,9 @@ namespace MyWideIO.API.Services
         public async Task BanUserAsync(Guid id)
         {
             AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");
-            string role = (await _userManager.GetRolesAsync(user)).First();
-            if (role == UserTypeEnum.Administrator.ToString())
-            {
+            if (!await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
                 throw new UserException("Admin can't be banned");
-            }
+
             user.EndOfBan = DateTime.Now.AddMinutes(30);
             IdentityResult result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)

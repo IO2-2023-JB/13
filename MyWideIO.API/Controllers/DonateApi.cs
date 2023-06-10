@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Exceptions;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
@@ -37,7 +38,9 @@ namespace MyWideIO.API.Controllers
         public async virtual Task<IActionResult> SendDonation([FromQuery(Name = "id")][Required()] Guid id, [FromQuery(Name = "amount")][Required()] decimal amount)
         {
             Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _donateService.SendDonation(id, userId, amount);
+            if (userId == id)
+                throw new DonationException("You can't send money to yourself");
+            await _donateService.SendDonation(id, amount);
             return Ok();
         }
 

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Services.Interfaces;
 using Newtonsoft.Json;
@@ -17,7 +18,7 @@ namespace MyWideIO.API.Controllers
     /// </summary>
     [ApiController]
     [Route("subscriptions")]
-    [Authorize] // jak jest tutaj, to nie trzeba tego pisac przed kazda metoda
+    [Authorize]
     public class SubscriptionsApiController : ControllerBase
     {
         private readonly ISubscriptionService _subscriptionService;
@@ -26,42 +27,23 @@ namespace MyWideIO.API.Controllers
         {
             _subscriptionService = subscriptionService;
         }
-
-
-
         /// <summary>
         /// Subscribe to another user
         /// </summary>
-        /// <param name="subId">Subscribed user ID</param>
+        /// <param name="creatorId"></param>
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        // powinno byc jeszcze code 404 
+        /// <response code="404">Not found</response>
 
         [HttpPost]
-        [Authorize] // nie potrzebne, jest przed calym kontrolerem
         [ValidateModelState]
         [SwaggerOperation("AddSubscription")]
         public virtual async Task<IActionResult> AddSubscription([FromQuery(Name = "creatorId")][Required()] Guid creatorId)
         {
-            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
-                viewerId = Guid.Empty;//  jesli jest Authorize, ale nie ma ClaimTypes.NameIdentifier, to blad jest(raczej nigdy tak nie bedzie)
-                                      // czyli Guid.Parse, bez ifa i Guid.Empty
-
-            try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
-            {
-                await _subscriptionService.SubscribeAsync(viewerId, creatorId);
-            }
-            catch (DataException exception)
-            {
-                return NotFound(exception.Message);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
+            var viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _subscriptionService.SubscribeAsync(viewerId, creatorId);
             return Ok();
-
         }
 
         /// <summary>
@@ -71,30 +53,15 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        // powinno byc jeszcze code 404 
+        /// <response code="404">Not found</response>
 
         [HttpDelete]
-        [Authorize] // nie potrzebne, jest przed calym kontrolerem
         [ValidateModelState]
         [SwaggerOperation("DeleteSubscription")]
         public virtual async Task<IActionResult> DeleteSubscription([FromQuery(Name = "subId")][Required()] Guid subId)
         {
-            if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid viewerId))
-                viewerId = Guid.Empty; //  jesli jest Authorize, ale nie ma ClaimTypes.NameIdentifier, to blad jest(raczej nigdy tak nie bedzie)
-                                       // czyli Guid.Parse, bez ifa i Guid.Empty
-
-            try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
-            {
-                await _subscriptionService.UnsubscribeAsync(viewerId, subId);
-            }
-            catch (DataException exception)
-            {
-                return NotFound(exception.Message);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
+            var viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _subscriptionService.UnsubscribeAsync(viewerId, subId);
             return Ok();
         }
 
@@ -105,28 +72,16 @@ namespace MyWideIO.API.Controllers
         /// <response code="200">OK</response>
         /// <response code="400">Bad request</response>
         /// <response code="401">Unauthorized</response>
-        // powinno byc jeszcze code 404
+        /// <response code="404">Not found</response>
 
         [HttpGet]
         [ValidateModelState]
         [SwaggerOperation("GetSubscriptions")]
         [SwaggerResponse(statusCode: 200, type: typeof(UserSubscriptionListDto), description: "OK")]
-        [AllowAnonymous] // to jest potrzebne, nadpisuje [Authorize] przed kontrolerem
+        [AllowAnonymous]
         public virtual async Task<IActionResult> GetSubscriptions([FromQuery(Name = "id")][Required()] Guid id)
         {
-            UserSubscriptionListDto subs;
-            try // przeciez jest middleware do obslugi wyjatkow, nie trzeba tego robic w controllerze
-            {
-                subs = await _subscriptionService.GetSubscriptionsAsync(id);
-            }
-            catch (DataException exception)
-            {
-                return NotFound(exception.Message);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
+            UserSubscriptionListDto subs = await _subscriptionService.GetSubscriptionsAsync(id);
             return Ok(subs);
         }
     }

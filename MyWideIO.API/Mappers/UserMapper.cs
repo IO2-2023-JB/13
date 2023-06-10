@@ -7,7 +7,7 @@ namespace MyWideIO.API.Mappers
 {
     public static class UserMapper
     {
-        public static  UserDto MapUserModelToUserDto(AppUserModel user, UserTypeEnum userType, bool includeBalance = false)
+        public static  UserDto ToUserDto(this AppUserModel user, UserTypeEnum userType, bool includeBalance = false)
         {
             var userDto = new UserDto
             {

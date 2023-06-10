@@ -7,6 +7,7 @@ using System.Security.Claims;
 using WideIO.API.Attributes;
 using System.Net.Http;
 using MyWideIO.API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MyWideIO.API.Controllers
 {
@@ -16,6 +17,7 @@ namespace MyWideIO.API.Controllers
     /// </summary>
     [ApiController]
     [Route("comment")]
+    [Authorize]
     public class CommentApiController : ControllerBase
     {
 
@@ -86,7 +88,8 @@ namespace MyWideIO.API.Controllers
         [SwaggerResponse(statusCode: 404, description: "Not Found")]
         public virtual async Task<IActionResult> DeleteComment([FromQuery(Name = "id")][Required()] Guid id)
         {
-            await _commentService.DeleteComment(id);
+            Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _commentService.DeleteComment(id, userId);
             return Ok();
         }
 

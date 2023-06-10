@@ -36,10 +36,11 @@ namespace MyWideIO.API.Middleware
                 VideoNotFoundException or
                 PlaylistNotFoundException or
                 CommentNotFoundException or
+                NotFoundException or
                 TicketNotFoundException => StatusCodes.Status404NotFound,
                 DuplicateEmailException => StatusCodes.Status409Conflict,
                 IncorrectPasswordException => StatusCodes.Status401Unauthorized,
-                VideoIsPrivateException or 
+                VideoIsPrivateException or
                 ForbiddenException => StatusCodes.Status403Forbidden,
                 //UserNotFoundExceptionDelete => HttpStatusCode.BadRequest,
                 CustomException => StatusCodes.Status418ImATeapot,

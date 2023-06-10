@@ -322,11 +322,9 @@ namespace MyWideIO.API.Services
         public async Task BanUserAsync(Guid id)
         {
             AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");
-            string role = (await _userManager.GetRolesAsync(user)).First();
-            if (role == UserTypeEnum.Administrator.ToString())
-            {
+            if (!await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
                 throw new UserException("Admin can't be banned");
-            }
+
             user.EndOfBan = DateTime.Now.AddMinutes(30);
             IdentityResult result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)

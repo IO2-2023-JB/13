@@ -14,10 +14,13 @@ namespace MyWideIO.API.Services
 {
     public class SubscriptionService : ISubscriptionService
     {
-        private readonly UserManager<AppUserModel> _userManager; // ?
+        private readonly UserManager<AppUserModel> _userManager;
         private readonly ISubscriptionRepository _subscriptionRepository;
 
-        public SubscriptionService(UserManager<AppUserModel> userManager, ISubscriptionRepository subscriptionRepository)
+        public SubscriptionService(
+            UserManager<AppUserModel> userManager,
+            ISubscriptionRepository subscriptionRepository
+            )
         {
             _userManager = userManager;
             _subscriptionRepository = subscriptionRepository;
@@ -25,38 +28,28 @@ namespace MyWideIO.API.Services
 
         public async Task SubscribeAsync(Guid viewerId, Guid subId)
         {
-            AppUserModel? creator = await _userManager.FindByIdAsync(subId.ToString());
-            AppUserModel? viewer = await _userManager.FindByIdAsync(viewerId.ToString());
+            if (viewerId == subId)
+                throw new CustomException("Can't subscribe to yourself");
+            AppUserModel creator = await _userManager.FindByIdAsync(subId.ToString()) ?? throw new UserNotFoundException();
+            var viewer = await _userManager.FindByIdAsync(viewerId.ToString()) ?? throw new UserNotFoundException();
 
-            // mozna zasubskrybowac samego siebie? // i guess
 
             if (await _subscriptionRepository.IsSubscribedAsync(viewerId, subId))
                 throw new BadRequestException("already subscribed");
 
-            var role = (await _userManager.GetRolesAsync(creator)).First();
-            if(role != UserTypeEnum.Creator.ToString())
-            {
+            if (!await _userManager.IsInRoleAsync(creator, UserTypeEnum.Creator.ToString()))
                 throw new NotCreatorException();
-            }
-
-            if (creator is not null && viewer is not null)
+            var subscription = new ViewerSubscription
             {
-                var subscription = new ViewerSubscription
-                {
-                    ViewerId = viewerId,
-                    CreatorId = subId,
-                    Creator = creator
-                };
+                ViewerId = viewerId,
+                CreatorId = subId,
+                Creator = creator, //
+                Viewer = viewer // 
+            };
 
-                creator.SubscribersAmount++;
-                await _userManager.UpdateAsync(creator);
-                await _subscriptionRepository.AddAsync(subscription);
-            }
-            else
-            {
-                throw new UserNotFoundException();
-            }
-
+            creator.SubscribersAmount++;
+            await _userManager.UpdateAsync(creator);
+            await _subscriptionRepository.AddAsync(subscription);
         }
 
         public async Task<UserSubscriptionListDto> GetSubscriptionsAsync(Guid id)
@@ -78,8 +71,6 @@ namespace MyWideIO.API.Services
             await _subscriptionRepository.RemoveAsync(sub);
             creator.SubscribersAmount--;
             await _userManager.UpdateAsync(creator);
-
-
         }
     }
 }

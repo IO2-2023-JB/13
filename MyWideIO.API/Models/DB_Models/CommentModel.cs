@@ -10,6 +10,7 @@ namespace MyWideIO.API.Models.DB_Models
         public string Content { get; set; }
 
         public Guid AuthorId { get; set; }
+        public AppUserModel Author { get; set; }
 
         public Guid? VideoId { get; set; }
 

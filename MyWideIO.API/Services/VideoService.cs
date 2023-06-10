@@ -25,8 +25,19 @@ namespace MyWideIO.API.Services
         private readonly ITicketRepository _ticketRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
 
-        public VideoService(IVideoRepository videoRepository, IImageStorageService imageService, IVideoStorageService videoStorageService, ILikeRepository likeRepository, UserManager<AppUserModel> userManager, ITransactionService transactionService,
-            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue, ICommentRepository commentRepository, IPlaylistRepository playlistRepository, ITicketRepository ticketRepository, ISubscriptionRepository subscriptionRepository)
+        public VideoService(
+            IVideoRepository videoRepository,
+            IImageStorageService imageService,
+            IVideoStorageService videoStorageService,
+            ILikeRepository likeRepository,
+            UserManager<AppUserModel> userManager,
+            ITransactionService transactionService,
+            IBackgroundTaskQueue<VideoProcessWorkItem> backgroundTaskQueue,
+            ICommentRepository commentRepository,
+            IPlaylistRepository playlistRepository,
+            ITicketRepository ticketRepository,
+            ISubscriptionRepository subscriptionRepository
+            )
         {
             _videoRepository = videoRepository;
             _imageStorageService = imageService;

@@ -37,5 +37,12 @@ namespace MyWideIO.API.Data.Repositories
                 .Where(t => t.TargetId == targetId)
                 .AnyAsync(cancellationToken);
         }
+
+        public async Task<TicketModel?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Tickets
+                .Where(t => t.Id == id)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace MyWideIO.API.Data.Repositories
                     .ThenInclude(v => v.Creator);
             return await query
                 .Where(p => p.ViewerId == userId)
-                .ToListAsync(cancellationToken: cancellationToken);
+                .ToListAsync(cancellationToken);
         }
 
         public IQueryable<PlaylistModel> GetIQuerablePlaylists()
@@ -55,7 +55,7 @@ namespace MyWideIO.API.Data.Repositories
                     .ThenInclude(v => v.Creator);
             return await query
                 .Where(p => p.VideoPlaylists.Any(vp => vp.VideoId == videoId))
-                .ToListAsync(cancellationToken: cancellationToken);
+                .ToListAsync(cancellationToken);
         }
     }
 }

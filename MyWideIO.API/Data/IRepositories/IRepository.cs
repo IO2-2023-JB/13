@@ -6,7 +6,6 @@
         public Task AddAsync(IEnumerable<T> entites, bool saveChanges = true);
         public Task RemoveAsync(T entity, bool saveChanges = true);
         public Task RemoveAsync(IEnumerable<T> entities, bool saveChanges = true);
-        public Task<T?> GetAsync(Guid id, CancellationToken cancellationToken = default);
         public Task UpdateAsync(T entity, bool saveChanges = true);
         public Task UpdateAsync(IEnumerable<T> entities, bool saveChanges = true);
         public Task SaveChangesAsync();

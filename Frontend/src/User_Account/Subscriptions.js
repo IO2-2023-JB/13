@@ -5,7 +5,7 @@ import axios from '../api/axios';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 
-const SUBSCRIPTIONS_URL = '/subscribtions'; // change to p
+const SUBSCRIPTIONS_URL = '/subscriptions';
 
 const Subscriptions = () => {
     const { auth } = useContext(AuthContext);

@@ -177,10 +177,11 @@ const Reports = () => {
 
     return(
         <div class="container" style={{marginTop: "200px", marginBottom:"50px"}}>
-            <h2 class="display-5" style={{textAlign: "center", marginBottom:"50px"}}> Your Reports: </h2>
-            <div class="display-5">Videos:</div>
+            <div class="mx-5">
+            <h1 class="display-4" style={{marginBottom:"50px"}}> Your Reports </h1>
+            <div class="display-6 center-div">Videos</div>
             {ticketsData.map(ticket => (
-                  <div>
+                  <div class="mx-5">
                     {videosData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
@@ -210,10 +211,10 @@ const Reports = () => {
                         </div>
                         </div>
                         <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <h3>Status: {ticket.status.status}</h3>
+                          <div>Status: {ticket.status.status}</div>
                           { ticket.status.status === "Resolved" && (
                             <div>
-                              <h3>Response: {ticket.response}</h3>
+                              Response: {ticket.response}
                             </div>
                           )}
                         </div>
@@ -221,9 +222,10 @@ const Reports = () => {
                     )}
                   </div>
             ))}
-            <div style={{marginTop:"50px"}} class="display-5">Users:</div>
+            
+            <div style={{marginTop:"50px"}} class="display-6 center-div">Users</div>
             {ticketsData.map(ticket => (
-                  <div>
+                  <div class="mx-5">
                     {usersData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
@@ -255,10 +257,10 @@ const Reports = () => {
                       </div>
                       </div>
                       <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <h3>Status: {ticket.status.status}</h3>
+                          <div>Status: {ticket.status.status}</div>
                           { ticket.status.status === "Resolved" && (
                             <div>
-                              <h3>Response: {ticket.response}</h3>
+                              Response: {ticket.response}
                             </div>
                           )}
                         </div>
@@ -266,9 +268,9 @@ const Reports = () => {
                     )}
                   </div>
             ))}
-            <div style={{marginTop:"50px"}} class="display-5">Playlists:</div>
+            <div style={{marginTop:"50px"}} class="display-6 center-div">Playlists</div>
             {ticketsData.map(ticket => (
-                  <div>
+                  <div class="mx-5">
                     {playlistsData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
@@ -291,10 +293,10 @@ const Reports = () => {
                             </li>
                           </div>
                           <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <h3>Status: {ticket.status.status}</h3>
+                          <div>Status: {ticket.status.status}</div>
                           { ticket.status.status === "Resolved" && (
                             <div>
-                              <h3>Response: {ticket.response}</h3>
+                              Response: {ticket.response}
                             </div>
                           )}
                         </div>
@@ -302,9 +304,9 @@ const Reports = () => {
                     )}
                   </div>
             ))}
-            <div style={{marginTop:"50px"}} class="display-5">Comments:</div>
+            <div style={{marginTop:"50px"}} class="display-6 center-div">Comments</div>
             {ticketsData.map(ticket => (
-                  <div>
+                  <div class="mx-5">
                     {commentsData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
@@ -312,15 +314,24 @@ const Reports = () => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
                       <h3>Reason:</h3> {ticket.reason}
                       </div>
-                      <div class="justify-content-center" style={{marginTop:"20px", 
-              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                        {commentsData[ticket.ticketId].nickname}: {commentsData[ticket.ticketId].content}
+                      <div style={{marginTop:"20px",  display:"flex",
+              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#c40000"}}>
+                        <img src={commentsData[ticket.ticketId].avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} 
+                          onClick={() => goToProfile(commentsData[ticket.ticketId].authorId)} />
+                          <div style={{display: "flex", flexDirection: "column"}}>
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                              <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(commentsData[ticket.ticketId].authorId)}>{commentsData[ticket.ticketId].nickname}</h4>
+                              <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
+                                <h6> {commentsData[ticket.ticketId].content} </h6>
+                              </div>
+                            </div>
+                          </div>
                       </div>
                       <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <h3>Status: {ticket.status.status}</h3>
+                          <div>Status: {ticket.status.status}</div>
                           { ticket.status.status === "Resolved" && (
                             <div>
-                              <h3>Response: {ticket.response}</h3>
+                              Response: {ticket.response}
                             </div>
                           )}
                         </div>
@@ -329,9 +340,9 @@ const Reports = () => {
                   </div>
             ))}
 
-            <div style={{marginTop:"50px"}} class="display-5">Comments responses:</div>
+            <div style={{marginTop:"50px"}} class="display-6 center-div">Comments responses</div>
             {ticketsData.map(ticket => (
-                  <div>
+                  <div class="mx-5">
                     {commentsResponseData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
@@ -339,15 +350,24 @@ const Reports = () => {
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
                       <h3>Reason:</h3> {ticket.reason}
                       </div>
-                      <div class="justify-content-center" style={{marginTop:"20px", 
-              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                        {commentsResponseData[ticket.ticketId].nickname}: {commentsResponseData[ticket.ticketId].content}
+                      <div style={{marginTop:"20px",  display:"flex",
+              color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#c40000"}}>
+                        <img src={commentsResponseData[ticket.ticketId].avatarImage} alt="Avatar" style={{width: "60px", height: "60px", borderRadius: "50%", marginRight: "10px", cursor: "pointer"}} 
+                          onClick={() => goToProfile(commentsResponseData[ticket.ticketId].authorId)} />
+                          <div style={{display: "flex", flexDirection: "column"}}>
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                              <h4 style={{fontSize: "30px", marginTop: "15px", cursor: "pointer"}} onClick={() => goToProfile(commentsResponseData[ticket.ticketId].authorId)}>{commentsResponseData[ticket.ticketId].nickname}</h4>
+                              <div style={{marginLeft: "50px", inlineSize: "400px", overflowWrap: "break-word"}}>
+                                <h6> {commentsResponseData[ticket.ticketId].content} </h6>
+                              </div>
+                            </div>
+                          </div>
                       </div>
                       <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <h3>Status: {ticket.status.status}</h3>
+                          <div>Status: {ticket.status.status}</div>
                           { ticket.status.status === "Resolved" && (
                             <div>
-                              <h3>Response: {ticket.response}</h3>
+                              Response: {ticket.response}
                             </div>
                           )}
                         </div>
@@ -355,7 +375,7 @@ const Reports = () => {
                     )}
                   </div>
             ))}
-
+          </div>
         </div>
     );
 };

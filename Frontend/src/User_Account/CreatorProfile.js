@@ -12,7 +12,7 @@ config.autoAddCss = false;
 const PROFILE_URL = '/user';
 const USER_VIDEOS_URL = '/user/videos';
 const USER_PLAYLISTS_URL = '/playlist/user';
-const SUBSCRIPTIONS_URL = '/subscribtions'; //change to p
+const SUBSCRIPTIONS_URL = '/subscriptions';
 const DONATE_SEND_URL = '/donate/send';
 const REPORT_URL = '/ticket';
 
@@ -196,7 +196,7 @@ const CreatorProfile = () => {
   }
 
   const handleSubscribeClick = () => {
-    axios.post(SUBSCRIPTIONS_URL + "?id=" + creator_id, {}, {
+    axios.post(SUBSCRIPTIONS_URL + "?creatorId=" + creator_id, {}, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -224,7 +224,7 @@ const CreatorProfile = () => {
   }
 
   const handleUnSubscribeClick = () => {
-    axios.delete(SUBSCRIPTIONS_URL + "?id=" + creator_id, {
+    axios.delete(SUBSCRIPTIONS_URL + "?subId=" + creator_id, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -347,11 +347,11 @@ const CreatorProfile = () => {
 
 return (
   <div style={{marginTop: "200px"}} class="container">
-      <div class="row">
-        <h1 class="display-1">{userData.nickname}</h1>
+      <div class="row mx-5">
+        <h1 class="display-3">{userData.nickname}</h1>
         <div class ="mt-2 row">
           <div class="col-sm">
-            <h2>User's data</h2>
+            <h3>User's data</h3>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <label>Name:</label>
@@ -409,7 +409,7 @@ return (
             )}
           </div>
           <div class="col-sm">
-            <h2>Avatar Image</h2>
+            <h3>Avatar Image</h3>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
               <img key={userData.avatarImage} src = {userData.avatarImage+"?time=" + new Date()} alt="No avatar image"/>
@@ -418,7 +418,7 @@ return (
           <div class="col-sm">
           {userData.userType !== 'Simple' && (
             <div>
-          <h2>{userData.nickname}'s videos</h2>
+          <h2>Videos</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>
@@ -452,7 +452,7 @@ return (
             </section>
             </div>
           )}
-          <h2>{userData.nickname}'s playlists</h2>
+          <h2 style={{marginTop:"50px"}}> Playlists</h2>
             <section class="container-fluid justify-content-center" style={{marginTop:"20px", 
               color:"white", borderRadius:"15px", paddingBottom:"20px", paddingTop:"0px", backgroundColor:"#333333"}}>
               <ul style={{padding:"0px"}}>

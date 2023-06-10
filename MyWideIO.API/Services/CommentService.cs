@@ -51,9 +51,9 @@ namespace MyWideIO.API.Services
         public async Task DeleteComment(Guid commentId, Guid userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new UserNotFoundException();
-            if (!await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
-                throw new ForbiddenException();
             CommentModel comment = await _commentRepository.GetAsync(commentId) ?? throw new CommentNotFoundException();
+            if (comment.AuthorId != userId && !await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
+                throw new ForbiddenException();
             if (comment.hasResponses)
             {
                 var responses = await _commentRepository.GetCommentResponses(commentId);

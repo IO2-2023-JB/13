@@ -23,8 +23,10 @@ namespace MyWideIO.API.Services
         }
         public async Task<SearchResultsDto> GetSearchResultsAsync(string query, SortingTypesEnum sortingCriteria, SortingDirectionsEnum sortingType, DateTime? beginDate, DateTime? endDate)
         {
-            //AppUserModel? viewer = await _userManager.FindByIdAsync(viewerId.ToString())
+            // videos
             var allVideos = _videoRepository.GetIQuerableVideos();
+
+            allVideos = allVideos.Where(v => v.IsVisible);
 
             if (beginDate.HasValue)
             {
@@ -37,10 +39,6 @@ namespace MyWideIO.API.Services
             }
 
             var videos = allVideos.Where(v => v.Title.Contains(query) || v.Tags.Select(t => t.Content).Contains(query));
-            //videos = videos.UnionBy(allVideos.Where(v => v.Tags.Select(t => t.Content).Contains(query)),v =>v.Id);
-            //videos = videos.UnionBy(allVideos.Where(v => v.Description.Contains(query)), v => v.Id);
-            //videos = videos.UnionBy(allVideos.Where(v => v.Creator.Name.Contains(query) || v.Creator.Surname.Contains(query) || v.Creator.Email.Contains(query) || v.Creator.UserName.Contains(query)), v => v.Id);
-
             videos = sortingCriteria switch
             {
                 SortingTypesEnum.PublishDate => sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.UploadDate) : videos.OrderByDescending(v => v.UploadDate),
@@ -48,26 +46,32 @@ namespace MyWideIO.API.Services
                 SortingTypesEnum.Popularity => sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.ViewCount) : videos.OrderByDescending(v => v.ViewCount),
             };
 
-            var videoList = await videos.Take(10).ToListAsync(); // paginacja by sie przydala
+            var videoList = await videos.ToListAsync(); // paginacja by sie przydala
+
+            // playlists
 
             var playlists = _playlistRepository.GetIQuerablePlaylists();
 
-            playlists = playlists.Where(p => p.Name.Contains(query));// || p.Viewer.Name.Contains(query) || p.Viewer.Surname.Contains(query) || p.Viewer.Email.Contains(query) || p.Viewer.UserName.Contains(query));
+            playlists = playlists.Where(p => p.IsVisible);
+
+            playlists = playlists.Where(p => p.Name.Contains(query));
 
             if (sortingCriteria is SortingTypesEnum.Alphabetical)
                 playlists = sortingType == SortingDirectionsEnum.Ascending ? playlists.OrderBy(p => p.Name) : playlists.OrderByDescending(p => p.Name);
 
 
-            var playlistList = await playlists.Take(10).ToListAsync(); // paginacja by sie przydala
+            var playlistList = await playlists.ToListAsync(); // paginacja by sie przydala
+
+            // users
 
             var users = _userManager.Users;
 
             users = users.Where(u => u.Name.Contains(query) || u.Surname.Contains(query)/* || u.Email.Contains(query)*/ || u.UserName.Contains(query));
 
             if (sortingCriteria is SortingTypesEnum.Alphabetical)
-                users = sortingType == SortingDirectionsEnum.Ascending ? users.OrderBy(u => u.Name) : users.OrderByDescending(u => u.Name);
+                users = sortingType == SortingDirectionsEnum.Ascending ? users.OrderBy(u => u.UserName) : users.OrderByDescending(u => u.UserName);
 
-            var userList = await users.Take(10).ToListAsync(); // paginacja by sie przydala
+            var userList = await users.ToListAsync(); // paginacja by sie przydala
             var userRoles = await userList.ToAsyncEnumerable().SelectAwait(async u => (await _userManager.GetRolesAsync(u)).First()).ToListAsync();
 
             return new SearchResultsDto

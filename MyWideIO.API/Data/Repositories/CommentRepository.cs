@@ -16,7 +16,7 @@ namespace MyWideIO.API.Data.Repositories
             return await _dbContext.Comments
                 .Include(c => c.Author)
                 .Where(c => c.VideoId == videoId)
-                .Where(c => !c.hasResponses)
+                .Where(c => c.ParentCommentId == null)
                 .ToListAsync(cancellationToken);
 
         }

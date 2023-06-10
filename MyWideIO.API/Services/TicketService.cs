@@ -17,7 +17,13 @@ namespace MyWideIO.API.Services
         private readonly UserManager<AppUserModel> _userManager;
         private readonly ICommentRepository _commentRepository;
 
-        public TicketService(ITicketRepository ticketRepository, IVideoRepository videoRepository, IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, ICommentRepository commentRepository)
+        public TicketService(
+            ITicketRepository ticketRepository,
+            IVideoRepository videoRepository,
+            IPlaylistRepository playlistRepository,
+            UserManager<AppUserModel> userManager,
+            ICommentRepository commentRepository
+            )
         {
             _ticketRepository = ticketRepository;
             _videoRepository = videoRepository;
@@ -43,7 +49,7 @@ namespace MyWideIO.API.Services
                     break;
                 case TicketTargetTypeEnum.CommentResponse: // moze jakies sprawdzenie czy to odpowiedz czy nie
                 case TicketTargetTypeEnum.Comment:
-                    if (await _commentRepository.GetComment(submitTicketDto.TargetId) is null)
+                    if (await _commentRepository.GetAsync(submitTicketDto.TargetId) is null)
                         throw new CommentNotFoundException();
                     break;
             }
@@ -62,14 +68,20 @@ namespace MyWideIO.API.Services
                 Id = ticket.Id
             };
         }
-        public async Task<GetTicketDto> GetTicketAsync(Guid ticketId, CancellationToken cancellationToken)
+        public async Task<GetTicketDto> GetTicketAsync(Guid ticketId, Guid userId, CancellationToken cancellationToken)
         {
             var ticket = await _ticketRepository.GetAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
-            return TicketMapper.MapTicketModelToGetTicketDto(ticket);
+            var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new UserNotFoundException();
+            if (ticket.SubmitterId != userId && !await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
+                throw new ForbiddenException();
+            return ticket.ToGetTicketDto();
         }
-        public async Task<GetTicketStatusDto> GetTicketStatusAsync(Guid ticketId, CancellationToken cancellationToken)
+        public async Task<GetTicketStatusDto> GetTicketStatusAsync(Guid ticketId, Guid userId, CancellationToken cancellationToken)
         {
             var ticket = await _ticketRepository.GetAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
+            var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new UserNotFoundException();
+            if (ticket.SubmitterId != userId && !await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
+                throw new ForbiddenException();
             return new GetTicketStatusDto
             {
                 Status = ticket.Status
@@ -85,7 +97,7 @@ namespace MyWideIO.API.Services
                 tickets = await _ticketRepository.GetSubbmitedTicketsAsync(cancellationToken);
             else
                 tickets = await _ticketRepository.GetUserTicketsAsync(userId, cancellationToken);
-            return tickets.Select(TicketMapper.MapTicketModelToGetTicketDto).ToList();
+            return tickets.Select(t => t.ToGetTicketDto()).ToList();
         }
         public async Task<SubmitTicketResponseDto> AddResponseToTicketAsync(RespondToTicketDto respondToTicketDto, Guid ticketId)
         {

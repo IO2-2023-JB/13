@@ -6,7 +6,7 @@ namespace MyWideIO.API.Services.Interfaces
     {
         public Task AddNewComment(Guid videoId, string content, Guid userId);
         public Task AddResponseToComment(Guid commentId, string content, Guid userId);
-        public Task DeleteComment(Guid commentId);
+        public Task DeleteComment(Guid commentId, Guid userId);
         public Task<CommentListDto> GetVideoComments(Guid videoId);
         public Task<CommentListDto> GetCommentResponses(Guid commentId);
         public Task<CommentDto> GetCommentById(Guid id);

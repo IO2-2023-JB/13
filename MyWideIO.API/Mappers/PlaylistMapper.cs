@@ -6,19 +6,19 @@ namespace MyWideIO.API.Mappers
 {
     public static class PlaylistMapper
     {
-        public static PlaylistDto MapPlaylistModelToPlaylistDto(PlaylistModel playlist)
+        public static PlaylistDto ToPlaylistDto(this PlaylistModel playlist)
         {
             var playlistDto = new PlaylistDto
             {
                 Name = playlist.Name,
                 Visibility = playlist.IsVisible ? VisibilityEnum.Public : VisibilityEnum.Private,
-                Videos = playlist.VideoPlaylists.Select(vp => VideoMapper.VideoModelToVideoMetadataDto(vp.Video)).ToList(),
+                Videos = playlist.VideoPlaylists.Select(vp => vp.Video.ToVideoMetadataDto()).ToList(),
                 AuthorId = playlist.ViewerId,
                 AuthorNickname = playlist.Viewer.UserName
             };
             return playlistDto;
         }
-        public static PlaylistBaseDto MapPlaylistModelToPlaylistBaseDto(PlaylistModel playlist)
+        public static PlaylistBaseDto ToPlaylistBaseDto(this PlaylistModel playlist)
         {
             var playlistBaseDto = new PlaylistBaseDto
             {

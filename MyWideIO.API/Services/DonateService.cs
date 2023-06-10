@@ -11,24 +11,16 @@ namespace MyWideIO.API.Services
     public class DonateService : IDonateService
     {
         private readonly UserManager<AppUserModel> _userManager;
-        private readonly IDonateRepository _donateRepository;
-        public DonateService(UserManager<AppUserModel> userManager, IDonateRepository donateRepository)
+        public DonateService(UserManager<AppUserModel> userManager)
         {
             _userManager = userManager;
-            _donateRepository = donateRepository;
         }
-        public async Task SendDonation(Guid reciverId, Guid senderId, decimal amount)
+        public async Task SendDonation(Guid reciverId, decimal amount)
         {
-            AppUserModel reciever, sender;
+            AppUserModel reciever;
             if ((reciever = await _userManager.FindByIdAsync(reciverId.ToString())) is null)
                 throw new UserNotFoundException();
-            //sender = await _userManager.FindByIdAsync(senderId.ToString());
-
-            //if(sender.AccountBalance - amount < 0)
-            //    throw new NotEnoughMoneyException();
-            //sender.AccountBalance -= amount;
             reciever.AccountBalance += amount;
-            //await _userManager.UpdateAsync(sender);
             await _userManager.UpdateAsync(reciever);
         }
 

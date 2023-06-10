@@ -9,19 +9,11 @@ using MyWideIO.API.Services.Interfaces;
 
 namespace MyWideIO.API.Data.Repositories
 {
-    public class VideoRepository : IVideoRepository
+    public class VideoRepository : Repository<VideoModel>, IVideoRepository
     {
-        private readonly ApplicationDbContext _dbContext;
 
-        public VideoRepository(ApplicationDbContext dbContext)
+        public VideoRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
-        }
-
-        public async Task AddAsync(VideoModel video)
-        {
-            _dbContext.Videos.Add(video);
-            await _dbContext.SaveChangesAsync();
         }
 
         public IQueryable<VideoModel> GetIQuerableVideos()
@@ -36,48 +28,26 @@ namespace MyWideIO.API.Data.Repositories
         {
             return await _dbContext.Videos
                 .Where(v => v.CreatorId == id)
-                .Include(v=>v.Tags)
-                .Include(v=>v.Creator)
-                .AsNoTracking()
+                .Include(v => v.Tags)
+                .Include(v => v.Creator)
                 .ToListAsync(cancellationToken);
         }
         public async Task<VideoModel?> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _dbContext.Videos
-                .Include(v=>v.Creator)
-                .Include(v=>v.Tags)
+                .Include(v => v.Creator)
+                .Include(v => v.Tags)
                 .Where(v => v.Id == id)
                 .SingleAsync(cancellationToken);
         }
 
-        public async Task RemoveAsync(VideoModel video)
-        {
-            _dbContext.Videos.Remove(video);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(VideoModel video)
-        {
-            _dbContext.Videos.Update(video);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task RemoveAsync(IEnumerable<VideoModel> video)
-        {
-            _dbContext.Videos.RemoveRange(video);
-            await _dbContext.SaveChangesAsync();
-        }
-
         public async Task<bool> UserHasVideosAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Videos.AnyAsync(v => v.CreatorId == userId, cancellationToken);
+            return await _dbContext.Videos
+                .Where(v => v.CreatorId == userId)
+                .AnyAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(IEnumerable<VideoModel> videos)
-        {
-            _dbContext.UpdateRange(videos);
-            await _dbContext.SaveChangesAsync();
-        }
     }
 
 }

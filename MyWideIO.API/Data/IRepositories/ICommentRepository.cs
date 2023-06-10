@@ -3,15 +3,11 @@ using MyWideIO.API.Models.DB_Models;
 
 namespace MyWideIO.API.Data.IRepositories
 {
-    public interface ICommentRepository
+    public interface ICommentRepository : IRepository<CommentModel>
     {
-        public Task AddComment(CommentModel model);
-        public Task Update(CommentModel comment);
-        public Task<CommentModel?> GetComment(Guid commentId);
-        public Task<List<CommentModel>> GetUserCommentsAsync(Guid userId);
-        public Task DeleteComment(CommentModel comment);
-        public Task<List<CommentModel>> GetVideoComments(Guid videoId);
-        public Task<List<CommentModel>> GetCommentResponses(Guid commentId);
-        public Task DeleteComments(IEnumerable<CommentModel> comments);
+        public Task<CommentModel?> GetAsync(Guid id, CancellationToken cancellationToken = default);
+        public Task<List<CommentModel>> GetUserCommentsAsync(Guid userId, CancellationToken cancellationToken = default);
+        public Task<List<CommentModel>> GetVideoComments(Guid videoId, CancellationToken cancellationToken = default);
+        public Task<List<CommentModel>> GetCommentResponses(Guid commentId, CancellationToken cancellationToken = default);
     }
 }

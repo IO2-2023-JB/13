@@ -22,16 +22,5 @@ namespace MyWideIO.API.Mappers
             EditDate = videoModel.EditDate,
             Duration = videoModel.Duration.ToString()
         };
-        public static VideoBaseDto ToVideoBaseDto(this VideoModel videoModel) => new()
-        {
-            Id = videoModel.Id,
-            Title = videoModel.Title,
-            Description = videoModel.Description,
-            Thumbnail = videoModel?.Thumbnail?.Url ?? "", // "" czy null
-            ViewCount = videoModel!.ViewCount,
-            UploadDate = videoModel.UploadDate,
-            Duration = videoModel.Duration.ToString()
-        };
-
     }
 }

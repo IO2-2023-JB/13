@@ -346,7 +346,7 @@ const CreatorProfile = () => {
   };
 
 return (
-  <div style={{marginTop: "200px"}} class="container">
+  <div style={{marginTop: "200px", marginBottom: "50px"}} class="container">
       <div class="row mx-5">
         <h1 class="display-3">{userData.nickname}</h1>
         <div class ="mt-2 row">

@@ -47,7 +47,7 @@ const ProfilePage = () => {
   })
 
   useEffect(() => {
-    axios.get(PROFILE_URL, {
+    axios.get(PROFILE_URL + "?id=" + auth?.id, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
@@ -212,7 +212,7 @@ const ProfilePage = () => {
   };
 
   const handleDeleteClick = async () => {
-    const result = window.confirm("Are you sure you want to delete your account?");
+    const result = window.confirm("Are you sure you want to delete your account? Approval will delete all your uploaded videos and you will lose all your subscribers. Do you want to continue?");
     if (result) {
       try{
         await axios.delete(PROFILE_URL + "?id=" + auth?.id,
@@ -495,8 +495,8 @@ const handleWithdrawConfirmClick = () => {
           setErrMsg('No Server Response')
       } else if(err.response?.status === 400) {
           setErrMsg('Bad request');
-      } else if(err.response?.status === 401){
-          setErrMsg('Unauthorised');
+      } else if(err.response?.status === 403){
+          setErrMsg('Forbidden');
       } else {
           setErrMsg('Getting metadata failed');
       }

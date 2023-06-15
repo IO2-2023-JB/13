@@ -74,7 +74,6 @@ namespace MyWideIO.API.BackgroundProcessing
             {
                 Console.WriteLine("Error while processing");
                 video.ProcessingProgress = ProcessingProgressEnum.FailedToProcess; // failed to process
-                video.Description = e.Message;
                 throw;
             }
             finally

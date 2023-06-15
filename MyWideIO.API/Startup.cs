@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text;
 using MyWideIO.API.Filters;
 using MyWideIO.API.BackgroundProcessing;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace MyWideIO.API
 {
@@ -186,15 +187,28 @@ namespace MyWideIO.API
                     }
                 });
                 config.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
-                config.SwaggerDoc("1.0.7", new OpenApiInfo
+                config.SwaggerDoc("1.0.9", new OpenApiInfo
                 {
                     Title = "VideIO API",
                     Description = "VideIO project API specification.",
-                    Version = "1.0.7",
+                    Version = "1.0.9",
                 });
-                config.DocumentFilter<BasePathFilter>("/VideIO/1.0.7");
+                config.DocumentFilter<BasePathFilter>("/VideIO/1.0.9");
                 config.OperationFilter<GeneratePathParamsValidationFilter>();
                 config.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly().GetName().Name}.xml");
+            });
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = null;
+            });
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = null;
+            });
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = int.MaxValue;
             });
 
             services.AddHostedService<VideoProcessingBackgroundService>();
@@ -217,7 +231,7 @@ namespace MyWideIO.API
             {
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/openapi/1.0.7/openapi.json", "VideIO API");
+                    c.SwaggerEndpoint("/openapi/1.0.9/openapi.json", "VideIO API");
                 });
                 app.UseSwagger(c =>
                 {

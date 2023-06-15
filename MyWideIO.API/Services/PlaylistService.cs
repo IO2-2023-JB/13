@@ -15,11 +15,14 @@ namespace MyWideIO.API.Services
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IVideoRepository _videoRepository;
 
-        public PlaylistService(IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, IVideoRepository videoRepository)
+        private readonly ITicketRepository _ticketRepository;
+
+        public PlaylistService(IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, IVideoRepository videoRepository, ITicketRepository ticketRepository)
         {
             _playlistRepository = playlistRepository;
             _userManager = userManager;
             _videoRepository = videoRepository;
+            _ticketRepository = ticketRepository;
         }
 
         public async Task AddVideoToPlaylistAsync(Guid viewerId, Guid playlistId, Guid videoId)
@@ -87,6 +90,9 @@ namespace MyWideIO.API.Services
             PlaylistModel playlist = await _playlistRepository.GetAsync(playlistId) ?? throw new PlaylistNotFoundException();
             if (playlist.ViewerId != userId)
                 throw new ForbiddenException();
+
+            var tickets = await _ticketRepository.GetTargetsTickets(playlistId);
+            await _ticketRepository.RemoveAsync(tickets);
 
             await _playlistRepository.RemoveAsync(playlist);
         }

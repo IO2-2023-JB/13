@@ -14,10 +14,13 @@ namespace MyWideIO.API.Services
         private readonly ICommentRepository _commentRepository;
         private readonly UserManager<AppUserModel> _userManager;
 
-        public CommentService(ICommentRepository commentRepository, UserManager<AppUserModel> userManager)
+        private readonly ITicketRepository _ticketRepository;
+
+        public CommentService(ICommentRepository commentRepository, UserManager<AppUserModel> userManager, ITicketRepository ticketRepository)
         {
             _commentRepository = commentRepository;
             _userManager = userManager;
+            _ticketRepository = ticketRepository;
         }
         public async Task AddResponseToComment(Guid commentId, string content, Guid userId)
         {
@@ -57,8 +60,17 @@ namespace MyWideIO.API.Services
             if (comment.hasResponses)
             {
                 var responses = await _commentRepository.GetCommentResponses(commentId);
+                foreach(var response in responses)
+                {
+                    var responseTickets = await _ticketRepository.GetTargetsTickets(response.Id);
+                    await _ticketRepository.RemoveAsync(responseTickets, false);
+                }
                 await _commentRepository.RemoveAsync(responses, false);
             }
+
+            var tickets = await _ticketRepository.GetTargetsTickets(commentId);
+            await _ticketRepository.RemoveAsync(tickets);
+
             await _commentRepository.RemoveAsync(comment, false);
             await _commentRepository.SaveChangesAsync();
         }

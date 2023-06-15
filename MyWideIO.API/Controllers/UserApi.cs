@@ -25,25 +25,6 @@ namespace MyWideIO.API.Controllers
         {
             _userService = userService;
         }
-        /// <summary>
-        /// Ban user
-        /// </summary>
-        /// <param name="id">User ID</param>
-        /// <response code="200">OK</response>
-        /// <response code="400">Bad request</response>
-        /// <response code="401">Unauthorized</response>
-        [HttpPost("ban/{id}")]
-        //[Route("ban/{id}")]
-        [ValidateModelState]
-        [Produces("application/json")]
-        [SwaggerOperation("BanUser")]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> BanUser([FromRoute(Name = "id")][Required] Guid id)
-        {
-            await _userService.BanUserAsync(id);
-            return Ok();
-        }
-
         /// <summary>   
         /// User account deletion
         /// </summary>
@@ -63,7 +44,7 @@ namespace MyWideIO.API.Controllers
         {
             if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje usunac nie swoje konto
                 if (User.FindFirstValue(ClaimTypes.Role) != UserTypeEnum.Administrator.ToString()) // i nie jest adminem
-                    Forbid();
+                    return Forbid();
             await _userService.DeleteUserAsync(id);
             return Ok();
         }
@@ -90,7 +71,7 @@ namespace MyWideIO.API.Controllers
             if (id is null)
                 id = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             else if (id != Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))) // jesli user probuje edytowac nie swoje konto
-                Forbid();
+                return Forbid();
 
             UserDto userDto = await _userService.EditUserDataAsync(updateUserDto, id.Value);
             return Ok(userDto);
@@ -119,7 +100,7 @@ namespace MyWideIO.API.Controllers
             if (id is null)
             {
                 if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid nId))
-                    BadRequest("Not logged in users must provide an id");
+                    return BadRequest("Not logged in users must provide an id");
                 id = nId;
             }
             if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid askerId))

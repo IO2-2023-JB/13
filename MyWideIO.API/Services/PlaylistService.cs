@@ -15,11 +15,14 @@ namespace MyWideIO.API.Services
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IVideoRepository _videoRepository;
 
-        public PlaylistService(IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, IVideoRepository videoRepository)
+        private readonly ITicketRepository _ticketRepository;
+
+        public PlaylistService(IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, IVideoRepository videoRepository, ITicketRepository ticketRepository)
         {
             _playlistRepository = playlistRepository;
             _userManager = userManager;
             _videoRepository = videoRepository;
+            _ticketRepository = ticketRepository;
         }
 
         public async Task AddVideoToPlaylistAsync(Guid viewerId, Guid playlistId, Guid videoId)
@@ -88,6 +91,9 @@ namespace MyWideIO.API.Services
             if (playlist.ViewerId != userId)
                 throw new ForbiddenException();
 
+            var tickets = await _ticketRepository.GetTargetsTickets(playlistId);
+            await _ticketRepository.RemoveAsync(tickets);
+
             await _playlistRepository.RemoveAsync(playlist);
         }
 
@@ -101,6 +107,47 @@ namespace MyWideIO.API.Services
             var a = playlist.VideoPlaylists.FirstOrDefault(p => p.VideoId == videoId) ?? throw new VideoNotFoundException();
             playlist.VideoPlaylists.Remove(a);
             await _playlistRepository.UpdateAsync(playlist);
+        }
+
+        public async Task<PlaylistDto> GetReccomendedVideosPlaylist(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if(user == null)
+                throw new Exception("No user of given id!");
+            List<VideoMetadataDto> videos = new List<VideoMetadataDto>();
+            List<VideoModel> loadVideos = await _videoRepository.GetUserReccomendationList(userId, 9);
+            foreach (VideoModel v in loadVideos)
+            {
+                var author = await _userManager.FindByIdAsync(v.CreatorId.ToString());
+                List<string>tags = new List<string>();
+                foreach (var t in v.Tags) tags.Add(t.Content);
+
+                videos.Add(new VideoMetadataDto()
+                {
+                    Id = v.Id,
+                    Title = v.Title,
+                    Description = v.Description,
+                    Thumbnail = v.Thumbnail?.FileName,
+                    AuthorId = v.CreatorId,
+                    AuthorNickname = author.UserName,
+                    ViewCount = v.ViewCount,
+                    Tags = tags,
+                    Visibility = v.IsVisible ? VisibilityEnum.Public : VisibilityEnum.Private,
+                    ProcessingProgress = v.ProcessingProgress,
+                    UploadDate = v.UploadDate,
+                    EditDate = v.EditDate,
+                    Duration = v.Duration.Minutes.ToString()+":"+v.Duration.Seconds.ToString(),
+                });
+            }
+            return new PlaylistDto()
+            {
+                AuthorId = userId,
+                Name = "Favorites",
+                Visibility = VisibilityEnum.Private,
+                AuthorNickname = user.Name,
+                Videos = videos
+            };
+
         }
     }
 }

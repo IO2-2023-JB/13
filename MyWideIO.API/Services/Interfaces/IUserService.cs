@@ -9,6 +9,5 @@ namespace MyWideIO.API.Services.Interfaces
         public Task DeleteUserAsync(Guid id);
         public Task<UserDto> EditUserDataAsync(UpdateUserDto userDto, Guid id);
         public Task<UserDto> GetUserAsync(Guid id, Guid askerId);
-        public Task BanUserAsync(Guid id);
     }
 }

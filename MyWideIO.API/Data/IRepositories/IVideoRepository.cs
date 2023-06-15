@@ -12,5 +12,6 @@ namespace MyWideIO.API.Data.IRepositories
         public Task<ICollection<VideoModel>> GetUserVideosAsync(Guid id, CancellationToken cancellationToken = default);
         public Task<bool> UserHasVideosAsync(Guid userId, CancellationToken cancellationToken = default);
         public IQueryable<VideoModel> GetIQuerableVideos();
+        public Task<ICollection<VideoModel>> GetUploadingUploadedProcessingVideos();
     }
 }

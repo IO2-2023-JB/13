@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MyWideIO.API.Data.IRepositories;
 using MyWideIO.API.Exceptions;
 using MyWideIO.API.Models.DB_Models;
 using MyWideIO.API.Models.Dto_Models;
@@ -45,14 +46,16 @@ namespace MyWideIO.API.Data
                 {
                     throw new UserException(result.Errors.First()?.Code);
                 }
-
-                adminUser.ProfilePicture = await imageStorageService.UploadImageAsync(base64Image, "admin");
-                result = await userManager.UpdateAsync(adminUser);
-                if (!result.Succeeded)
-                {
-                    throw new UserException(result.Errors.First()?.Code);
-                }
             }
+
+            var videoRepository = serviceProvider.GetRequiredService<IVideoRepository>();
+            var videos = await videoRepository.GetUploadingUploadedProcessingVideos();
+            foreach (var video in videos)
+            {
+                video.ProcessingProgress = video.ProcessingProgress == ProcessingProgressEnum.Uploading ? ProcessingProgressEnum.FailedToUpload : ProcessingProgressEnum.FailedToProcess;
+            }
+            await videoRepository.UpdateAsync(videos);
+
         }
     }
 }

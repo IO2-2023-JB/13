@@ -17,19 +17,17 @@ namespace MyWideIO.API.Services
         }
         public async Task SendDonation(Guid reciverId, decimal amount)
         {
-            AppUserModel reciever;
-            if ((reciever = await _userManager.FindByIdAsync(reciverId.ToString())) is null)
-                throw new UserNotFoundException();
+            AppUserModel reciever = await _userManager.FindByIdAsync(reciverId.ToString()) ?? throw new UserNotFoundException();
             reciever.AccountBalance += amount;
             await _userManager.UpdateAsync(reciever);
         }
 
         public async Task Withdraw(Guid UserId, decimal amount)
         {
-            AppUserModel user = await _userManager.FindByIdAsync(UserId.ToString());
+            AppUserModel user = await _userManager.FindByIdAsync(UserId.ToString()) ?? throw new UserNotFoundException();
 
-            if(amount < 0)
-                throw new NotEnoughMoneyException(); 
+            if (amount < 0)
+                throw new NotEnoughMoneyException();
 
             if (user.AccountBalance < amount)
                 throw new NotEnoughMoneyException();

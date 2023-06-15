@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyWideIO.API.Data.IRepositories;
-using MyWideIO.API.Extensions;
-using MyWideIO.API.Models;
 using MyWideIO.API.Models.DB_Models;
-using MyWideIO.API.Models.Dto_Models;
 using MyWideIO.API.Models.Enums;
-using MyWideIO.API.Services.Interfaces;
 
 namespace MyWideIO.API.Data.Repositories
 {
@@ -48,6 +44,16 @@ namespace MyWideIO.API.Data.Repositories
                 .AnyAsync(cancellationToken);
         }
 
+        public async Task<ICollection<VideoModel>> GetUploadingUploadedProcessingVideos()
+        {
+            return await _dbContext.Videos
+                .Where(v =>
+                v.ProcessingProgress == ProcessingProgressEnum.Uploading
+                || v.ProcessingProgress == ProcessingProgressEnum.Processing
+                || v.ProcessingProgress == ProcessingProgressEnum.Uploaded
+                )
+                .ToListAsync();
+        }
     }
 
 }

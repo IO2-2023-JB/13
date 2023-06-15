@@ -42,12 +42,14 @@ namespace MyWideIO.API.Data
             modelBuilder.Entity<ViewerSubscription>()
                 .HasOne(vs => vs.Viewer)
                 .WithMany(v => v.Subscriptions)
-                .HasForeignKey(vs => vs.ViewerId);
+                .HasForeignKey(vs => vs.ViewerId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ViewerSubscription>()
                 .HasOne(vs => vs.Creator)
                 .WithMany(c => c.Subscribers)
-                .HasForeignKey(vs => vs.CreatorId);
+                .HasForeignKey(vs => vs.CreatorId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ViewerLike>()
                 .HasKey(vl => new { vl.ViewerId, vl.VideoId });
@@ -55,12 +57,14 @@ namespace MyWideIO.API.Data
             modelBuilder.Entity<ViewerLike>()
                 .HasOne(vl => vl.Viewer)
                 .WithMany(v => v.Likes)
-                .HasForeignKey(vl => vl.ViewerId);
+                .HasForeignKey(vl => vl.ViewerId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ViewerLike>()
                 .HasOne(vl => vl.Video)
                 .WithMany(v => v.LikedBy)
-                .HasForeignKey(vl => vl.VideoId);
+                .HasForeignKey(vl => vl.VideoId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<VideoPlaylist>()
                 .HasKey(vp => new { vp.VideoId, vp.PlaylistId });
@@ -69,12 +73,14 @@ namespace MyWideIO.API.Data
             modelBuilder.Entity<VideoPlaylist>()
                 .HasOne(vp => vp.Video)
                 .WithMany(v => v.Playlists)
-                .HasForeignKey(vp => vp.VideoId);
+                .HasForeignKey(vp => vp.VideoId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<VideoPlaylist>()
                 .HasOne(vp => vp.Playlist)
                 .WithMany(p => p.VideoPlaylists)
-                .HasForeignKey(vp => vp.PlaylistId);
+                .HasForeignKey(vp => vp.PlaylistId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<CommentModel>()
                 .HasOne(c => c.Author)

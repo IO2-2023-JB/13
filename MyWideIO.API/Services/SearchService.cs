@@ -38,7 +38,7 @@ namespace MyWideIO.API.Services
                 allVideos = allVideos.Where(v => v.UploadDate <= endDate.Value);
             }
 
-            var videos = allVideos.Where(v => v.Title.Contains(query) || v.Tags.Select(t => t.Content).Contains(query));
+            var videos = allVideos.Where(v => v.Title.Contains(query) || v.Tags.Any(t => t.Content.Contains(query)));
             videos = sortingCriteria switch
             {
                 SortingTypesEnum.PublishDate => sortingType == SortingDirectionsEnum.Ascending ? videos.OrderBy(v => v.UploadDate) : videos.OrderByDescending(v => v.UploadDate),

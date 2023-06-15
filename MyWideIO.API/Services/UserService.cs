@@ -23,8 +23,22 @@ namespace MyWideIO.API.Services
         private readonly IPlaylistRepository _playlistRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
         private readonly ITicketRepository _ticketRepository;
+        private readonly IVideoService _videoService;
 
-        public UserService(UserManager<AppUserModel> userManager, IImageStorageService imageService, SignInManager<AppUserModel> signInManager, ITokenService authenticationService, ITransactionService transactionService, IVideoRepository videoRepository, ILikeRepository likeRepository, ICommentRepository commentRepository, IPlaylistRepository playlistRepository, ISubscriptionRepository subscriptionRepository, ITicketRepository ticketRepository)
+        public UserService(
+            UserManager<AppUserModel> userManager,
+            IImageStorageService imageService,
+            SignInManager<AppUserModel> signInManager,
+            ITokenService authenticationService,
+            ITransactionService transactionService,
+            IVideoRepository videoRepository,
+            ILikeRepository likeRepository,
+            ICommentRepository commentRepository,
+            IPlaylistRepository playlistRepository,
+            ISubscriptionRepository subscriptionRepository,
+            ITicketRepository ticketRepository,
+            IVideoService videoService
+            )
         {
             _imageService = imageService;
             _userManager = userManager;
@@ -37,6 +51,7 @@ namespace MyWideIO.API.Services
             _playlistRepository = playlistRepository;
             _subscriptionRepository = subscriptionRepository;
             _ticketRepository = ticketRepository;
+            _videoService = videoService;
         }
         public async Task RegisterUserAsync(RegisterDto registerDto)
         {
@@ -141,8 +156,9 @@ namespace MyWideIO.API.Services
                     }
                     else if (newRole == UserTypeEnum.Simple.ToString() && role == UserTypeEnum.Creator.ToString())
                     {
-                        if (await _videoRepository.UserHasVideosAsync(id))
-                            throw new UserException("Can't remove creator with videos");
+                        var videos = await _videoRepository.GetUserVideosAsync(id);
+                        foreach (var video in videos)
+                            await _videoService.RemoveVideoAsync(video.Id, id);
 
                         // remove subscriptions to creator
                         var subscriptions = await _subscriptionRepository.GetSubscriptionsToCreator(id);
@@ -201,36 +217,6 @@ namespace MyWideIO.API.Services
         {
             AppUserModel user = (await _userManager.FindByEmailAsync(loginDto.Email)) ??
                 throw new UserNotFoundException();
-            var now = DateTime.Now;
-            if (user.EndOfBan > now)
-            {
-                var time = user.EndOfBan - now;
-                var sb = new StringBuilder();
-                // use string builder to format massage
-                if (time.Days > 0)
-                {
-                    if (sb.Length > 0)
-                        sb.Append(" ,");
-                    sb.Append(time.Days);
-                    sb.Append(" days");
-                }
-                if (time.Hours > 0)
-                {
-                    if (sb.Length > 0)
-                        sb.Append(" ,");
-                    sb.Append(time.Hours);
-                    sb.Append(" hours");
-                }
-                if (time.Minutes > 0)
-                {
-                    if (sb.Length > 0)
-                        sb.Append(" ,");
-                    sb.Append(time.Minutes);
-                    sb.Append(" minutes");
-                }
-                throw new ForbiddenException($"User is banned for {sb}"); // 
-            }
-
             if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 throw new IncorrectPasswordException();
@@ -249,12 +235,12 @@ namespace MyWideIO.API.Services
             {
                 AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserNotFoundException();
 
-                // if creator has any videos throw exception
                 var role = (await _userManager.GetRolesAsync(user)).First();
                 if (role == UserTypeEnum.Creator.ToString())
                 {
-                    if (await _videoRepository.UserHasVideosAsync(id))
-                        throw new UserException("Can't remove creator with videos");
+                    var videos = await _videoRepository.GetUserVideosAsync(id);
+                    foreach (var video in videos)
+                        await _videoService.RemoveVideoAsync(video.Id, id);
 
                     // remove subscriptions
                     var subscriptionsToCreator = await _subscriptionRepository.GetSubscriptionsToCreator(id);
@@ -271,7 +257,7 @@ namespace MyWideIO.API.Services
                     switch (like.Reaction)
                     {
                         case ReactionEnum.Positive:
-                            video.PositiveReactions--; ; // wolne, mozna groupby z select .count(wtedy nie bedzie samej listy)  i dodatkowy call po wszystki lajki do usuniecia
+                            video.PositiveReactions--;
                             break;
                         case ReactionEnum.Negative:
                             video.NegativeReactions--;
@@ -303,6 +289,12 @@ namespace MyWideIO.API.Services
                 }
                 await _subscriptionRepository.RemoveAsync(subscriptions);
 
+                // remove tickets
+                var tickets = await _ticketRepository.GetTargetsTickets(id); // tickets where user is target
+                tickets.AddRange(await _ticketRepository.GetUserTicketsAsync(id)); // tickets where user is sender
+
+                await _ticketRepository.RemoveAsync(tickets);
+
                 IdentityResult result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
                 {
@@ -317,20 +309,6 @@ namespace MyWideIO.API.Services
                 throw;
             }
             await _transactionService.CommitAsync();
-        }
-
-        public async Task BanUserAsync(Guid id)
-        {
-            AppUserModel user = await _userManager.FindByIdAsync(id.ToString()) ?? throw new UserException("User doesn't exist");
-            if (!await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
-                throw new UserException("Admin can't be banned");
-
-            user.EndOfBan = DateTime.Now.AddMinutes(30);
-            IdentityResult result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                throw new UserException(result.Errors.First()?.Code);
-            }
         }
     }
 }

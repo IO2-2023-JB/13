@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using MyWideIO.API.Services.Interfaces;
 using WideIO.API.Attributes;
+using MyWideIO.API.Models.Enums;
 
 namespace MyWideIO.API.Controllers
 {
@@ -63,7 +64,8 @@ namespace MyWideIO.API.Controllers
         [HttpGet("status")]
         [ValidateModelState]
         [SwaggerOperation("GetTicketStatus")]
-        [SwaggerResponse(statusCode: 200, type: typeof(GetTicketStatusDto), description: "OK")]
+        [Produces("application/json")]
+        [SwaggerResponse(statusCode: 200, type: typeof(TicketStatusEnum), description: "OK")]
         public async Task<IActionResult> GetTicketStatus([FromQuery(Name = "id")][Required()] Guid id, CancellationToken cancellationToken)
         {
             Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

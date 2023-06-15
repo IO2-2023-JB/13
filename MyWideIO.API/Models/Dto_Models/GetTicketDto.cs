@@ -42,7 +42,7 @@ namespace MyWideIO.API.Models.Dto_Models
         /// Gets or Sets Status
         /// </summary>
         [DataMember(Name = "status", EmitDefaultValue = false)]
-        public GetTicketStatusDto Status { get; set; }
+        public TicketStatusEnum Status { get; set; }
 
         /// <summary>
         /// Gets or Sets Response

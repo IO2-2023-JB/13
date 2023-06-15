@@ -49,10 +49,10 @@ const Home = () => {
                     </svg>
                 </tr> 
                 <div style={{marginBottom:"20px", marginTop:"20px", 
-                            color:"white", borderRadius:"15px", padding:"30px", backgroundColor:"#222222"}}>
+                            color:"white", borderRadius:"15px", padding:"15px", backgroundColor:"#222222"}}>
                 <h1 class="display-3 mb-5 mt-4" style={{marginLeft:"40px"}}>Now popular</h1>
                     <div class="wrapper" style={{marginBottom:"20px", marginTop:"20px", 
-                            color:"white", borderRadius:"15px", padding:"30px", backgroundColor:"#111111"}}>
+                            color:"white", borderRadius:"15px", padding:"15px", backgroundColor:"#111111"}}>
                         <div className="boxT5">
                             <div className="box2">
                                 <table>

@@ -17,7 +17,10 @@ namespace MyWideIO.API.Data.Repositories
             if (includeVideos)
                 query = query.Include(p => p.VideoPlaylists.OrderBy(vp => vp.Order))
                .ThenInclude(vp => vp.Video)
-               .ThenInclude(v => v.Creator);
+               .ThenInclude(v => v.Creator)
+               .Include(p => p.VideoPlaylists)
+               .ThenInclude(vp => vp.Video)
+               .ThenInclude(v => v.Tags);
             return await query
                   .Include(p => p.Viewer)
                   .Where(p => p.Id == id)
@@ -32,7 +35,10 @@ namespace MyWideIO.API.Data.Repositories
                 query = query
                     .Include(p => p.VideoPlaylists.OrderBy(vp => vp.Order))
                     .ThenInclude(vp => vp.Video)
-                    .ThenInclude(v => v.Creator);
+                    .ThenInclude(v => v.Creator)
+                    .Include(p => p.VideoPlaylists)
+                    .ThenInclude(vp => vp.Video)
+                    .ThenInclude(v => v.Tags);
             return await query
                 .Where(p => p.ViewerId == userId)
                 .ToListAsync(cancellationToken);
@@ -52,10 +58,16 @@ namespace MyWideIO.API.Data.Repositories
                 query = query
                     .Include(p => p.VideoPlaylists.OrderBy(vp => vp.Order))
                     .ThenInclude(vp => vp.Video)
-                    .ThenInclude(v => v.Creator);
+                    .ThenInclude(v => v.Creator)
+                    .Include(p => p.VideoPlaylists)
+                    .ThenInclude(vp => vp.Video)
+                    .ThenInclude(v => v.Tags);
+
             return await query
                 .Where(p => p.VideoPlaylists.Any(vp => vp.VideoId == videoId))
                 .ToListAsync(cancellationToken);
         }
+
+
     }
 }

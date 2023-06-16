@@ -43,7 +43,9 @@ namespace MyWideIO.API.Data.Repositories
         {
             IQueryable<ViewerSubscription> query = _dbContext.Subscriptions;
             query = includeVideos
-                ? query.Include(s => s.Creator).ThenInclude(c => c.OwnedVideos) // include i theninclude zwracaja rozne typy
+                ? query.Include(s => s.Creator)
+                .ThenInclude(c => c.OwnedVideos)
+                .ThenInclude(v => v.Tags)
                 : query.Include(s => s.Creator);
             return await query
                 .Where(s => s.ViewerId == viewerId)

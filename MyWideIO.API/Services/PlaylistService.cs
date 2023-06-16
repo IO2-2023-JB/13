@@ -15,11 +15,14 @@ namespace MyWideIO.API.Services
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IVideoRepository _videoRepository;
 
-        public PlaylistService(IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, IVideoRepository videoRepository)
+        private readonly ITicketRepository _ticketRepository;
+
+        public PlaylistService(IPlaylistRepository playlistRepository, UserManager<AppUserModel> userManager, IVideoRepository videoRepository, ITicketRepository ticketRepository)
         {
             _playlistRepository = playlistRepository;
             _userManager = userManager;
             _videoRepository = videoRepository;
+            _ticketRepository = ticketRepository;
         }
 
         public async Task AddVideoToPlaylistAsync(Guid viewerId, Guid playlistId, Guid videoId)
@@ -88,6 +91,9 @@ namespace MyWideIO.API.Services
             if (playlist.ViewerId != userId)
                 throw new ForbiddenException();
 
+            var tickets = await _ticketRepository.GetTargetsTickets(playlistId);
+            await _ticketRepository.RemoveAsync(tickets);
+
             await _playlistRepository.RemoveAsync(playlist);
         }
 
@@ -101,6 +107,23 @@ namespace MyWideIO.API.Services
             var a = playlist.VideoPlaylists.FirstOrDefault(p => p.VideoId == videoId) ?? throw new VideoNotFoundException();
             playlist.VideoPlaylists.Remove(a);
             await _playlistRepository.UpdateAsync(playlist);
+        }
+
+        public async Task<PlaylistDto> GetReccomendedVideosPlaylist(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                throw new Exception("No user of given id!");
+            List<VideoModel> videos = await _videoRepository.GetUserReccomendationList(userId, 9);
+            return new PlaylistDto()
+            {
+                AuthorId = userId,
+                Name = "Favorites",
+                Visibility = VisibilityEnum.Private,
+                AuthorNickname = user.Name,
+                Videos = videos.Select(v => v.ToVideoMetadataDto()).ToList()
+            };
+
         }
     }
 }

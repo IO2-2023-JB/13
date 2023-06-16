@@ -13,7 +13,7 @@ namespace MyWideIO.API.Mappers
                 Reason = ticketModel.Reason,
                 TargetId = ticketModel.TargetId,
                 TargetType = ticketModel.TargetType,
-                Status =  new GetTicketStatusDto{Status = ticketModel.Status}, // ?
+                Status =  ticketModel.Status, // ?
                 Response = ticketModel.Response ?? "",
                 SubmitterId = ticketModel.SubmitterId
             };

@@ -9,9 +9,23 @@
 .wrapper {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-gap: 0px;
+  justify-items: center;
 }
 
+@media (max-width: 1500px) {
+    .wrapper {
+        justify-content: center;
+        grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+@media (max-width: 800px) {
+.wrapper {
+    justify-content: center;
+    grid-template-columns: 1fr;
+}
+}
 
 .search-bars {
     background-color: black;
@@ -24,7 +38,7 @@
     background-color: black;
     width: 500px;
     height: 300px;
-    margin: 30px;
+    margin: 10px;
     padding: 30px;
     display: flex;
     align-items: center;

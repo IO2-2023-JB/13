@@ -160,9 +160,10 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("GetRecommendedPlaylist")]
         [SwaggerResponse(statusCode: 200, type: typeof(PlaylistDto), description: "OK")]
-        public virtual Task<IActionResult> GetRecommendedPlaylist()
+        public virtual async Task<ActionResult<PlaylistDto>> GetRecommendedPlaylist()
         {
-            throw new NotImplementedException();
+            Guid viewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(await _playlistService.GetReccomendedVideosPlaylist(viewerId));
         }
 
         /// <summary>

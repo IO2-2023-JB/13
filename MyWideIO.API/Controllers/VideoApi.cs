@@ -150,7 +150,7 @@ namespace MyWideIO.API.Controllers
         [ValidateModelState]
         [SwaggerOperation("PostVideoFile")]
         [Authorize(Roles = "Creator")]
-        [DisableRequestSizeLimit]
+        [RequestSizeLimit(1_000_000_000)]
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
 
         public virtual async Task<IActionResult> PostVideoFile([FromRoute(Name = "id")][Required] Guid videoId, [FromForm] IFormFile videoFile, CancellationToken cancellationToken)
@@ -168,7 +168,7 @@ namespace MyWideIO.API.Controllers
             return Ok();
 
         }
-        private /*static*/ readonly HashSet<string> allowedExtensions = new() { "video/mp4", "video/webm", "video/avi", "video/mkv" };
+        private /*static*/ readonly HashSet<string> allowedExtensions = new() { "video/mp4", "video/webm", "video/avi", "video/x-matroska" };
         /// <summary>
         /// Video metadata retreival
         /// </summary>

@@ -89,7 +89,6 @@ const AddVideoToPlaylist = () => {
     }
 
     const handleConfirmClick = () => {
-      console.log(auth.accessToken);
       playlistsList.forEach(playlist_id => {
           axios.post(PLAYLIST_URL + "/" + playlist_id + "/" + video_id, {},
               {
@@ -148,7 +147,6 @@ const AddVideoToPlaylist = () => {
                 withCredentials: false //cred
               }
             );
-            console.log(video_id);
             await axios.post(PLAYLIST_URL + "/" + response?.data.id + "/" + video_id, {},
             {
               headers: { 

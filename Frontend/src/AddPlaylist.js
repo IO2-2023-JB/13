@@ -32,10 +32,6 @@ const AddPlaylist = () => {
           setVideosList(newList);
         }
     }
-
-    useEffect(() => {
-        console.log(videosList);
-    }, [videosList]); //TO DELETE
     
     const nameRef = useRef();
     const [errMsg, setErrMsg] = useState('');

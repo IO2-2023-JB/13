@@ -54,9 +54,100 @@ const Home = () => {
                 <tr>
                     <div class="wrapper">
                         <div className="boxT5">
+                        <div className="box2">
+                        <table>
+                            <tr>
+                                    <div className="movieT5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                        </svg>
+                            </div>
+                            </tr>
+                                </table>
+                            </div>   
+                        </div>
+                        <div className="boxT5">
                             <div className="box2">
                                 <table>
-                                    <tr>
+                            <tr>
+                                    <div className="movieT5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                </svg>
+                            </div>
+                            </tr>
+                        </table>
+                        </div>   
+                    </div>
+                        <div className="boxT5">
+                    <div className="box2">
+                        <table>
+                            <tr>
+                                    <div className="movieT5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                        </svg>
+                            </div>
+                            </tr>
+                                </table>
+                            </div>   
+                        </div>
+                        <div className="boxT5">
+                            <div className="box2">
+                                <table>
+                            <tr>
+                                    <div className="movieT5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                </svg>
+                            </div>
+                            </tr>
+                        </table>
+                        </div> 
+                    </div>
+                        <div className="boxT5">
+                    <div className="box2">
+                        <table>
+                            <tr>
+                                    <div className="movieT5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                        </svg>
+                            </div>
+                            </tr>
+                                </table>
+                            </div>   
+                        </div>
+                        <div className="boxT5">
+                            <div className="box2">
+                                <table>
+                            <tr>
+                                    <div className="movieT5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                </svg>
+                            </div>
+                            </tr>
+                        </table>
+                        </div> 
+                    </div>
+                        <div className="boxT5">
+                    <div className="box2">
+                        <table>
+                            <tr>
+                                    <div className="movieT5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                        </svg>
+                            </div>
+                            </tr>
+                                </table>
+                            </div>   
+                        </div>
+                        <div className="boxT5">
+                            <div className="box2">
+                                <table>
+                            <tr>
                                     <div className="movieT5">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
                                             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
@@ -71,105 +162,14 @@ const Home = () => {
                                 <table>
                                     <tr>
                                     <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
-                        <div className="boxT5">
-                            <div className="box2">
-                                <table>
-                                    <tr>
-                                    <div className="movieT5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
-                                        </svg>
-                                    </div>
-                                    </tr>
-                                </table>
-                            </div>   
-                        </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                                </svg>
+                            </div>
+                            </tr>
+                        </table>
+                        </div> 
+                    </div>
                     </div>
                 </tr>
             </table>

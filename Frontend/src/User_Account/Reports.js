@@ -181,7 +181,7 @@ const Reports = () => {
             <h1 class="display-4" style={{marginBottom:"50px"}}> Your Reports </h1>
             <div class="display-6 center-div">Videos</div>
             {ticketsData.map(ticket => (
-                  <div>
+                  <div class="mx-5">
                     {videosData[ticket.ticketId] && (
                       <div class="justify-content-center" style={{marginTop:"20px", 
                       color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>

@@ -530,7 +530,7 @@ const Administrator = () => {
                             style={{color:"white", backgroundColor:"black", marginRight: '10px', marginLeft: '10px', width: "500px"}} />
                           <button type="submit" class="btn btn-dark" style={{marginRight: "10px", marginBottom:"20px"}} disabled={!ticketResponseUsersTexts[index]}>Reject ticket</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px"}} 
-                              onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.USER, Actions.BAN)} disabled={!ticketResponseUsersTexts[index]}>Ban user </button>
+                              onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.USER, Actions.BAN)} disabled={!ticketResponseUsersTexts[index]}>Delete user </button>
                         </form>
                       </div>
                     </div>

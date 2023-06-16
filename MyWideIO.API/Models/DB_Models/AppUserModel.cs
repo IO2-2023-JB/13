@@ -18,7 +18,6 @@ namespace MyWideIO.API.Models.DB_Models
 
         public virtual ICollection<ViewerLike> Likes { get; set; } = new Collection<ViewerLike>();
         public virtual ICollection<PlaylistModel> Playlists { get; set; } = new Collection<PlaylistModel>();
-        public DateTime EndOfBan { get; set; }
         public virtual ImageModel? ProfilePicture { get; set; }
         public decimal AccountBalance { get; set; }
 

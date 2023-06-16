@@ -76,16 +76,13 @@ namespace MyWideIO.API.Services
                 throw new ForbiddenException();
             return ticket.ToGetTicketDto();
         }
-        public async Task<GetTicketStatusDto> GetTicketStatusAsync(Guid ticketId, Guid userId, CancellationToken cancellationToken)
+        public async Task<TicketStatusEnum> GetTicketStatusAsync(Guid ticketId, Guid userId, CancellationToken cancellationToken)
         {
             var ticket = await _ticketRepository.GetAsync(ticketId, cancellationToken) ?? throw new TicketNotFoundException();
             var user = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new UserNotFoundException();
             if (ticket.SubmitterId != userId && !await _userManager.IsInRoleAsync(user, UserTypeEnum.Administrator.ToString()))
                 throw new ForbiddenException();
-            return new GetTicketStatusDto
-            {
-                Status = ticket.Status
-            };
+            return ticket.Status;
         }
         public async Task<List<GetTicketDto>> GetUserTicketsAsync(Guid userId, CancellationToken cancellationToken)
         {

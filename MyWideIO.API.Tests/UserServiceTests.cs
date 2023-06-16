@@ -25,6 +25,7 @@ namespace MyWideIO.API.Tests
         private readonly Mock<IPlaylistRepository> _mockPlaylistRepository;
         private readonly Mock<ITicketRepository> _mockTicketRepository;
         private readonly Mock<ISubscriptionRepository> _mockSubscribtionRepository;
+        private readonly Mock<IVideoService> _mockVideoService;
         private readonly UserService _userService;
 
         public UserServiceTests()
@@ -44,8 +45,9 @@ namespace MyWideIO.API.Tests
             _mockPlaylistRepository = new Mock<IPlaylistRepository>();
             _mockTicketRepository = new Mock<ITicketRepository>();
             _mockSubscribtionRepository = new Mock<ISubscriptionRepository>();
+            _mockVideoService = new Mock<IVideoService>();
 
-            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object, _mockTransactionService.Object, _mockVideoRepository.Object, _mockLikeRepository.Object, _mockCommentRepository.Object, _mockPlaylistRepository.Object, _mockSubscribtionRepository.Object, _mockTicketRepository.Object);
+            _userService = new UserService(_mockUserManager.Object, _mockImageService.Object, _mockSignInManager.Object, _mockTokenService.Object, _mockTransactionService.Object, _mockVideoRepository.Object, _mockLikeRepository.Object, _mockCommentRepository.Object, _mockPlaylistRepository.Object, _mockSubscribtionRepository.Object, _mockTicketRepository.Object, _mockVideoService.Object);
         }
 
         [Fact]

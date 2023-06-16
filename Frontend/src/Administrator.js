@@ -14,7 +14,7 @@ const PLAYLIST_URL = '/playlist/details'
 const COMMENT_URL = '/comment/commentById';
 const RESPONSE_URL = '/comment/responseById';
 const VIDEO_URL = '/video';
-const BAN_URL = '/ban';
+const BAN_URL = '/user';
 
 const Administrator = () => {
 
@@ -270,7 +270,7 @@ const Administrator = () => {
           withCredentials: false
         }
       ).then(() => {
-        ticket.status.status = "Resolved";
+        ticket.status = "Resolved";
         if(targetType === TargetType.VIDEO){
           clearTicketResponseVideosText(index);
         }else if(targetType === TargetType.USER){
@@ -390,7 +390,7 @@ const Administrator = () => {
       }else if(targetType === TargetType.COMMENT_RESPONSE){
         idToBan = commentsResponseData[ticket.ticketId].authorId;
       }
-      axios.post(BAN_URL + "/" + idToBan, {},
+      axios.delete(BAN_URL + "?id=" + idToBan,
         {
           headers: { 
             'Content-Type': 'application/json',
@@ -442,7 +442,7 @@ const Administrator = () => {
           <div class="display-5">Videos:</div>
           {ticketsData.map((ticket, index) => (
                 <div>
-                  {ticket.status.status === "Submitted" && videosData[ticket.ticketId] && (
+                  {ticket.status === "Submitted" && videosData[ticket.ticketId] && (
                     <div class="justify-content-center" style={{marginTop:"20px", 
                     color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                        <div class="justify-content-center" style={{marginTop:"20px", 
@@ -479,7 +479,7 @@ const Administrator = () => {
                           <button type="submit" class="btn btn-dark" style={{marginRight: "10px", marginBottom:"20px"}} disabled={!ticketResponseVideosTexts[index]}>Reject ticket</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px" }} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.VIDEO, Actions.DELETE)} disabled={!ticketResponseVideosTexts[index]}>Delete reported content</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px", width: "300px"}} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.VIDEO, Actions.BAN)} disabled={!ticketResponseVideosTexts[index]}>
-                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Ban user and delete</span>
+                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Delete user and</span>
                             <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>reported content</span>
                           </button>
                         </form>
@@ -491,7 +491,7 @@ const Administrator = () => {
           <div style={{marginTop:"50px"}} class="display-5">Users:</div>
           {ticketsData.map((ticket, index) => (
                 <div>
-                  {ticket.status.status === "Submitted" && usersData[ticket.ticketId] && (
+                  {ticket.status === "Submitted" && usersData[ticket.ticketId] && (
                     <div class="justify-content-center" style={{marginTop:"20px", 
                     color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                        <div class="justify-content-center" style={{marginTop:"20px", 
@@ -530,7 +530,7 @@ const Administrator = () => {
                             style={{color:"white", backgroundColor:"black", marginRight: '10px', marginLeft: '10px', width: "500px"}} />
                           <button type="submit" class="btn btn-dark" style={{marginRight: "10px", marginBottom:"20px"}} disabled={!ticketResponseUsersTexts[index]}>Reject ticket</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px"}} 
-                              onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.USER, Actions.BAN)} disabled={!ticketResponseUsersTexts[index]}>Ban user </button>
+                              onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.USER, Actions.BAN)} disabled={!ticketResponseUsersTexts[index]}>Delete user </button>
                         </form>
                       </div>
                     </div>
@@ -540,7 +540,7 @@ const Administrator = () => {
           <div style={{marginTop:"50px"}} class="display-5">Playlists:</div>
           {ticketsData.map((ticket, index) => (
                 <div>
-                  {ticket.status.status === "Submitted" && playlistsData[ticket.ticketId] && (
+                  {ticket.status === "Submitted" && playlistsData[ticket.ticketId] && (
                     <div class="justify-content-center" style={{marginTop:"20px", 
                     color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                        <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
@@ -571,7 +571,7 @@ const Administrator = () => {
                           <button type="submit" class="btn btn-dark" style={{marginRight: "10px", marginBottom:"20px"}} disabled={!ticketResponsePlaylistsTexts[index]}>Reject ticket</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px" }} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.PLAYLIST, Actions.DELETE)} disabled={!ticketResponsePlaylistsTexts[index]}>Delete reported content</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px", width: "300px"}} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.PLAYLIST, Actions.BAN)} disabled={!ticketResponsePlaylistsTexts[index]}>
-                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Ban user and delete</span>
+                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Delete user and</span>
                             <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>reported content</span>
                           </button>
                         </form>
@@ -583,7 +583,7 @@ const Administrator = () => {
           <div style={{marginTop:"50px"}} class="display-5">Comments:</div>
           {ticketsData.map((ticket, index) => (
                 <div>
-                  {ticket.status.status === "Submitted" && commentsData[ticket.ticketId] && (
+                  {ticket.status === "Submitted" && commentsData[ticket.ticketId] && (
                     <div class="justify-content-center" style={{marginTop:"20px", 
                     color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                        <div class="justify-content-center" style={{marginTop:"20px", 
@@ -604,7 +604,7 @@ const Administrator = () => {
                           <button type="submit" class="btn btn-dark" style={{marginRight: "10px", marginBottom:"20px"}} disabled={!ticketResponseCommentsTexts[index]}>Reject ticket</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px" }} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.COMMENT, Actions.DELETE)} disabled={!ticketResponseCommentsTexts[index]}>Delete reported content</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px", width: "300px"}} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.COMMENT, Actions.BAN)} disabled={!ticketResponseCommentsTexts[index]}>
-                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Ban user and delete</span>
+                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Delete user and</span>
                             <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>reported content</span>
                           </button>
                         </form>
@@ -617,7 +617,7 @@ const Administrator = () => {
           <div style={{marginTop:"50px"}} class="display-5">Comments responses:</div>
           {ticketsData.map((ticket, index) => (
                 <div>
-                  {ticket.status.status === "Submitted" && commentsResponseData[ticket.ticketId] && (
+                  {ticket.status === "Submitted" && commentsResponseData[ticket.ticketId] && (
                     <div class="justify-content-center" style={{marginTop:"20px", 
                     color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#222222"}}>
                        <div class="justify-content-center" style={{marginTop:"20px", 
@@ -638,7 +638,7 @@ const Administrator = () => {
                           <button type="submit" class="btn btn-dark" style={{marginRight: "10px", marginBottom:"20px"}} disabled={!ticketResponseCommentsResponsesTexts[index]}>Reject ticket</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px" }} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.COMMENT_RESPONSE, Actions.DELETE)} disabled={!ticketResponseCommentsResponsesTexts[index]}>Delete reported content</button>
                           <button type="button" className="btn btn-dark" style={{ marginRight: "10px", marginTop: "-0px", width: "300px"}} onClick={(event) => handleTicketResponseAdd(event, ticket, index, TargetType.COMMENT_RESPONSE, Actions.BAN)} disabled={!ticketResponseCommentsResponsesTexts[index]}>
-                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Ban user and delete</span>
+                            <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>Delete user and</span>
                             <span style={{ display: "inline-block", maxWidth: "100%", overflowWrap: "break-word" }}>reported content</span>
                           </button>
                         </form>

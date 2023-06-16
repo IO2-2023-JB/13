@@ -9,8 +9,8 @@ const TICKET_LIST = "/ticket/list";
 const METADATA_URL = '/video-metadata';
 const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
-const COMMENT_URL = '/comment/commentById'; //add /commentById
-const RESPONSE_URL = '/comment/responseById'; //add ById
+const COMMENT_URL = '/comment/commentById';
+const RESPONSE_URL = '/comment/responseById';
 
 const Reports = () => {
     const { auth } = useContext(AuthContext);
@@ -211,10 +211,10 @@ const Reports = () => {
                         </div>
                         </div>
                         <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <div>Status: {ticket.status.status}</div>
-                          { ticket.status.status === "Resolved" && (
+                          <h3>Status: {ticket.status}</h3>
+                          { ticket.status === "Resolved" && (
                             <div>
-                              Response: {ticket.response}
+                              <h3>Response: {ticket.response}</h3>
                             </div>
                           )}
                         </div>
@@ -257,10 +257,10 @@ const Reports = () => {
                       </div>
                       </div>
                       <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <div>Status: {ticket.status.status}</div>
-                          { ticket.status.status === "Resolved" && (
+                          <h3>Status: {ticket.status}</h3>
+                          { ticket.status === "Resolved" && (
                             <div>
-                              Response: {ticket.response}
+                              <h3>Response: {ticket.response}</h3>
                             </div>
                           )}
                         </div>
@@ -293,10 +293,10 @@ const Reports = () => {
                             </li>
                           </div>
                           <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <div>Status: {ticket.status.status}</div>
-                          { ticket.status.status === "Resolved" && (
+                          <h3>Status: {ticket.status}</h3>
+                          { ticket.status === "Resolved" && (
                             <div>
-                              Response: {ticket.response}
+                              <h3>Response: {ticket.response}</h3>
                             </div>
                           )}
                         </div>
@@ -328,10 +328,10 @@ const Reports = () => {
                           </div>
                       </div>
                       <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <div>Status: {ticket.status.status}</div>
-                          { ticket.status.status === "Resolved" && (
+                          <h3>Status: {ticket.status}</h3>
+                          { ticket.status === "Resolved" && (
                             <div>
-                              Response: {ticket.response}
+                              <h3>Response: {ticket.response}</h3>
                             </div>
                           )}
                         </div>
@@ -364,10 +364,10 @@ const Reports = () => {
                           </div>
                       </div>
                       <div class="justify-content-center" style={{marginTop:"20px", color:"white", borderRadius:"15px", padding:"20px", backgroundColor:"#333333"}}>
-                          <div>Status: {ticket.status.status}</div>
-                          { ticket.status.status === "Resolved" && (
+                          <h3>Status: {ticket.status}</h3>
+                          { ticket.status === "Resolved" && (
                             <div>
-                              Response: {ticket.response}
+                              <h3>Response: {ticket.response}</h3>
                             </div>
                           )}
                         </div>

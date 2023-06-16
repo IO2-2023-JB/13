@@ -46,13 +46,13 @@ namespace MyWideIO.API.Data.Repositories
 
         public async Task<List<VideoModel>> GetUserReccomendationList(Guid userId, int n)
         {
-            Random r = new Random(userId.GetHashCode());
-            var videos = await _dbContext.Videos
+            return await _dbContext.Videos
                 .Include(v => v.Creator)
                 .Include(v => v.Tags)
                 .Where(v => v.IsVisible)
+                .OrderBy(v => Guid.NewGuid())
+                .Take(n)
                 .ToListAsync();
-            return videos.OrderBy(v => r.Next()).Take(n).ToList();
         }
 
         public async Task<ICollection<VideoModel>> GetUploadingUploadedProcessingVideos()

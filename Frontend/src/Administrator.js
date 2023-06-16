@@ -390,6 +390,7 @@ const Administrator = () => {
       }else if(targetType === TargetType.COMMENT_RESPONSE){
         idToBan = commentsResponseData[ticket.ticketId].authorId;
       }
+      handleTicketReject(ticket, targetType, index, responseText);
       axios.delete(BAN_URL + "?id=" + idToBan,
         {
           headers: { 
@@ -398,9 +399,7 @@ const Administrator = () => {
           },
           withCredentials: false
         }
-      ).then(() => {
-        handleTicketReject(ticket, targetType, index, responseText);
-      }).catch(err => {
+      ).catch(err => {
         if(!err?.response) {
             setErrMsg('No Server Response')
         } else if(err.response?.status === 400) {

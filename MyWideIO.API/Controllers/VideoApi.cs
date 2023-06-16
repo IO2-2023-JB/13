@@ -42,7 +42,7 @@ namespace MyWideIO.API.Controllers
         [HttpDelete]
         [ValidateModelState]
         [SwaggerOperation("DeleteVideo")]
-        [Authorize(Roles = "Creator")]
+        [Authorize(Roles = "Creator,Administrator")]
         public virtual async Task<IActionResult> DeleteVideo([FromQuery(Name = "id")][Required()] Guid videoId)
         {
             Guid creatorId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

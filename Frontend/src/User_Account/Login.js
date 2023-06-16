@@ -54,6 +54,7 @@ const Login = () => {
             let id = payload["sub"];
 
             const accessToken = token;
+            cookies.remove("accessToken");
             cookies.set("accessToken", accessToken, { expires: new Date(payload["exp"] * 1000)});
 
             if(!id){

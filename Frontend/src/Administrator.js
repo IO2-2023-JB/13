@@ -12,6 +12,7 @@ const PROFILE_URL = '/user';
 const PLAYLIST_DETAILS_URL = '/playlist/video'
 const PLAYLIST_URL = '/playlist/details'
 const COMMENT_URL = '/comment/commentById';
+const COMMENT_DELETE_URL = '/comment';
 const RESPONSE_URL = '/comment/responseById';
 const VIDEO_URL = '/video';
 const BAN_URL = '/user';
@@ -349,7 +350,7 @@ const Administrator = () => {
           }
         });
       }else if(targetType === TargetType.COMMENT || targetType === TargetType.COMMENT_RESPONSE){
-        axios.delete(COMMENT_URL + "?id=" + ticket.targetId,
+        axios.delete(COMMENT_DELETE_URL + "?id=" + ticket.targetId,
           {
             headers: { 
               'Content-Type': 'application/json',

@@ -832,8 +832,8 @@ const VideoPlayer = () => {
             setErrMsg('No Server Response')
         } else if(err.response?.status === 400) {
             setErrMsg('Bad request');
-        } else if(err.response?.status === 401){
-            setErrMsg('Unauthorised');
+        } else if(err.response?.status === 404){
+            setErrMsg('Not Found');
         } else {
             setErrMsg('Getting metadata failed');
         }

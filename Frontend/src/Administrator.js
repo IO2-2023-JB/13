@@ -298,6 +298,7 @@ const Administrator = () => {
 
     const handleTicketDelete = (ticket, targetType, index, responseText) => {
       if(targetType === TargetType.VIDEO){
+        handleTicketReject(ticket, targetType, index, responseText);
         axios.delete(VIDEO_URL + "?id=" + ticket.targetId,
           {
             headers: { 
@@ -306,9 +307,7 @@ const Administrator = () => {
             },
             withCredentials: false
           }
-        ).then(() => {
-          handleTicketReject(ticket, targetType, index, responseText);
-        }).catch(err => {
+        ).catch(err => {
           if(!err?.response) {
               setErrMsg('No Server Response')
           } else if(err.response?.status === 400) {
@@ -324,6 +323,7 @@ const Administrator = () => {
           }
         });
       }else if(targetType === TargetType.PLAYLIST){
+        handleTicketReject(ticket, targetType, index, responseText);
         axios.delete(PLAYLIST_URL + "?id=" + ticket.targetId,
           {
             headers: { 
@@ -332,9 +332,7 @@ const Administrator = () => {
             },
             withCredentials: false
           }
-        ).then(() => {
-          handleTicketReject(ticket, targetType, index, responseText);
-        }).catch(err => {
+        ).catch(err => {
           if(!err?.response) {
               setErrMsg('No Server Response')
           } else if(err.response?.status === 400) {
@@ -350,6 +348,7 @@ const Administrator = () => {
           }
         });
       }else if(targetType === TargetType.COMMENT || targetType === TargetType.COMMENT_RESPONSE){
+        handleTicketReject(ticket, targetType, index, responseText);
         axios.delete(COMMENT_DELETE_URL + "?id=" + ticket.targetId,
           {
             headers: { 
@@ -358,9 +357,7 @@ const Administrator = () => {
             },
             withCredentials: false
           }
-        ).then(() => {
-          handleTicketReject(ticket, targetType, index, responseText);
-        }).catch(err => {
+        ).catch(err => {
           if(!err?.response) {
               setErrMsg('No Server Response')
           } else if(err.response?.status === 400) {

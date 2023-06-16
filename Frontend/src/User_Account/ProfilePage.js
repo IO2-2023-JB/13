@@ -47,7 +47,7 @@ const ProfilePage = () => {
   })
 
   useEffect(() => {
-    axios.get(PROFILE_URL + "?id=" + auth?.id, {
+    axios.get(PROFILE_URL, {
       headers: { 
         'Content-Type': 'application/json',
         "Authorization" : `Bearer ${auth?.accessToken}`
